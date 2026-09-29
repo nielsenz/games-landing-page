@@ -23,3 +23,11 @@ netlify sites:list --json returns full deploy and site metadata, overflowing the
 2026-09-29T05:07:01.090Z - gpt-6-astra - znielsen
 
 Netlify does not expose listDnsZones as a CLI API method; discover the exact DNS operation names with netlify api --list before calling them.
+
+2026-09-29T05:08:14.002Z - gpt-6-astra - znielsen
+
+Requesting the TLS certificate immediately after attaching games.zacharynielsen.com returned an uninformative 422 Unprocessable Entity; check DNS propagation and certificate state before retrying.
+
+2026-09-29T05:08:28.404Z - gpt-6-astra - znielsen
+
+After Netlify created the games DNS record, dig resolved it but curl still reported Could not resolve host, consistent with a cached negative DNS result. Verify HTTPS against a resolved Netlify address while the local resolver refreshes.
