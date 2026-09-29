@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Dreadworks — 16-bit reverse platform defense</title>
+<style>
+  :root {
+    color-scheme: dark;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: #130f24;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 50% 25%, #29204a 0 18%, transparent 42%),
+      #130f24;
+    color: #f4e9ce;
+  }
+  .shell {
+    width: min(1100px, 100vw);
+    padding: 14px;
+  }
+  .topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: baseline;
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #cfc0df;
+  }
+  .topline strong { color: #ffcf70; }
+  .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 4px solid #6c547c;
+    outline: 4px solid #231b38;
+    box-shadow: 0 16px 50px rgba(0,0,0,.45);
+    background: #19152c;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .hint {
+    margin-top: 10px;
+    line-height: 1.45;
+    color: #a99ab8;
+    font-size: 12px;
+  }
+  kbd {
+    border: 1px solid #6c547c;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 1px 5px;
+    background: #231b38;
+    color: #f4e9ce;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topline">
+    <div><strong>DREADWORKS</strong> / prototype 0.1</div>
+    <div>Build the level. Release the heroes. Regret the gaps.</div>
+  </div>
+  <div class="frame"><canvas id="game" width="384" height="216"></canvas></div>
+  <div class="hint">
+    Click a shop card, then a tile to place it. Right-click a placed trap to sell it in build phase.
+    <kbd>1</kbd>–<kbd>5</kbd> select cards, <kbd>Space</kbd> releases a wave, <kbd>P</kbd> pauses, <kbd>R</kbd> restarts after defeat.
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Canvas + constants
+  // ---------------------------------------------------------------------------
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const TILE = 16;
+  const HUD_H = 26;
+  const SHOP_Y = 178;
+  const WORLD_BOTTOM = 176;
+  const GRAVITY = 180;
+  const CASTLE_X = 354;
+
+  const C = {
+    sky0: '#17142c',
+    sky1: '#2d2851',
+    sky2: '#4a3f6f',
+    moon: '#f0d89f',
+    cloud: '#73658b',
+    dirt: '#5d332d',
+    dirt2: '#84452d',
+    dirt3: '#bb6938',
+    grass: '#7f9d52',
+    stone0: '#2b293a',
+    stone1: '#4c485e',
+    stone2: '#77728b',
+    cream: '#f4e9ce',
+    gold: '#ffcf70',
+    red: '#ef5b56',
+    orange: '#e8894a',
+    cyan: '#63c9c6',
+    blue: '#4b7fa8',
+    green: '#86b95b',
+    purple: '#9a70b9',
+    black: '#0b0a12',
+    white: '#fff8e8'
+  };
+
+  const TRAP_DEFS = {
+    block:    { name: 'BLOCK',    cost: 4,  support: false, desc: 'route' },
+    spikes:   { name: 'SPIKES',   cost: 6,  support: true,  desc: 'hurt' },
+    spring:   { name: 'SPRING',   cost: 7,  support: true,  desc: 'launch' },
+    conveyor: { name: 'REVERSE',  cost: 6,  support: true,  desc: 'push' },
+    saw:      { name: 'SAW',      cost: 10, support: true,  desc: 'shred' },
+    cannon:   { name: 'CANNON',   cost: 16, support: true,  desc: 'ranged' },
+    crusher:  { name: 'CRUSHER',  cost: 14, support: false, desc: 'slam' }
+  };
+
+  const HERO_DEFS = {
+    recruit:  { hp: 1, speed: 27, jumpSkill: .72, jumpPower: 70, bounty: 1, tint: C.cream },
+    rogue:    { hp: 1, speed: 38, jumpSkill: .82, jumpPower: 72, bounty: 1, tint: C.cyan },
+    knight:   { hp: 3, speed: 20, jumpSkill: .58, jumpPower: 64, bounty: 2, tint: C.blue },
+    acrobat:  { hp: 1, speed: 29, jumpSkill: .97, jumpPower: 92, bounty: 2, tint: C.green },
+    balloon:  { hp: 1, speed: 23, jumpSkill: 1, jumpPower: 0, bounty: 2, tint: C.purple, flying: true }
+  };
+
+  const baseSolids = [
+    { x: 0,   y: 160, w: 96, h: 16, kind: 'ground' },
+    { x: 112, y: 160, w: 96, h: 16, kind: 'ground' },
+    { x: 224, y: 160, w: 96, h: 16, kind: 'ground' },
+    { x: 336, y: 160, w: 48, h: 16, kind: 'ground' },
+    { x: 48,  y: 112, w: 48, h: 8,  kind: 'platform' },
+    { x: 160, y: 96,  w: 48, h: 8,  kind: 'platform' },
+    { x: 256, y: 128, w: 48, h: 8,  kind: 'platform' }
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------------------
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const irand = (a, b) => Math.floor(rand(a, b + 1));
+  const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  const snap = v => Math.floor(v / TILE) * TILE;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function rect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  }
+
+  function pxText(text, x, y, color = C.cream, size = 8, align = 'left') {
+    ctx.font = `bold ${size}px ui-monospace, monospace`;
+    ctx.textAlign = align;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = C.black;
+    ctx.fillText(text, Math.round(x + 1), Math.round(y + 1));
+    ctx.fillStyle = color;
+    ctx.fillText(text, Math.round(x), Math.round(y));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Audio — deliberately tiny + synthesized
+  // ---------------------------------------------------------------------------
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function beep(freq = 220, dur = .05, type = 'square', volume = .025, slide = 0) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, now);
+    if (slide) o.frequency.linearRampToValueAtTime(Math.max(40, freq + slide), now + dur);
+    g.gain.setValueAtTime(volume, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + dur);
+  }
+
+  // ---------------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------------
+  let state;
+  let lastT = performance.now();
+  let pointer = { x: 0, y: 0, inside: false };
+
+  function freshState() {
+    return {
+      mode: 'build', // build | wave | gameover
+      paused: false,
+      wave: 1,
+      gold: 30,
+      castleHp: 10,
+      maxCastleHp: 10,
+      traps: [],
+      heroes: [],
+      projectiles: [],
+      particles: [],
+      floaters: [],
+      shop: [],
+      selected: null,
+      kills: 0,
+      totalEscaped: 0,
+      spawnLeft: 0,
+      spawnTimer: 0,
+      waveSpawned: 0,
+      banner: 'BUILD PHASE',
+      bannerT: 1.8,
+      shake: 0,
+      nextId: 1,
+      castleFlash: 0,
+      waveClearT: 0
+    };
+  }
+
+  function resetGame() {
+    state = freshState();
+    rollShop();
+  }
+
+  function rollShop() {
+    const advanced = shuffle(['spring', 'conveyor', 'saw', 'cannon', 'crusher']);
+    const offers = ['block', 'spikes'];
+    if (state.wave >= 6) {
+      offers.push('cannon');
+      for (const id of advanced) if (!offers.includes(id) && offers.length < 5) offers.push(id);
+    } else {
+      for (const id of advanced) if (offers.length < 5) offers.push(id);
+    }
+    state.shop = offers.slice(0, 5);
+    state.selected = state.shop[0];
+  }
+
+  resetGame();
+
+  // ---------------------------------------------------------------------------
+  // Geometry helpers
+  // ---------------------------------------------------------------------------
+  function solids() {
+    const blocks = state.traps
+      .filter(t => t.type === 'block')
+      .map(t => ({ x: t.x, y: t.y, w: 16, h: 16, kind: 'block', ref: t }));
+    return baseSolids.concat(blocks);
+  }
+
+  function supportAt(x, yTop, tolerance = 2) {
+    return solids().some(s => x >= s.x && x <= s.x + s.w && Math.abs(s.y - yTop) <= tolerance);
+  }
+
+  function hasSupportBelowCell(x, y) {
+    const footY = y + TILE;
+    return solids().some(s => {
+      const horizontal = x + 3 < s.x + s.w && x + TILE - 3 > s.x;
+      return horizontal && Math.abs(s.y - footY) <= 1;
+    });
+  }
+
+  function trapAtCell(x, y) {
+    return state.traps.find(t => t.x === x && t.y === y);
+  }
+
+  function placementValid(type, x, y) {
+    if (state.mode !== 'build') return false;
+    if (x < 0 || x > W - TILE || y < HUD_H || y > 160 - TILE) return false;
+    if (x >= CASTLE_X - 8) return false;
+    if (x < 16 && y >= 128) return false;
+    if (trapAtCell(x, y)) return false;
+    if (TRAP_DEFS[type].support && !hasSupportBelowCell(x, y)) return false;
+
+    const candidate = { x, y, w: 16, h: 16 };
+    if (type !== 'block') {
+      // Non-solid traps can sit over base solids but not inside block cells.
+      if (state.traps.some(t => t.type === 'block' && overlaps(candidate, { x: t.x, y: t.y, w: 16, h: 16 }))) return false;
+    } else {
+      // A block may not overlap existing world geometry.
+      if (baseSolids.some(s => overlaps(candidate, s))) return false;
+    }
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Building
+  // ---------------------------------------------------------------------------
+  function placeSelectedAt(x, y) {
+    if (!state.selected) return;
+    const def = TRAP_DEFS[state.selected];
+    if (state.gold < def.cost) {
+      state.banner = 'NOT ENOUGH GOLD'; state.bannerT = .8;
+      beep(90, .08, 'square', .02, -20);
+      return;
+    }
+    if (!placementValid(state.selected, x, y)) {
+      state.banner = 'INVALID TILE'; state.bannerT = .55;
+      beep(120, .04, 'square', .015, -25);
+      return;
+    }
+    state.gold -= def.cost;
+    state.traps.push({
+      id: state.nextId++,
+      type: state.selected,
+      x, y,
+      cooldown: 0,
+      phase: 0,
+      springUsed: new Set()
+    });
+    spawnParticles(x + 8, y + 8, C.gold, 5, 22);
+    beep(330, .045, 'square', .024, 90);
+  }
+
+  function sellAt(x, y) {
+    if (state.mode !== 'build') return;
+    const tx = snap(x), ty = snap(y);
+    const idx = state.traps.findIndex(t => t.x === tx && t.y === ty);
+    if (idx < 0) return;
+    const t = state.traps[idx];
+    const refund = Math.ceil(TRAP_DEFS[t.type].cost * .6);
+    state.gold += refund;
+    state.traps.splice(idx, 1);
+    addFloater(`+${refund}g`, tx + 8, ty, C.gold);
+    spawnParticles(tx + 8, ty + 8, C.stone2, 6, 28);
+    beep(190, .05, 'square', .022, -60);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Waves + heroes
+  // ---------------------------------------------------------------------------
+  function startWave() {
+    if (state.mode !== 'build') return;
+    state.mode = 'wave';
+    state.paused = false;
+    state.spawnLeft = Math.min(12 + state.wave * 4, 76);
+    state.waveSpawned = 0;
+    state.spawnTimer = .15;
+    state.banner = `WAVE ${state.wave}`;
+    state.bannerT = 1.1;
+    beep(180, .08, 'square', .03, 180);
+    setTimeout(() => beep(260, .08, 'square', .025, 120), 65);
+  }
+
+  function heroTypeForWave() {
+    const w = state.wave;
+    const r = Math.random();
+    if (w >= 6 && r < Math.min(.08 + (w - 6) * .012, .20)) return 'balloon';
+    if (w >= 5 && r < .23) return 'acrobat';
+    if (w >= 4 && r < .44) return 'knight';
+    if (w >= 3 && r < .66) return 'rogue';
+    return 'recruit';
+  }
+
+  function spawnHero() {
+    const type = heroTypeForWave();
+    const d = HERO_DEFS[type];
+    const flying = !!d.flying;
+    const hpScale = state.wave >= 12 ? 1 + Math.floor((state.wave - 10) / 6) : 1;
+    const h = {
+      id: state.nextId++,
+      type,
+      x: -10 - rand(0, 5),
+      y: flying ? rand(64, 118) : 150,
+      w: type === 'knight' ? 9 : 7,
+      h: type === 'knight' ? 11 : 10,
+      vx: d.speed,
+      vy: 0,
+      speed: d.speed * (1 + Math.min(state.wave * .006, .12)),
+      jumpSkill: d.jumpSkill,
+      jumpPower: d.jumpPower,
+      hp: d.hp * hpScale,
+      maxHp: d.hp * hpScale,
+      bounty: d.bounty,
+      grounded: !flying,
+      groundY: 160,
+      threatSeen: false,
+      hitTimers: Object.create(null),
+      dead: false,
+      flying,
+      bob: Math.random() * Math.PI * 2,
+      anim: Math.random() * 10
+    };
+    state.heroes.push(h);
+  }
+
+  function threatAhead(h) {
+    if (h.flying || !h.grounded) return false;
+    const look = clamp(7 + h.speed * .12, 8, 13);
+    const footY = h.y + h.h;
+    const probeX = h.x + h.w + look;
+    const sameLevelSupport = supportAt(probeX, footY, 2);
+
+    const obstacle = solids().some(s => {
+      if (s.y >= footY - 1) return false;
+      const withinX = s.x >= h.x + h.w - 1 && s.x <= probeX + 2;
+      const verticalOverlap = h.y + h.h - 2 > s.y && h.y + 2 < s.y + s.h;
+      return withinX && verticalOverlap;
+    });
+
+    return !sameLevelSupport || obstacle;
+  }
+
+  function damageHero(h, amount, source, knockX = 0, knockY = 0) {
+    if (h.dead) return;
+    h.hp -= amount;
+    if (knockX) h.vx += knockX;
+    if (knockY) h.vy = knockY;
+    spawnParticles(h.x + h.w / 2, h.y + h.h / 2, HERO_DEFS[h.type].tint, 4, 26);
+    if (h.hp <= 0) {
+      h.dead = true;
+      state.gold += h.bounty;
+      state.kills++;
+      addFloater(`+${h.bounty}`, h.x, h.y - 4, C.gold);
+      beep(h.type === 'knight' ? 95 : 135, .04, 'square', .012, -35);
+      spawnParticles(h.x + h.w / 2, h.y + h.h / 2, C.red, 7, 42);
+    }
+  }
+
+  function updateHero(h, dt) {
+    h.anim += dt * 10;
+    h.bob += dt * 4;
+
+    for (const k of Object.keys(h.hitTimers)) {
+      h.hitTimers[k] -= dt;
+      if (h.hitTimers[k] <= 0) delete h.hitTimers[k];
+    }
+
+    if (h.flying) {
+      h.x += h.speed * dt;
+      h.y += Math.sin(h.bob) * 2.4 * dt;
+    } else {
+      const threat = threatAhead(h);
+      if (threat && !h.threatSeen && h.grounded) {
+        h.threatSeen = true;
+        const skillNoise = rand(-.08, .08);
+        if (Math.random() < clamp(h.jumpSkill + skillNoise, .05, .99)) {
+          h.vy = -h.jumpPower * rand(.90, 1.06);
+          h.grounded = false;
+          beep(250, .018, 'square', .006, 50);
+        }
+      } else if (!threat) {
+        h.threatSeen = false;
+      }
+
+      // Let conveyor / trap impulses alter vx, but pull toward native movement.
+      h.vx += (h.speed - h.vx) * Math.min(1, dt * 4.5);
+
+      // Horizontal movement + simple block collision.
+      const oldX = h.x;
+      h.x += h.vx * dt;
+      const hr = { x: h.x, y: h.y, w: h.w, h: h.h };
+      for (const s of solids()) {
+        if (s.kind === 'ground' || s.kind === 'platform') continue;
+        if (overlaps(hr, s)) {
+          if (h.vx > 0 && oldX + h.w <= s.x + 2) {
+            h.x = s.x - h.w;
+            h.vx *= .15;
+          } else if (h.vx < 0 && oldX >= s.x + s.w - 2) {
+            h.x = s.x + s.w;
+            h.vx = 0;
+          }
+        }
+      }
+
+      const oldY = h.y;
+      h.vy += GRAVITY * dt;
+      h.y += h.vy * dt;
+      h.grounded = false;
+      let bestTop = Infinity;
+
+      if (h.vy >= 0) {
+        for (const s of solids()) {
+          const oldBottom = oldY + h.h;
+          const newBottom = h.y + h.h;
+          const horiz = h.x + h.w - 1 > s.x && h.x + 1 < s.x + s.w;
+          if (horiz && oldBottom <= s.y + 2 && newBottom >= s.y && s.y < bestTop) {
+            bestTop = s.y;
+          }
+        }
+        if (bestTop < Infinity) {
+          h.y = bestTop - h.h;
+          h.vy = 0;
+          h.grounded = true;
+          h.groundY = bestTop;
+        }
+      } else {
+        // Head collision only against blocks/platforms. Ground undersides are irrelevant.
+        for (const s of solids()) {
+          const oldTop = oldY;
+          const newTop = h.y;
+          const horiz = h.x + h.w - 1 > s.x && h.x + 1 < s.x + s.w;
+          if (horiz && oldTop >= s.y + s.h - 2 && newTop <= s.y + s.h && newTop < oldTop) {
+            h.y = s.y + s.h;
+            h.vy = 18;
+          }
+        }
+      }
+    }
+
+    if (h.y > WORLD_BOTTOM + 18) {
+      h.dead = true;
+      state.kills++;
+      state.gold += h.bounty;
+      addFloater(`+${h.bounty}`, clamp(h.x, 4, W - 12), 163, C.gold);
+      beep(85, .06, 'square', .014, -30);
+    }
+
+    if (h.x + h.w >= CASTLE_X) {
+      h.dead = true;
+      state.castleHp--;
+      state.totalEscaped++;
+      state.castleFlash = .45;
+      state.shake = Math.max(state.shake, 3.5);
+      addFloater('-1 CORE', CASTLE_X - 9, 104, C.red);
+      beep(70, .12, 'sawtooth', .04, -20);
+      if (state.castleHp <= 0) {
+        state.castleHp = 0;
+        state.mode = 'gameover';
+        state.banner = 'THE HEROES BROKE IN';
+        state.bannerT = 999;
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Traps
+  // ---------------------------------------------------------------------------
+  function updateTraps(dt) {
+    for (const t of state.traps) {
+      t.cooldown = Math.max(0, t.cooldown - dt);
+      if (t.type === 'crusher') updateCrusher(t, dt);
+      if (t.type === 'cannon') updateCannon(t);
+    }
+
+    for (const h of state.heroes) {
+      if (h.dead) continue;
+      for (const t of state.traps) {
+        const key = `${t.id}`;
+        if (t.type === 'spikes') {
+          const zone = { x: t.x + 1, y: t.y + 7, w: 14, h: 9 };
+          if (overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+            h.hitTimers[key] = .42;
+            damageHero(h, 1, 'spikes', 2, -25);
+            beep(145, .025, 'square', .009, 80);
+          }
+        } else if (t.type === 'saw') {
+          const zone = { x: t.x + 2, y: t.y + 3, w: 12, h: 13 };
+          if (overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+            h.hitTimers[key] = .22;
+            damageHero(h, 2, 'saw', -8, -18);
+            beep(115, .018, 'square', .008, 35);
+          }
+        } else if (t.type === 'spring') {
+          const zone = { x: t.x + 1, y: t.y + 8, w: 14, h: 8 };
+          if (overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+            h.hitTimers[key] = .65;
+            h.vy = -106;
+            h.vx = Math.max(h.vx, 40);
+            h.grounded = false;
+            spawnParticles(t.x + 8, t.y + 7, C.cyan, 5, 28);
+            beep(310, .05, 'square', .02, 150);
+          }
+        } else if (t.type === 'conveyor') {
+          const zone = { x: t.x, y: t.y + 6, w: 16, h: 10 };
+          if (overlaps(h, zone) && !h.flying) {
+            h.vx -= 72 * dt;
+          }
+        }
+      }
+    }
+  }
+
+  function updateCannon(t) {
+    if (t.cooldown > 0) return;
+    let target = null;
+    let best = 130;
+    for (const h of state.heroes) {
+      if (h.dead) continue;
+      const dx = h.x - t.x;
+      const dy = Math.abs((h.y + h.h / 2) - (t.y + 6));
+      if (dx > 4 && dx < best && dy < 62) {
+        target = h; best = dx;
+      }
+    }
+    if (!target) return;
+    t.cooldown = 1.15;
+    const ox = t.x + 15, oy = t.y + 7;
+    const tx = target.x + target.w / 2, ty = target.y + target.h / 2;
+    const len = Math.hypot(tx - ox, ty - oy) || 1;
+    const spd = 125;
+    state.projectiles.push({ x: ox, y: oy, vx: (tx - ox) / len * spd, vy: (ty - oy) / len * spd, life: 1.5, damage: 1 });
+    t.phase = .12;
+    beep(175, .03, 'square', .017, -80);
+  }
+
+  function updateCrusher(t, dt) {
+    // phase 0 idle; 1 = descending; 2 = rising. t.offset is pixels.
+    if (t.offset == null) t.offset = 0;
+    if (t.crushState == null) t.crushState = 0;
+
+    if (t.crushState === 0 && t.cooldown <= 0) {
+      const trigger = state.heroes.some(h => !h.dead && Math.abs((h.x + h.w/2) - (t.x + 8)) < 11 && h.y > t.y + 8 && h.y < t.y + 78);
+      if (trigger) {
+        t.crushState = 1;
+        beep(95, .05, 'square', .018, -15);
+      }
+    }
+
+    if (t.crushState === 1) {
+      t.offset += 145 * dt;
+      if (t.offset >= 52) {
+        t.offset = 52;
+        t.crushState = 2;
+        t.cooldown = 1.6;
+        state.shake = Math.max(state.shake, 2.2);
+        spawnParticles(t.x + 8, t.y + t.offset + 14, C.stone2, 8, 36);
+        beep(62, .08, 'square', .035, -18);
+      }
+    } else if (t.crushState === 2) {
+      t.offset -= 72 * dt;
+      if (t.offset <= 0) {
+        t.offset = 0;
+        t.crushState = 0;
+      }
+    }
+
+    if (t.offset > 4) {
+      const head = { x: t.x + 2, y: t.y + t.offset, w: 12, h: 14 };
+      for (const h of state.heroes) {
+        if (h.dead) continue;
+        const key = `${t.id}-crusher`;
+        if (overlaps(h, head) && !h.hitTimers[key]) {
+          h.hitTimers[key] = .55;
+          damageHero(h, 3, 'crusher', -12, 35);
+        }
+      }
+    }
+  }
+
+  function updateProjectiles(dt) {
+    for (const p of state.projectiles) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+      for (const h of state.heroes) {
+        if (h.dead) continue;
+        if (Math.abs((h.x + h.w/2) - p.x) < h.w/2 + 2 && Math.abs((h.y + h.h/2) - p.y) < h.h/2 + 2) {
+          damageHero(h, p.damage, 'cannon', 10, -12);
+          p.life = 0;
+          spawnParticles(p.x, p.y, C.orange, 4, 36);
+          beep(220, .02, 'square', .008, -100);
+          break;
+        }
+      }
+    }
+    state.projectiles = state.projectiles.filter(p => p.life > 0 && p.x > -8 && p.x < W + 8 && p.y > HUD_H && p.y < WORLD_BOTTOM + 8);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Particles + floaters
+  // ---------------------------------------------------------------------------
+  function spawnParticles(x, y, color, count = 5, speed = 25) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = rand(speed * .45, speed);
+      state.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - speed * .25, life: rand(.22, .5), color, size: Math.random() < .7 ? 1 : 2 });
+    }
+  }
+
+  function addFloater(text, x, y, color = C.cream) {
+    state.floaters.push({ text, x, y, life: .85, color });
+  }
+
+  function updateFx(dt) {
+    for (const p of state.particles) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 65 * dt; p.life -= dt;
+    }
+    state.particles = state.particles.filter(p => p.life > 0);
+    for (const f of state.floaters) { f.y -= 13 * dt; f.life -= dt; }
+    state.floaters = state.floaters.filter(f => f.life > 0);
+    state.shake = Math.max(0, state.shake - dt * 14);
+    state.castleFlash = Math.max(0, state.castleFlash - dt);
+    state.bannerT = Math.max(0, state.bannerT - dt);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Main update
+  // ---------------------------------------------------------------------------
+  function update(dt) {
+    dt = Math.min(dt, .033);
+    updateFx(dt);
+
+    if (state.mode !== 'wave' || state.paused) return;
+
+    state.spawnTimer -= dt;
+    if (state.spawnLeft > 0 && state.spawnTimer <= 0) {
+      spawnHero();
+      state.spawnLeft--;
+      state.waveSpawned++;
+      const base = Math.max(.08, .33 - state.wave * .012);
+      state.spawnTimer = base * rand(.62, 1.15);
+    }
+
+    updateTraps(dt);
+    for (const h of state.heroes) updateHero(h, dt);
+    updateProjectiles(dt);
+    state.heroes = state.heroes.filter(h => !h.dead);
+
+    if (state.mode === 'wave' && state.spawnLeft === 0 && state.heroes.length === 0) {
+      const clearBonus = 10 + state.wave * 2;
+      state.gold += clearBonus;
+      addFloater(`WAVE CLEAR +${clearBonus}g`, W / 2, 62, C.gold);
+      state.banner = 'WAVE CLEAR'; state.bannerT = 1.1;
+      state.wave++;
+      state.mode = 'build';
+      state.paused = false;
+      for (const t of state.traps) { t.cooldown = 0; t.crushState = 0; t.offset = 0; }
+      rollShop();
+      beep(330, .06, 'square', .025, 100);
+      setTimeout(() => beep(460, .09, 'square', .02, 80), 80);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Rendering
+  // ---------------------------------------------------------------------------
+  function drawBackground() {
+    rect(0, 0, W, H, C.sky0);
+    rect(0, HUD_H, W, 38, C.sky1);
+    rect(0, HUD_H + 38, W, 74, C.sky2);
+
+    // Moon
+    rect(300, 38, 22, 22, C.moon);
+    rect(296, 42, 30, 14, C.moon);
+    rect(303, 35, 14, 28, C.moon);
+    rect(298, 39, 4, 4, C.sky1);
+    rect(315, 49, 3, 3, '#d3ba83');
+
+    // Distant mountains
+    ctx.fillStyle = '#342d50';
+    ctx.beginPath();
+    ctx.moveTo(0, 131); ctx.lineTo(40, 90); ctx.lineTo(72, 120); ctx.lineTo(112, 76);
+    ctx.lineTo(156, 127); ctx.lineTo(206, 84); ctx.lineTo(246, 125); ctx.lineTo(302, 88);
+    ctx.lineTo(350, 128); ctx.lineTo(384, 104); ctx.lineTo(384, 176); ctx.lineTo(0, 176); ctx.closePath(); ctx.fill();
+
+    // tiny stars
+    const stars = [[17,42],[34,65],[86,40],[132,55],[149,34],[206,48],[236,70],[273,43],[345,63],[366,36]];
+    for (const [x,y] of stars) rect(x,y,1,1,C.cream);
+  }
+
+  function drawTerrain() {
+    for (const s of baseSolids) {
+      if (s.kind === 'ground') {
+        rect(s.x, s.y, s.w, s.h, C.dirt);
+        rect(s.x, s.y, s.w, 3, C.grass);
+        for (let x = s.x + 4; x < s.x + s.w; x += 11) rect(x, s.y + 7 + ((x/11|0)%2)*3, 3, 2, C.dirt2);
+        rect(s.x, s.y + s.h - 2, s.w, 2, '#3b2426');
+      } else {
+        rect(s.x, s.y, s.w, s.h, C.stone1);
+        rect(s.x, s.y, s.w, 2, C.stone2);
+        for (let x = s.x + 4; x < s.x + s.w - 2; x += 12) rect(x, s.y + 4, 5, 2, C.stone0);
+      }
+    }
+  }
+
+  function drawCastle() {
+    const flash = state.castleFlash > 0 && Math.floor(state.castleFlash * 20) % 2 === 0;
+    const stone = flash ? C.red : C.stone1;
+    rect(350, 120, 34, 40, C.stone0);
+    rect(354, 108, 26, 52, stone);
+    rect(352, 106, 8, 8, stone); rect(364, 104, 8, 10, stone); rect(376, 106, 6, 8, stone);
+    rect(362, 142, 12, 18, C.black);
+    rect(364, 132, 4, 6, C.gold);
+    rect(374, 118, 2, 10, C.red);
+    rect(376, 118, 8, 5, C.red);
+  }
+
+  function drawTrap(t) {
+    const x = Math.round(t.x), y = Math.round(t.y);
+    switch (t.type) {
+      case 'block':
+        rect(x, y, 16, 16, C.dirt2); rect(x, y, 16, 3, C.dirt3);
+        rect(x+2,y+5,6,3,C.dirt); rect(x+10,y+5,4,3,C.dirt);
+        rect(x+5,y+11,8,3,C.dirt); break;
+      case 'spikes':
+        rect(x, y+12, 16, 4, C.stone0);
+        ctx.fillStyle = C.cream;
+        for (let i=0;i<4;i++) { ctx.beginPath(); ctx.moveTo(x+i*4,y+12); ctx.lineTo(x+i*4+2,y+4); ctx.lineTo(x+i*4+4,y+12); ctx.fill(); }
+        break;
+      case 'spring':
+        rect(x+1,y+12,14,4,C.stone0); rect(x+3,y+2,10,3,C.cyan);
+        rect(x+5,y+5,6,2,C.stone2); rect(x+4,y+7,8,2,C.stone1); rect(x+5,y+9,6,3,C.stone2); break;
+      case 'conveyor':
+        rect(x,y+9,16,7,C.stone0); rect(x,y+9,16,2,C.stone2);
+        rect(x+2,y+12,3,2,C.orange); rect(x+7,y+12,3,2,C.orange); rect(x+12,y+12,2,2,C.orange);
+        pxText('‹',x+5,y+2,C.gold,8); break;
+      case 'saw': {
+        rect(x,y+12,16,4,C.stone0);
+        const cx=x+8, cy=y+8;
+        ctx.fillStyle=C.cream;
+        ctx.beginPath();
+        const rot = performance.now()/80;
+        for (let i=0;i<12;i++) {
+          const a = rot + i*Math.PI/6;
+          const r = i%2===0 ? 7 : 5;
+          const px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r;
+          if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+        }
+        ctx.closePath(); ctx.fill(); rect(cx-2,cy-2,4,4,C.red); break;
+      }
+      case 'cannon':
+        rect(x+2,y+9,12,7,C.stone0); rect(x+4,y+5,9,5,C.stone1); rect(x+11,y+6,7,3,C.cream);
+        rect(x+3,y+14,4,2,C.gold); rect(x+10,y+14,4,2,C.gold);
+        if(t.cooldown>1.02) rect(x+17,y+6,3,3,C.orange); break;
+      case 'crusher': {
+        const off = t.offset || 0;
+        rect(x+6,y,4,Math.max(6,off+5),C.stone1);
+        rect(x+2,y+off,12,14,C.stone0); rect(x+1,y+off+10,14,4,C.stone2);
+        rect(x+3,y+off+12,2,4,C.cream); rect(x+7,y+off+12,2,4,C.cream); rect(x+11,y+off+12,2,4,C.cream);
+        break;
+      }
+    }
+  }
+
+  function drawHero(h) {
+    const d = HERO_DEFS[h.type];
+    const x = Math.round(h.x), y = Math.round(h.y + (h.flying ? Math.sin(h.bob)*1.5 : 0));
+
+    if (h.type === 'balloon') {
+      rect(x+1,y-8,6,7,d.tint); rect(x+2,y-10,4,2,C.cream); rect(x+3,y-1,1,5,C.cream);
+      rect(x+1,y+3,6,6,C.stone0); rect(x+2,y+4,1,1,C.cream); rect(x+5,y+4,1,1,C.cream); return;
+    }
+
+    // body
+    rect(x+1,y+3,h.w-2,h.h-5,d.tint);
+    rect(x+1,y,h.w-2,4,'#d8a77f');
+    // blank little face
+    rect(x+2,y+2,1,1,C.black); rect(x+h.w-3,y+2,1,1,C.black);
+    // hair / helmet
+    if (h.type === 'knight') {
+      rect(x,y-1,h.w,4,C.stone2); rect(x+h.w-2,y+2,2,5,C.stone1);
+    } else {
+      rect(x+1,y-1,h.w-2,2,C.black);
+    }
+    // legs
+    const step = Math.sin(h.anim) > 0 ? 1 : 0;
+    rect(x+1,y+h.h-2,2,3,C.black); rect(x+h.w-3,y+h.h-2+step,2,3,C.black);
+
+    if (h.hp < h.maxHp || h.type === 'knight') {
+      rect(x, y-4, h.w, 2, C.black);
+      rect(x, y-4, Math.ceil(h.w * h.hp / h.maxHp), 1, C.red);
+    }
+  }
+
+  function drawProjectiles() {
+    for (const p of state.projectiles) {
+      rect(p.x-1,p.y-1,3,3,C.gold); rect(p.x,p.y,1,1,C.white);
+    }
+  }
+
+  function drawParticles() {
+    for (const p of state.particles) rect(p.x,p.y,p.size,p.size,p.color);
+    for (const f of state.floaters) pxText(f.text,f.x,f.y,f.color,7,'center');
+  }
+
+  function drawPlacementGhost() {
+    if (state.mode !== 'build' || !pointer.inside || pointer.y >= SHOP_Y || pointer.y < HUD_H) return;
+    const x = snap(pointer.x), y = snap(pointer.y);
+    const ok = placementValid(state.selected, x, y) && state.gold >= TRAP_DEFS[state.selected].cost;
+    ctx.globalAlpha = .45;
+    rect(x,y,16,16,ok?C.green:C.red);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = ok ? C.green : C.red;
+    ctx.strokeRect(x+.5,y+.5,15,15);
+  }
+
+  function drawHud() {
+    rect(0,0,W,HUD_H,'#100d1d');
+    rect(0,HUD_H-2,W,2,C.stone1);
+    pxText(`WAVE ${state.wave}`,7,6,C.cream,8);
+    pxText(`GOLD ${state.gold}`,70,6,C.gold,8);
+    pxText(`CORE ${state.castleHp}/${state.maxCastleHp}`,137,6,state.castleHp<=3?C.red:C.cyan,8);
+    pxText(`KILLS ${state.kills}`,218,6,C.cream,8);
+
+    const bx=306,by=4,bw=72,bh=18;
+    rect(bx,by,bw,bh,state.mode==='build'?C.red:C.stone0);
+    rect(bx+2,by+2,bw-4,bh-4,state.mode==='build'?C.orange:C.stone1);
+    pxText(state.mode==='build'?'RELEASE [SPACE]':state.paused?'PAUSED [P]':'WAVE RUNNING',bx+bw/2,by+5,C.black,6,'center');
+  }
+
+  function drawShop() {
+    rect(0,SHOP_Y,W,H-SHOP_Y,'#100d1d');
+    rect(0,SHOP_Y,W,2,C.stone1);
+    const gap=3, cardW=72, start=8;
+    state.shop.forEach((id,i)=>{
+      const d=TRAP_DEFS[id], x=start+i*(cardW+gap), y=183;
+      const selected=id===state.selected;
+      rect(x,y,cardW,28,selected?C.gold:C.stone0);
+      rect(x+2,y+2,cardW-4,24,selected?'#503b31':C.stone1);
+      pxText(`${i+1} ${d.name}`,x+4,y+4,selected?C.gold:C.cream,6);
+      pxText(`${d.cost}g`,x+4,y+14,state.gold>=d.cost?C.cyan:C.red,6);
+      pxText(d.desc,x+cardW-4,y+14,C.cream,5,'right');
+    });
+  }
+
+  function drawOverlay() {
+    if (state.mode === 'gameover') {
+      rect(54,55,276,93,'rgba(9,7,16,.92)');
+      ctx.strokeStyle=C.red; ctx.strokeRect(55.5,56.5,273,90);
+      pxText('THE HEROES BROKE IN',W/2,70,C.red,14,'center');
+      pxText(`Reached wave ${state.wave}  •  ${state.kills} defeated`,W/2,98,C.cream,8,'center');
+      pxText('Press R to rebuild the nightmare',W/2,121,C.gold,7,'center');
+      return;
+    }
+
+    if (state.bannerT > 0 && state.banner) {
+      const alpha=Math.min(1,state.bannerT*2);
+      ctx.globalAlpha=alpha;
+      const tw=Math.max(116,state.banner.length*8+20);
+      rect(W/2-tw/2,42,tw,24,'rgba(12,10,19,.82)');
+      pxText(state.banner,W/2,49,state.banner.includes('INVALID')||state.banner.includes('NOT')?C.red:C.gold,10,'center');
+      ctx.globalAlpha=1;
+    }
+
+    if (state.paused && state.mode==='wave') {
+      rect(138,74,108,34,'rgba(9,7,16,.9)');
+      pxText('PAUSED',W/2,84,C.gold,11,'center');
+    }
+  }
+
+  function render() {
+    ctx.save();
+    if (state.shake > 0) ctx.translate(Math.round(rand(-state.shake,state.shake)), Math.round(rand(-state.shake,state.shake)));
+    drawBackground();
+    drawTerrain();
+    drawCastle();
+    for (const t of state.traps) drawTrap(t);
+    for (const h of state.heroes) drawHero(h);
+    drawProjectiles();
+    drawParticles();
+    drawPlacementGhost();
+    ctx.restore();
+    drawHud();
+    drawShop();
+    drawOverlay();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Input
+  // ---------------------------------------------------------------------------
+  function pointerToCanvas(ev) {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (ev.clientX - r.left) * W / r.width,
+      y: (ev.clientY - r.top) * H / r.height
+    };
+  }
+
+  canvas.addEventListener('pointermove', ev => {
+    const p = pointerToCanvas(ev);
+    pointer.x = p.x; pointer.y = p.y; pointer.inside = true;
+  });
+  canvas.addEventListener('pointerleave', () => pointer.inside = false);
+
+  canvas.addEventListener('pointerdown', ev => {
+    ensureAudio();
+    const p = pointerToCanvas(ev);
+    pointer.x=p.x; pointer.y=p.y; pointer.inside=true;
+
+    if (ev.button === 2) {
+      ev.preventDefault();
+      sellAt(p.x,p.y);
+      return;
+    }
+
+    // release button
+    if (p.x >= 306 && p.x <= 378 && p.y >= 4 && p.y <= 22) {
+      startWave(); return;
+    }
+
+    // shop
+    if (p.y >= 183) {
+      const gap=3, cardW=72, start=8;
+      for(let i=0;i<state.shop.length;i++) {
+        const x=start+i*(cardW+gap);
+        if(p.x>=x && p.x<=x+cardW && p.y<=211) {
+          state.selected=state.shop[i];
+          beep(280, .025, 'square', .014, 30);
+          return;
+        }
+      }
+    }
+
+    if (state.mode === 'build' && p.y >= HUD_H && p.y < SHOP_Y) {
+      placeSelectedAt(snap(p.x), snap(p.y));
+    }
+  });
+
+  canvas.addEventListener('contextmenu', ev => ev.preventDefault());
+
+  window.addEventListener('keydown', ev => {
+    ensureAudio();
+    if (['Space','Digit1','Digit2','Digit3','Digit4','Digit5','KeyP','KeyR'].includes(ev.code)) ev.preventDefault();
+    if (ev.code === 'Space') startWave();
+    if (ev.code === 'KeyP' && state.mode === 'wave') state.paused = !state.paused;
+    if (ev.code === 'KeyR' && state.mode === 'gameover') resetGame();
+    if (ev.code.startsWith('Digit')) {
+      const i = Number(ev.code.slice(5)) - 1;
+      if (i >= 0 && i < state.shop.length) state.selected = state.shop[i];
+    }
+  }, { passive: false });
+
+  // ---------------------------------------------------------------------------
+  // Loop
+  // ---------------------------------------------------------------------------
+  function loop(t) {
+    const dt=(t-lastT)/1000; lastT=t;
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

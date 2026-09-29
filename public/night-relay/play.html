@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1013">
+  <meta name="description" content="Night Relay: a pixel-art gunship escort game. Keep Rook-1 alive. A standalone playable prototype.">
+  <title>Night Relay — Gunship Escort</title>
+  <style>
+:root{color-scheme:dark;--bg:#0b1013;--panel:#11191d;--border:#2a373b;--cream:#e7e9dd;--dim:#93a3a6;--cyan:#9ce4d2;--amber:#efbd79;--red:#f29280}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--cream);font:14px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background-image:linear-gradient(#ffffff02 1px,transparent 1px),linear-gradient(90deg,#ffffff02 1px,transparent 1px);background-size:48px 48px}.app{max-width:1460px;margin:0 auto;padding:27px 32px 18px}.topbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:23px;border-bottom:1px solid var(--border);gap:18px}.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:46px;height:48px;border:1px solid var(--cyan);font:900 22px/1.3 monospace;color:var(--cyan);padding:2px 5px;position:relative}.brand-mark span{position:absolute;right:5px;bottom:0}.brand h1{font-size:28px;font-weight:850;letter-spacing:2.5px;line-height:1;margin:0 0 9px}.brand p{font:10px monospace;letter-spacing:1.5px;color:var(--dim);margin:0}.version{color:#778f91}.top-actions{display:flex;gap:7px}button{font-family:inherit;cursor:pointer;color:var(--cream);background:transparent;border:1px solid var(--border);padding:11px 13px;transition:background .15s,border-color .15s}button:hover{background:#233236;border-color:#718e8c}button:focus-visible,canvas:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}.top-actions button{font:10px monospace;letter-spacing:.8px}.top-actions button[aria-pressed=true]{color:var(--cyan)}kbd{display:inline-block;font:10px monospace;color:#cbd7d4;border:1px solid #4d6267;min-width:18px;padding:2px 4px;text-align:center;border-radius:2px}.mission-line{display:flex;justify-content:space-between;align-items:center;margin:21px 0 15px;gap:16px}.mission-line>div{display:flex;align-items:center;gap:13px}.tag{font:10px monospace;color:var(--cyan);border:1px solid #3c5b54;padding:5px 7px;letter-spacing:.8px}.mission-line strong{font-size:17px;font-weight:600}.subtle{color:var(--dim)}.mission-line .subtle{font-size:12px}.local-label{font:9px monospace;letter-spacing:1px;color:var(--dim)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 238px;gap:18px;align-items:start}.main-feed{min-width:0}.feed-top,.feed-bottom{display:flex;justify-content:space-between;background:#131d21;border:1px solid var(--border);padding:10px 13px;font:10px monospace;letter-spacing:1px}.feed-top{border-bottom:0}.feed-bottom{border-top:0;font-size:9px;color:#afc0bf}.live-dot{width:6px;height:6px;display:inline-block;border-radius:50%;background:var(--cyan);margin-right:7px;vertical-align:1px}.viewport{position:relative;border:1px solid #435558;background:#1b282c;overflow:hidden;aspect-ratio:16/9}#game{display:block;width:100%;height:100%;image-rendering:pixelated;cursor:crosshair;touch-action:none}#game:focus{outline:none}.scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0px,transparent 3px,#06111222 4px);opacity:.65}.feed-corners{position:absolute;inset:13px;pointer-events:none;border:1px solid #cce6de12}.feed-corners:after{content:"";position:absolute;inset:-1px;border:1px solid #cce6de58;clip-path:polygon(0 0,24px 0,24px 1px,1px 1px,1px 24px,0 24px,0 0,100% 0,100% 24px,calc(100% - 1px) 24px,calc(100% - 1px) 1px,calc(100% - 24px) 1px,calc(100% - 24px) 0)}.flash-message{position:absolute;top:18px;left:50%;transform:translateX(-50%);background:#111a20e8;border:1px solid #c19764;color:var(--amber);font:11px monospace;letter-spacing:.6px;padding:9px 14px;pointer-events:none;white-space:nowrap;opacity:0}.flash-message.visible{opacity:1}.screen-overlay{position:absolute;inset:0;background:linear-gradient(90deg,#071214ed,#091517bc);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(1px)}.screen-overlay[hidden], [hidden]{display:none!important}.briefing-card,.pause-card,.results-card{max-width:565px;width:100%}.eyebrow{font:10px monospace;letter-spacing:1.6px;color:var(--cyan);margin-bottom:18px}.screen-overlay h2{font-size:clamp(29px,3.3vw,49px);letter-spacing:-1.8px;line-height:1.03;margin:0 0 18px;font-weight:850}.screen-overlay p{line-height:1.7;font-size:13px;color:#b5c6c4;margin:0 0 18px}.identify{display:flex;gap:25px;font:10px monospace;letter-spacing:.2px;margin:18px 0}.friendly-diamond{color:var(--cyan);font-size:19px}.hostile-mark{color:#edf2e5;font-size:19px}.identify b{margin-right:4px;vertical-align:-2px}.brief-controls{display:flex;gap:15px;font:11px monospace;color:var(--dim);margin:16px 0 21px;align-items:center}.brief-controls kbd{margin-right:3px}.start-actions{display:flex;gap:10px;align-items:center}.primary{background:var(--cyan);color:#102521;border-color:var(--cyan);font:700 11px monospace;letter-spacing:1px;padding:14px 20px;min-width:186px;text-align:left}.primary:hover{background:#c1f3e7}.primary span{float:right;font-size:16px;margin-left:24px}.primary kbd{float:right;color:inherit;border-color:#487c70}.screen-overlay .fine-print{font:10px monospace;color:#869d9c;margin-top:18px;margin-bottom:0}.start-actions>button:not(.primary),.pause-card>button:not(.primary){font:10px monospace}.pause-card>button{margin-right:8px}.weapons{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.weapon{text-align:left;background:var(--panel);padding:13px;position:relative}.weapon.selected{border-color:var(--cyan);background:#182b2b}.weapon.selected:before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:2px;background:var(--cyan)}.weapon-head{display:flex;align-items:center;gap:10px;font:600 13px monospace;letter-spacing:1px}.weapon-symbol{margin-left:auto;font-size:19px;color:var(--dim);line-height:14px}.weapon p{font-size:11px;color:var(--dim);margin:9px 0 12px}.meter{height:4px;background:#344247;overflow:hidden}.meter i{display:block;height:100%;width:100%;background:var(--cyan);transition:width .1s linear}#heat-fill{width:0;background:var(--amber)}.weapon-status{display:flex;justify-content:space-between;font:9px monospace;color:#b0c2c0;margin-top:8px;gap:5px}.weapon-status span+span{color:#8a9e9c}.controls-footer{display:flex;gap:17px;justify-content:center;margin-top:16px;flex-wrap:wrap;color:var(--dim);font:10px monospace}.controls-footer kbd{margin-right:3px}.sidebar{display:flex;flex-direction:column;gap:12px}.panel{background:var(--panel);border:1px solid var(--border);padding:14px}.panel-label{display:flex;justify-content:space-between;align-items:center;font:9px monospace;letter-spacing:1px;color:var(--dim);margin-bottom:14px}.panel-label .friendly-diamond{line-height:10px}.escort-name{display:flex;justify-content:space-between;align-items:center;font:600 18px monospace;letter-spacing:.6px}.escort-name span{font:8px monospace;color:var(--cyan);letter-spacing:0}.health-row{display:flex;justify-content:space-between;align-items:end;margin-top:13px}.health-row>span{font:9px monospace;color:var(--dim)}.health-row strong{font:25px monospace}.health-row strong span{font-size:12px;color:var(--dim)}.health-meter{margin:7px 0 12px;height:6px}.small-row{display:flex;justify-content:space-between;font:9px monospace;margin-top:10px;color:var(--dim);gap:5px}.small-row strong{color:var(--cream);font-weight:400}.small-row #objective{max-width:152px;line-height:1.3}#minimap{display:block;width:100%;height:auto;border:1px solid #304246;image-rendering:pixelated;cursor:crosshair}.route-milestones{display:flex;justify-content:space-between;color:#91a7a7;font:8px monospace;gap:4px;margin:10px 0}.route-milestones .done{color:var(--cyan)}.progress-meter{height:3px}.progress-meter i{width:0}.telemetry{display:grid;grid-template-columns:1fr 1fr;gap:10px}.telemetry>div+div{border-left:1px solid var(--border);padding-left:16px}.telemetry span{display:block;font:9px monospace;color:var(--dim);letter-spacing:1px;margin-bottom:8px}.telemetry strong{font:22px monospace}.radio-panel{flex:1;min-height:180px}.radio-panel .panel-label{margin-bottom:8px}.radio-bars{color:var(--cyan)}#radio{max-height:158px;overflow:hidden}#radio p{font:10px/1.6 monospace;color:#c1cfcb;margin:0;padding:7px 0;border-bottom:1px solid #263538}#radio time{font-size:8px;color:#829c9c;margin-right:6px}#radio p.urgent{color:var(--amber)}#radio p.radio-empty{color:var(--dim);border:0}.page-footer{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:25px;padding-top:13px;font:9px monospace;color:#91a2a4;letter-spacing:.5px}.page-footer>span:first-child{color:var(--cyan)}.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.result-stats div{border-left:2px solid #5e8e80;padding-left:10px}.result-stats strong{font:25px monospace;display:block;margin-bottom:5px}.result-stats span{font:9px monospace;color:var(--dim)}.mobile-note{display:none}.fx-off .scanlines{display:none}.fx-off button,.fx-off .meter i{transition:none}@media(min-width:1550px){.app{padding-top:40px}.screen-overlay{padding:45px}}@media(max-width:1100px){.app{padding:18px}.layout{grid-template-columns:minmax(0,1fr) 214px;gap:12px}.mission-line .subtle{display:none}.briefing-card .eyebrow{margin-bottom:12px}.screen-overlay h2{margin-bottom:10px}.screen-overlay p{margin-bottom:10px;font-size:12px}.identify{margin:10px 0;gap:15px;font-size:9px}.brief-controls{margin:10px 0 14px;gap:10px;font-size:10px}.screen-overlay .fine-print{margin-top:12px}.weapon-status span+span{display:none}.weapon-head{font-size:11px}.page-footer{font-size:8px}.radio-panel{min-height:130px}#radio{max-height:108px}}@media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr}.telemetry{align-content:start}.mission-line strong{font-size:14px}.local-label,.version{display:none}.brand h1{font-size:20px}.brand p{font-size:8px}.top-actions button{padding:8px;font-size:9px}.brand-mark{display:none}.screen-overlay h2{font-size:30px}.screen-overlay{padding:18px}.mobile-note{display:block;font-size:11px;color:var(--amber);line-height:1.6}.page-footer span+span{display:none}.sidebar .panel{min-width:0}}@media(max-width:520px){.app{padding:10px}.topbar{gap:6px}.top-actions{gap:4px}#motion{display:none}.brand h1{font-size:17px}.brand p{letter-spacing:.3px}.mission-line>div{gap:8px}.screen-overlay{padding:12px}.screen-overlay h2{font-size:23px;margin-bottom:8px}.eyebrow{font-size:7px;margin-bottom:8px}.screen-overlay p{font-size:10px;line-height:1.4}.identify,.brief-controls,.screen-overlay .fine-print{display:none}.primary{min-width:150px;padding:10px;font-size:10px}.start-actions>button:not(.primary){font-size:8px;padding:10px}.weapon{padding:9px}.weapon-head{gap:5px;letter-spacing:0;font-size:10px}.weapon-symbol{display:none}.weapon p{font-size:9px}.weapon-status{font-size:8px}.feed-top,.feed-bottom{font-size:8px;padding:8px}.controls-footer{gap:8px;font-size:9px}.result-stats{margin:8px 0}.result-stats strong{font-size:17px}.result-stats span{font-size:7px}}
+
+/* v0.2 mission selector + responsive touch cockpit. Controls stay outside the aim surface. */
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.45;cursor:default}button[aria-pressed=true]{border-color:var(--cyan)}
+.mission-picker{display:flex;align-items:center;gap:8px;margin:0 0 10px}.mission-picker button{font:10px monospace;letter-spacing:.5px;padding:10px 12px;min-height:44px}.mission-picker button span{color:var(--dim);margin-right:8px}.mission-picker button[aria-pressed=true]{background:#1b3431;color:var(--cyan)}.mission-picker b{font:8px monospace;color:var(--amber);margin-left:8px}.mission-picker-hint{margin-left:auto;font:8px monospace;color:var(--dim)}
+#brief-headline{white-space:pre-line}.screen-overlay{overflow:auto;overscroll-behavior:contain}.screen-overlay .mission-intel{font:10px/1.6 monospace;color:var(--amber);border-left:2px solid #a18c62;padding-left:10px;margin:10px 0 14px}.briefing-card{max-width:590px}.briefing-card .eyebrow{margin-bottom:10px}.briefing-card h2{margin-bottom:12px}.briefing-card p{margin-bottom:10px}.identify{margin:10px 0}.brief-controls{margin:10px 0 16px}.start-actions{flex-wrap:wrap}.screen-overlay .fine-print{margin-top:12px}
+.touch-controls,.mobile-hud,.touch-hint,.mobile-radio{display:none}.mobile-note{display:none}#minimap{touch-action:none}
+.touch-mode .touch-controls{display:grid;grid-template-columns:1fr 110px;gap:10px;margin-top:10px;user-select:none;-webkit-user-select:none}.touch-tools{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.touch-controls button{min-height:54px;font:11px monospace;padding:8px 4px}.touch-controls small{display:block;font:9px monospace;color:var(--dim);margin-top:3px}.touch-controls button[aria-pressed=true]{background:#24453f;color:var(--cyan)}
+#touch-fire{background:#7ed6bb;color:#10251e;border:1px solid #b7f1da;font-weight:bold;font-size:17px;touch-action:none;-webkit-touch-callout:none}#touch-fire small{color:#1d4839;font-size:8px}#touch-fire.pressed{background:#e7f5c6;box-shadow:inset 0 0 0 3px #599d83}
+.touch-mode .touch-hint{display:block;color:var(--dim);font:10px/1.4 monospace;text-align:center;margin-top:8px}.touch-mode .controls-footer{display:none}.touch-mode .mobile-note{display:block;color:var(--dim);font:10px/1.5 monospace}.touch-mode .mobile-radio{display:block;border-left:2px solid var(--amber);padding:6px 8px;font:10px/1.5 monospace;color:var(--amber);margin-top:9px;min-height:34px}
+@media(max-width:1100px){.screen-overlay h2{font-size:30px}.screen-overlay{padding:18px}.screen-overlay .mission-intel{font-size:9px}.briefing-card .identify{font-size:8px}.briefing-card .brief-controls{font-size:9px}.mission-picker-hint{display:none}.screen-overlay .eyebrow{font-size:8px;letter-spacing:1px}}
+@media(max-width:800px){.touch-mode .app{padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}.topbar{padding-bottom:12px}.touch-mode .mission-line{margin:12px 0 10px}.touch-mode .mobile-hud{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#172923;border:1px solid #46645b;padding:9px 10px;font:10px monospace}.mobile-hud strong{font-weight:400;color:var(--cyan)}.touch-mode .sidebar{display:none}.touch-mode .feed-bottom{font-size:7px}.touch-mode .page-footer{margin-top:15px}.touch-mode .top-actions button{min-height:44px}.touch-mode .brand p{display:none}.touch-mode .brand h1{font-size:17px;margin:0}.touch-mode #touch-mode{display:none}.touch-mode .weapon{min-height:76px}.touch-mode .weapon p{margin:5px 0 8px}.mission-picker{gap:6px}.mission-picker button{flex:1;padding:9px 5px;font-size:9px}.mission-picker button span{margin-right:5px}.mission-picker b{margin-left:3px}}
+@media(max-width:600px) and (orientation:portrait){.touch-mode .viewport{aspect-ratio:4/3}.touch-mode .screen-overlay{padding:14px;align-items:center}.touch-mode .screen-overlay h2{font-size:30px}.touch-mode .screen-overlay p{font-size:11px;line-height:1.45}.touch-mode .screen-overlay .mission-intel{font-size:9px;line-height:1.4;margin:8px 0 12px}.touch-mode .identify,.touch-mode .brief-controls{display:none}.touch-mode .screen-overlay .eyebrow{font-size:7px;margin-bottom:7px}.touch-mode .primary{min-height:44px;min-width:154px}.touch-mode .start-actions>button:not(.primary){min-height:44px;font-size:9px}.touch-mode .screen-overlay .fine-print{display:none}.touch-mode .weapons{gap:6px;margin-top:9px}.touch-mode .touch-controls{grid-template-columns:1fr 88px;gap:7px}.touch-mode .touch-tools{gap:4px}.touch-mode .touch-tools button{font-size:10px}.touch-mode .flash-message{font-size:8px;white-space:normal;max-width:94%;width:max-content;text-align:center}.touch-mode .result-stats{margin:12px 0}.touch-mode .result-stats strong{font-size:21px}.touch-mode .result-stats span{font-size:7px}.touch-mode .page-footer{display:none}}
+@media(max-height:900px) and (orientation:landscape) and (max-width:1200px){
+ .touch-mode{overflow:hidden}.touch-mode .app{height:100vh;height:100dvh;max-width:none;padding:4px max(6px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:4px}
+ .touch-mode .topbar{padding:0;border:0;min-height:34px}.touch-mode .brand-mark,.touch-mode .brand p,.touch-mode .version,.touch-mode .mission-line,.touch-mode .sidebar,.touch-mode .page-footer,.touch-mode .mobile-note{display:none}.touch-mode .brand h1{font-size:16px;margin:0}.touch-mode .top-actions button{padding:6px 10px;min-height:34px}.touch-mode .top-actions{gap:6px}.touch-mode #touch-mode{display:none}
+ .touch-mode .layout{display:block;min-height:0;flex:1}.touch-mode .main-feed{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 174px;grid-template-rows:38px 26px minmax(0,1fr) 18px;column-gap:8px;row-gap:0}
+ .touch-mode .mission-picker{grid-column:1;grid-row:1;margin:0 0 3px}.touch-mode .mission-picker button{min-height:34px;padding:6px 9px;flex:1}.touch-mode .mission-picker-hint{display:none}
+ .touch-mode .mobile-hud{display:flex;justify-content:space-between;align-items:center;grid-column:1;grid-row:2;font:10px monospace;padding:4px 8px;background:#172923;border:1px solid #46645b}
+ .touch-mode .feed-top{display:none}.touch-mode .viewport{grid-column:1;grid-row:3;aspect-ratio:auto;min-height:0;height:100%;width:100%}.touch-mode .feed-bottom{grid-column:1;grid-row:4;font-size:7px;padding:4px 6px}.touch-mode .weapons{grid-column:2;grid-row:1/4;align-self:start;display:grid;grid-template-columns:1fr;margin:0;gap:4px}.touch-mode .weapon{padding:7px 9px;min-height:46px;height:48px}.touch-mode .weapon p,.touch-mode .weapon-symbol,.touch-mode .weapon kbd{display:none}.touch-mode .weapon-head{font-size:10px;line-height:12px}.touch-mode .weapon .meter{height:3px;margin-top:5px}.touch-mode .weapon-status{font-size:8px;margin-top:4px}.touch-mode .weapon-status span+span{display:none}
+ .touch-mode .touch-controls{grid-column:2;grid-row:3/5;align-self:end;display:grid;grid-template-columns:1fr;margin:0;gap:5px}.touch-mode .touch-tools{grid-template-columns:repeat(2,1fr);gap:4px}.touch-mode .touch-tools button{min-height:34px;font-size:9px;padding:4px}.touch-mode .touch-tools small{display:inline;font-size:8px;margin:0}.touch-mode #touch-fire{min-height:48px}.touch-mode .touch-hint,.touch-mode .mobile-radio{display:none}
+ .touch-mode .screen-overlay{padding:14px;align-items:center}.touch-mode .briefing-card{max-width:600px}.touch-mode .screen-overlay h2{font-size:25px;white-space:normal;letter-spacing:-1px;margin:0 0 6px}.touch-mode .screen-overlay .eyebrow,.touch-mode .screen-overlay .fine-print,.touch-mode .identify,.touch-mode .brief-controls{display:none}.touch-mode .screen-overlay p{font-size:10px;line-height:1.35;margin-bottom:7px}.touch-mode .screen-overlay .mission-intel{font-size:9px;line-height:1.35;margin:6px 0 10px}.touch-mode .primary{padding:10px 14px;min-height:40px;font-size:10px;min-width:158px}.touch-mode .start-actions button{min-height:40px}.touch-mode .result-stats{margin:10px 0}.touch-mode .result-stats strong{font-size:20px}
+}
+@media(max-width:600px) and (max-height:740px) and (orientation:portrait){
+ .touch-mode .app{padding-top:6px}.touch-mode .topbar{padding-bottom:6px}.touch-mode .mission-line{display:none}.touch-mode .mission-picker{margin:8px 0}.touch-mode .mobile-hud{padding:6px 8px}.touch-mode .feed-top{display:none}
+ .touch-mode .viewport{height:clamp(150px,calc(100dvh - 390px),260px);aspect-ratio:auto}.touch-mode .feed-bottom{padding:6px;font-size:7px}
+ .touch-mode .weapon{min-height:62px;padding:8px}.touch-mode .weapon p{display:none}.touch-mode .weapon .meter{margin-top:8px}.touch-mode .weapon-status{margin-top:6px;font-size:8px}.touch-mode .touch-hint,.touch-mode .mobile-radio,.touch-mode .mobile-note{display:none}
+ .touch-mode .screen-overlay{padding:10px;align-items:flex-start}.touch-mode .screen-overlay h2{font-size:22px;white-space:normal;letter-spacing:-.5px}.touch-mode .screen-overlay .eyebrow{display:none}.touch-mode .screen-overlay p{font-size:10px}.touch-mode .screen-overlay .mission-intel{font-size:8px;margin:6px 0 8px}.touch-mode .primary{min-width:144px;font-size:9px}.touch-mode .start-actions{gap:6px}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">N<span>R</span></span><div><h1>NIGHT RELAY</h1><p>A GUNSHIP ESCORT GAME <span class="version">/ PROTOTYPE 0.2</span></p></div></div>
+    <div class="top-actions"><button id="touch-mode" aria-pressed="false" aria-label="Toggle touch controls">TOUCH</button><button id="sound" aria-pressed="false">SOUND OFF</button><button id="motion" aria-pressed="true">FX ON</button><button id="pause">PAUSE <kbd>P</kbd></button></div>
+  </header>
+  <div class="mission-line"><div><span class="tag" id="mission-tag">MISSION 01</span><strong id="mission-title">Bring them home.</strong><span class="subtle" id="mission-subtitle">Protect Rook-1 through the blackout.</span></div><span class="local-label" id="save-status">NO ACCOUNT · LOCAL ONLY</span></div>
+  <main class="layout">
+    <section class="main-feed" aria-label="Gunship targeting view">
+      <div class="mission-picker" role="group" aria-label="Choose mission"><button data-mission="home" aria-pressed="true"><span>01</span> BRING THEM HOME</button><button data-mission="floodgate" aria-pressed="false"><span>02</span> FLOODGATE <b>NEW</b></button><span class="mission-picker-hint">SELECT FROM BRIEFING</span></div>
+      <div class="mobile-hud" aria-label="Mission status"><strong id="mobile-hp">◇ 100%</strong><span id="mobile-objective">PROTECT ROOK-1</span><strong id="mobile-clock">05:00</strong></div>
+      <div class="feed-top"><span><i class="live-dot"></i> LIVE FEED <span class="subtle">/ WHITE HOT</span></span><span id="camera-label">WIDE · AUTO TRACK</span></div>
+      <div class="viewport" id="viewport">
+        <canvas id="game" width="768" height="432" tabindex="0" aria-label="Night Relay playfield. Mouse aims, left click fires, 1 2 3 select weapons. Hold Space to stop the courier. Q zooms, WASD pans, F follows, P pauses.">This game needs a browser with HTML Canvas support.</canvas>
+        <div class="scanlines" aria-hidden="true"></div>
+        <div class="feed-corners" aria-hidden="true"></div>
+        <div id="flash-message" class="flash-message" role="status"></div>
+        <div class="screen-overlay" id="overlay">
+          <div class="briefing-card" id="briefing">
+            <div class="eyebrow">GUNSHIP ONLINE / AWAITING YOUR SIGNAL</div>
+            <h2 id="brief-headline">One road.<br>One way home.</h2>
+            <p id="brief-description">Rook-1 has the relay. You have the sky. Clear a path, cover the stops, and get them to extraction.</p><p id="mission-intel" class="mission-intel"></p>
+            <div class="identify"><span><b class="friendly-diamond">◇</b> ROOK-1 — PROTECT</span><span><b class="hostile-mark">┼</b> WHITE MARKS — HOSTILE</span></div>
+            <div class="brief-controls" id="brief-controls"><span><kbd>CLICK</kbd> Fire</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Weapons</span><span><kbd>SPACE</kbd> Hold escort</span></div>
+            <div class="start-actions"><button id="start" class="primary">BEGIN ESCORT <span>↗</span></button><button id="training">RELAXED RUN</button></div>
+            <p class="fine-print" id="brief-fine">About 4 minutes · Friendly fire is on</p>
+          </div>
+          <div class="pause-card" id="pause-card" hidden><div class="eyebrow">FEED SUSPENDED</div><h2>Holding orbit.</h2><p>The mission clock is paused.</p><button id="resume" class="primary">RESUME MISSION</button><button id="abort">RETURN TO BRIEFING</button></div>
+          <div class="results-card" id="results" hidden><div class="eyebrow" id="result-label">MISSION COMPLETE</div><h2 id="result-title">Rook-1 is home.</h2><p id="result-detail"></p><div class="result-stats" id="result-stats"></div><div class="start-actions"><button id="retry" class="primary">FLY AGAIN <kbd>R</kbd></button><button id="next-mission" hidden>NEXT MISSION ↗</button><button id="briefing-again">BRIEFING</button></div><p class="fine-print" id="result-best"></p></div>
+        </div>
+      </div>
+      <div class="feed-bottom"><span id="sector-label">SECTOR 01 / OUTSKIRTS</span><span id="feed-status">AWAITING DEPLOYMENT</span></div>
+      <div class="weapons" role="group" aria-label="Select weapon">
+        <button class="weapon selected" data-weapon="0" aria-pressed="true"><div class="weapon-head"><kbd>1</kbd><span>NEEDLE</span><span class="weapon-symbol">⋮</span></div><p>Precision · rapid fire</p><div class="meter"><i id="heat-fill"></i></div><div class="weapon-status"><span id="needle-status">HEAT 0%</span><span>14px BLAST</span></div></button>
+        <button class="weapon" data-weapon="1" aria-pressed="false"><div class="weapon-head"><kbd>2</kbd><span>HAMMER</span><span class="weapon-symbol">⊕</span></div><p>Clusters · armored targets</p><div class="meter"><i id="hammer-fill"></i></div><div class="weapon-status"><span id="hammer-status">8 / 8 ROUNDS</span><span>36px BLAST</span></div></button>
+        <button class="weapon" data-weapon="2" aria-pressed="false"><div class="weapon-head"><kbd>3</kbd><span>THUNDER</span><span class="weapon-symbol">◎</span></div><p>Large blast · finite ammo</p><div class="meter"><i id="thunder-fill"></i></div><div class="weapon-status"><span id="thunder-status">6 ROUNDS LEFT</span><span>76px BLAST</span></div></button>
+      </div>
+      <div class="touch-controls" aria-label="Touch controls">
+        <div class="touch-tools"><button id="touch-pan" aria-pressed="false">PAN</button><button id="touch-follow">FOLLOW</button><button id="touch-zoom">ZOOM</button><button id="touch-hold" aria-pressed="false">HOLD <small id="touch-hold-budget">16s</small></button></div>
+        <button id="touch-fire" aria-label="Hold to fire selected weapon">FIRE <small>HOLD TO FIRE</small></button>
+      </div>
+      <div class="touch-hint" id="touch-hint">Tap / drag the feed to aim, then hold FIRE. Lift to stop.</div>
+      <div class="mobile-radio" id="mobile-radio" aria-live="off">Keep the cyan diamond alive. Friendly fire is on.</div>
+      <div class="controls-footer"><span><kbd>WASD</kbd> Pan</span><span><kbd>F</kbd> Follow</span><span><kbd>Q</kbd> Zoom</span><span><kbd>SPACE</kbd> Hold escort</span><span><kbd>P</kbd> Pause</span><span><kbd>M</kbd> Sound</span></div>
+    </section>
+    <aside class="sidebar">
+      <section class="panel escort-panel"><div class="panel-label">YOUR PRIORITY <span class="friendly-diamond">◇</span></div><div class="escort-name">ROOK-1 <span id="escort-status">STANDING BY</span></div><div class="health-row"><span>HULL INTEGRITY</span><strong id="health">100<span>%</span></strong></div><div class="meter health-meter"><i id="health-fill"></i></div><div class="small-row"><span>HOLD RESERVE</span><strong id="hold-budget">16.0s</strong></div><div class="small-row"><span>WINDOW LEFT</span><strong id="clock">05:00</strong></div></section>
+      <section class="panel"><div class="panel-label">ROUTE TO EXTRACTION</div><canvas id="minimap" width="216" height="120" aria-label="Mission overview; click to pan camera"></canvas><div class="route-milestones"><span id="cp0">01 RELAY</span><span id="cp1">02 GATE</span><span id="cp2">03 EXFIL</span></div><div class="meter progress-meter"><i id="progress-fill"></i></div><div class="small-row"><span id="objective">Cover the courier</span><strong id="progress">0%</strong></div></section>
+      <section class="panel telemetry"><div><span>SCORE</span><strong id="score">00000</strong></div><div><span>HOSTILES</span><strong id="threats">00</strong></div></section>
+      <section class="panel radio-panel"><div class="panel-label"><span>RADIO / TEXT CHANNEL</span><span class="radio-bars">▂▄▆</span></div><div id="radio" role="log" aria-live="polite" aria-label="Mission radio"><p class="radio-empty">Waiting for your signal.</p></div></section>
+    </aside>
+  </main>
+  <footer class="page-footer"><span>KEEP THE CYAN DIAMOND ALIVE.</span><span>No downloads inside the game. No accounts. No tracking scripts.</span></footer>
+  <p class="mobile-note">Touch: aim on the feed, hold FIRE, tap weapons to switch. PAN lets you drag the camera; FOLLOW returns to Rook-1. HOLD pauses the escort, not the mission. Landscape gives you more room.</p>
+</div>
+<noscript>Enable JavaScript to play Night Relay.</noscript>
+<script>
+/* Night Relay v0.2 — shared mission data, collision geometry and navigation.
+   Rendering and simulation use the SAME obstacle rectangles. No external assets. */
+(function(root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.NightRelayWorld = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function() {
+  'use strict';
+  const WORLD = Object.freeze({width:1800, height:1000});
+  const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+  const dist = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
+  const rngFor = seed => { let s=seed>>>0; return () => {s+=0x6D2B79F5; let t=s; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296;}; };
+  function routeData(points, stops) {
+    const route=points.map(([x,y])=>Object.freeze({x,y}));
+    const segments=route.slice(1).map((p,i)=>dist(p,route[i]));
+    const checkpoints=stops.map(s=>Object.freeze({...s,at:segments.slice(0,s.node).reduce((a,b)=>a+b,0)}));
+    return {route:Object.freeze(route),segments:Object.freeze(segments),length:segments.reduce((a,b)=>a+b,0),checkpoints:Object.freeze(checkpoints)};
+  }
+  const MISSIONS = Object.freeze([
+    Object.freeze({id:'home',number:1,title:'Bring them home.',subtitle:'Protect Rook-1 through the blackout.',
+      headline:'One road.\nOne way home.',brief:'Rook-1 has the relay. You have the sky. Clear a path, cover two stops, and get them to extraction.',
+      intel:'Buildings stop movement and ground fire. The canal can only be crossed at the bridge. Roofs absorb your rounds.',
+      seed:240926,terrainSeed:77391,speed:11,maxTime:300,extractTime:22,holdBudget:16,
+      intro:'ROOK-1: We have the relay. Keep the road clear.',
+      sectors:['OUTSKIRTS','RELAY DISTRICT','THE CROSSING','EXTRACTION'],
+      ...routeData([[170,730],[425,730],[590,500],[830,500],[1000,665],[1230,665],[1475,420],[1640,420]],
+        [{node:2,wait:14,name:'RELAY STATION',short:'RELAY'},{node:4,wait:18,name:'BRIDGE GATE',short:'GATE'}]),
+      canals:[{x:1100,w:58,bridges:[{y:633,h:64}]}],
+      gate:null,
+      entries:[[80,410],[310,385],[650,790],[860,775],[810,205],[440,150],[1050,925],[1260,940],[1260,310],[1550,770],[1710,155],[1420,130],[1720,690]]
+    }),
+    Object.freeze({id:'floodgate',number:2,title:'Floodgate.',subtitle:'Two canals. One repair crew. No way around.',
+      headline:'Open the gate.\nHold the line.',brief:'Rook-1 must restore a floodgate, cross the warehouse district, and survive a 28-second extraction. Keep the repair crew alive.',
+      intel:'The first bridge is sealed until the 20-second gate repair finishes. Attackers can use the southern service bridge. Watch both banks.',
+      seed:250926,terrainSeed:88127,speed:13.5,maxTime:360,extractTime:28,holdBudget:20,
+      intro:'ROOK-1: The floodgate is sealed. Get us to the controls; we can open it.',
+      sectors:['LOWER CANAL','GATE CONTROL','WAREHOUSE DISTRICT','EAST BANK EXFIL'],
+      ...routeData([[140,780],[400,780],[400,560],[690,560],[690,400],[960,400],[1080,240],[1220,240],[1220,660],[1530,660],[1660,500]],
+        [{node:4,wait:20,name:'FLOODGATE CONTROLS',short:'GATE',opensGate:true},{node:7,wait:18,name:'RELAY UPLINK',short:'UPLINK'}]),
+      canals:[{x:780,w:90,bridges:[{y:360,h:80},{y:800,h:80}]},{x:1320,w:80,bridges:[{y:620,h:80}]}],
+      gate:{id:'floodgate',kind:'gate',x:784,y:360,w:10,h:80},
+      entries:[[80,435],[380,160],[645,130],[200,940],[620,850],[1030,850],[940,80],[1160,70],[1000,650],[1270,925],[1500,935],[1540,240],[1720,810],[1730,125]]
+    })
+  ]);
+  const getMission=id=> MISSIONS.find(m=>m.id===id || m.number===id) || MISSIONS[0];
+  function pointOnRoute(d, config=MISSIONS[0]) {
+    if(d>=config.length){const n=config.route.length-1,a=config.route[n-1],b=config.route[n];return {x:b.x,y:b.y,angle:Math.atan2(b.y-a.y,b.x-a.x),segment:n-1};}
+    let left=clamp(d,0,config.length);
+    for(let i=0;i<config.segments.length;i++) {
+      if(left<=config.segments[i] || i===config.segments.length-1) {
+        const a=config.route[i],b=config.route[i+1],t=clamp(left/config.segments[i],0,1);
+        return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,angle:Math.atan2(b.y-a.y,b.x-a.x),segment:i};
+      }
+      left-=config.segments[i];
+    }
+  }
+  // Slab intersection with a padded rectangle. Conservative for a moving circle:
+  // rounded corners may stop it early, but cannot let it tunnel through a wall.
+  function segmentHit(a,b,r,pad=0) {
+    let lo=0, hi=1;
+    for(const [v,d,min,max] of [[a.x,b.x-a.x,r.x-pad,r.x+r.w+pad],[a.y,b.y-a.y,r.y-pad,r.y+r.h+pad]]) {
+      if(Math.abs(d)<1e-9) {if(v<min || v>max)return null;}
+      else {let t1=(min-v)/d,t2=(max-v)/d; if(t1>t2)[t1,t2]=[t2,t1];lo=Math.max(lo,t1);hi=Math.min(hi,t2);if(lo>hi)return null;}
+    }
+    return lo;
+  }
+  function circleRect(x,y,r,b) {
+    const dx=x-clamp(x,b.x,b.x+b.w),dy=y-clamp(y,b.y,b.y+b.h);
+    return dx*dx+dy*dy <= r*r;
+  }
+  function overlap(a,b,pad=0) {return a.x<b.x+b.w+pad && a.x+a.w+pad>b.x && a.y<b.y+b.h+pad && a.y+a.h+pad>b.y;}
+  class MinHeap {
+    constructor(){this.items=[];}
+    push(item){const a=this.items; a.push(item);let i=a.length-1;while(i){const p=(i-1)>>1;if(a[p].f<=item.f)break;a[i]=a[p];i=p;}a[i]=item;}
+    pop(){const a=this.items,out=a[0],last=a.pop();if(a.length){let i=0;while(i*2+1<a.length){let k=i*2+1;if(k+1<a.length&&a[k+1].f<a[k].f)k++;if(a[k].f>=last.f)break;a[i]=a[k];i=k;}a[i]=last;}return out;}
+  }
+  class Terrain {
+    constructor(config=MISSIONS[0], empty=false) {
+      this.config=config;this.version=0;this.gridCache=new Map();this.buildings=[];this.water=[];
+      this.bridges=[];this.gates=empty?[]:config.gate?[{...config.gate,open:false}]:[];
+      if(!empty) {
+        for(const c of config.canals) {
+          let y=0;
+          for(const b of c.bridges) {if(b.y>y)this.water.push({kind:'water',x:c.x,y,w:c.w,h:b.y-y});this.bridges.push({x:c.x-8,y:b.y,w:c.w+16,h:b.h});y=b.y+b.h;}
+          if(y<WORLD.height)this.water.push({kind:'water',x:c.x,y,w:c.w,h:WORLD.height-y});
+        }
+        const rng=rngFor(config.terrainSeed);
+        for(let i=0;i<(config.id==='floodgate'?230:180);i++) {
+          const b={id:`building-${i}`,kind:'building',x:35+Math.floor(rng()*1680),y:35+Math.floor(rng()*900),w:24+Math.floor(rng()*(config.id==='floodgate'?62:42)),h:24+Math.floor(rng()*42)};
+          // Keep the full footprint off the authored route, bridge approach and ingress points.
+          if(config.route.slice(1).some((p,j)=>segmentHit(config.route[j],p,b,42)!==null))continue;
+          if(config.canals.some(c=>overlap(b,{x:c.x-28,y:0,w:c.w+56,h:1000})))continue;
+          if(config.entries.some(([x,y])=>circleRect(x,y,36,b)))continue;
+          if(this.buildings.some(a=>overlap(a,b,20)))continue;
+          this.buildings.push(b);
+        }
+      }
+      this.refresh();
+    }
+    refresh(){this.solids=[...this.buildings,...this.gates.filter(g=>!g.open)];this.obstacles=[...this.solids,...this.water];this.gridCache.clear();}
+    openGate(){let changed=false;for(const g of this.gates){if(!g.open){g.open=true;changed=true;}}if(changed){this.version++;this.refresh();}return changed;}
+    canStand(x,y,r=0){return Number.isFinite(x)&&Number.isFinite(y)&&x>=r&&y>=r&&x<=WORLD.width-r&&y<=WORLD.height-r&&!this.obstacles.some(b=>circleRect(x,y,r,b));}
+    segmentFree(a,b,r=0,coverOnly=false){
+      if(!coverOnly && (!this.canStand(a.x,a.y,r)||!this.canStand(b.x,b.y,r)))return false;
+      return !(coverOnly?this.solids:this.obstacles).some(rect=>segmentHit(a,b,rect,r)!==null);
+    }
+    coverAt(x,y){return this.solids.find(b=>circleRect(x,y,0,b))||null;}
+    firstCover(a,b){let hit=null;for(const r of this.solids){const t=segmentHit(a,b,r);if(t!==null&&(!hit||t<hit.t))hit={t,x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,kind:r.kind};}return hit;}
+    move(entity,dx,dy){
+      // Swept movement + axis slide, never an endpoint-only collision test.
+      const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/5));let moved=false;
+      for(let i=0;i<steps;i++){
+        const a={x:entity.x,y:entity.y},b={x:a.x+dx/steps,y:a.y+dy/steps};
+        if(this.segmentFree(a,b,entity.radius)){entity.x=b.x;entity.y=b.y;moved=true;continue;}
+        const bx={x:b.x,y:a.y};if(this.segmentFree(a,bx,entity.radius)){entity.x=bx.x;moved=true;}
+        const ay={x:entity.x,y:entity.y},by={x:entity.x,y:b.y};if(this.segmentFree(ay,by,entity.radius)){entity.y=by.y;moved=true;}
+      }return moved;
+    }
+    grid(radius){
+      // One clearance grid serves both infantry types; vehicles use a larger one.
+      const r=radius>6?12:8,key=String(r);if(this.gridCache.has(key))return this.gridCache.get(key);
+      const cell=20,cols=WORLD.width/cell,rows=WORLD.height/cell,n=cols*rows,blocked=new Uint8Array(n);
+      for(let i=0;i<n;i++){const p={x:(i%cols+.5)*cell,y:(Math.floor(i/cols)+.5)*cell};blocked[i]=this.canStand(p.x,p.y,r)?0:1;}
+      const grid={r,cell,cols,rows,blocked};this.gridCache.set(key,grid);return grid;
+    }
+    nearbyCell(point,grid){
+      const {cell,cols,rows,blocked,r}=grid,cx=Math.floor(point.x/cell),cy=Math.floor(point.y/cell);
+      let best=-1,bestD=Infinity;
+      for(let range=0;range<4;range++) {
+        for(let y=cy-range;y<=cy+range;y++)for(let x=cx-range;x<=cx+range;x++){
+          if(x<0||y<0||x>=cols||y>=rows)continue;const idx=y*cols+x;if(blocked[idx])continue;
+          const p={x:(x+.5)*cell,y:(y+.5)*cell},d=dist(point,p);
+          if(d<bestD&&this.segmentFree(point,p,r)){best=idx;bestD=d;}
+        }
+        if(best>=0)break;
+      }return best;
+    }
+    findPath(start,goal,radius=6){
+      const clearance=radius>6?12:8;
+      if(this.segmentFree(start,goal,clearance))return [{x:goal.x,y:goal.y}];
+      const g=this.grid(radius),a=this.nearbyCell(start,g),b=this.nearbyCell(goal,g);if(a<0||b<0)return [];
+      const {cols,rows,cell,blocked,r}=g,n=blocked.length,prev=new Int32Array(n).fill(-1),cost=new Float64Array(n).fill(Infinity),closed=new Uint8Array(n);
+      const heap=new MinHeap(),bx=b%cols,by=Math.floor(b/cols);
+      const pos=i=>({x:(i%cols+.5)*cell,y:(Math.floor(i/cols)+.5)*cell});
+      const heuristic=i=>Math.abs(i%cols-bx)+Math.abs(Math.floor(i/cols)-by);
+      heap.push({id:a,f:heuristic(a)});cost[a]=0;
+      while(heap.items.length){const {id}=heap.pop();if(closed[id])continue;if(id===b)break;closed[id]=1;
+        const x=id%cols,y=Math.floor(id/cols);
+        for(const [nx,ny] of [[x+1,y],[x,y+1],[x-1,y],[x,y-1]]){
+          if(nx<0||ny<0||nx>=cols||ny>=rows)continue;const ni=ny*cols+nx;
+          if(blocked[ni]||closed[ni]||cost[id]+1>=cost[ni])continue;
+          // A thin gate/wall between free centers must still block the graph edge.
+          if(!this.segmentFree(pos(id),pos(ni),r))continue;
+          cost[ni]=cost[id]+1;prev[ni]=id;heap.push({id:ni,f:cost[ni]+heuristic(ni)});
+        }
+      }
+      if(!Number.isFinite(cost[b]))return [];
+      const path=[];let p=b;while(p!==a){path.push(pos(p));p=prev[p];if(p<0)return [];}path.push(pos(a));path.reverse();path.push({x:goal.x,y:goal.y});
+      // Greedy visibility smoothing preserves clearance; no diagonal corner cutting.
+      const result=[];let anchor=start,i=0;
+      while(i<path.length){let far=i;for(let j=i+1;j<path.length;j++){if(this.segmentFree(anchor,path[j],r))far=j;}
+        result.push(path[far]);anchor=path[far];i=far+1;
+      }return result;
+    }
+    spawnPoint(x,y,r,courier,minDistance=240){
+      for(let ring=0;ring<5;ring++)for(let k=0;k<(ring?12:1);k++){
+        const angle=k*Math.PI/6,p={x:clamp(x+Math.cos(angle)*ring*20,25,1775),y:clamp(y+Math.sin(angle)*ring*20,25,975)};
+        if(dist(p,courier)<minDistance||!this.canStand(p.x,p.y,r+3))continue;
+        if(this.findPath(p,courier,r).length)return p;
+      }return null;
+    }
+  }
+  return {WORLD,MISSIONS,getMission,pointOnRoute,Terrain,segmentHit,circleRect};
+});
+
+</script>
+<script>
+/* Night Relay — pure simulation. No DOM, network, or third-party dependencies. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./world.js'));
+  else root.NightRelay = factory(root.NightRelayWorld);
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (T) {
+  'use strict';
+  const VERSION = '0.2.0';
+  const WORLD = T.WORLD, ROUTE = T.MISSIONS[0].route;
+  const WEAPONS = Object.freeze([
+    Object.freeze({ name: 'Needle', role: 'PRECISION', interval: 0.12, flight: 0.20,
+      radius: 14, damage: 38, friendly: 5, heat: 7, armor: 0.28 }),
+    Object.freeze({ name: 'Hammer', role: 'AREA CONTROL', interval: 0.85, flight: 0.55,
+      radius: 36, damage: 115, friendly: 28, heat: 0, armor: 1 }),
+    Object.freeze({ name: 'Thunder', role: 'HEAVY BLAST', interval: 3.8, flight: 1.0,
+      radius: 76, damage: 280, friendly: 82, heat: 0, armor: 1 })
+  ]);
+  const ENEMIES = Object.freeze({
+    runner: Object.freeze({ hp: 34, speed: 18, range: 95, interval: 2.4, damage: 2, points: 75, radius: 5 }),
+    launcher: Object.freeze({ hp: 70, speed: 12, range: 225, interval: 6.5, damage: 9, points: 150, radius: 6 }),
+    raider: Object.freeze({ hp: 180, speed: 29, range: 145, interval: 3.4, damage: 5, points: 250, radius: 10 })
+  });
+  const RULES = Object.freeze({ speed: 11, maxTime: 300, holdBudget: 16, extractTime: 22,
+    heatCool: 19, heatUnlock: 30, mediumMax: 8, mediumRecharge: 3.2,
+    heavyAmmo: 6, spawnGrace: 3, enemyCap: 26 });
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+  const SEGMENTS = T.MISSIONS[0].segments, ROUTE_LENGTH = T.MISSIONS[0].length;
+  const CHECKPOINTS = T.MISSIONS[0].checkpoints;
+  function makeRng(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a += 0x6D2B79F5;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const pointOnRoute = T.pointOnRoute;
+  function falloff(d, radius) {
+    if (d > radius) return 0;
+    return d <= radius * 0.25 ? 1 : 1 - 0.75 * (d / radius - 0.25) / 0.75;
+  }
+  class Mission {
+    constructor(options = {}) {
+      this.config = T.getMission(options.mission);
+      this.terrain = new T.Terrain(this.config, options.terrain === false);
+      this.route = this.config.route; this.routeLength = this.config.length;
+      this.checkpoints = this.config.checkpoints; this.routeBlocked = false;
+      this.seed = Number.isFinite(options.seed) ? options.seed >>> 0 : this.config.seed;
+      this.difficulty = options.difficulty === 'relaxed' ? 'relaxed' : 'standard';
+      this.enableSpawns = options.spawns !== false;
+      this.rng = makeRng(this.seed);
+      this.status = 'briefing'; this.phase = 'transit'; this.time = 0;
+      this.courier = { ...pointOnRoute(0, this.config), hp: 100, radius: 10, distance: 0 };
+      this.checkpointIndex = 0; this.wait = 0; this.extraction = this.config.extractTime;
+      this.holdRemaining = this.config.holdBudget; this.holdRequested = false;
+      this.enemies = []; this.shots = []; this.events = []; this.nextId = 1;
+      this.cooldowns = [0, 0, 0]; this.heat = 0; this.overheated = false;
+      this.mediumAmmo = RULES.mediumMax; this.heavyAmmo = RULES.heavyAmmo;
+      this.nextWave = 6; this.wave = 0; this.score = 0; this.reason = '';
+      this.stats = { kills: 0, shots: [0, 0, 0], hits: 0, friendlyDamage: 0,
+        enemyDamage: 0, killPoints: 0, escortBonus: 0, penalty: 0 };
+      this.radioFlags = new Set();
+    }
+    emit(type, data = {}) {
+      this.events.push({ type, time: this.time, ...data });
+      if (this.events.length > 160) this.events.shift();
+    }
+    drainEvents() { return this.events.splice(0); }
+    radio(text, urgent = false) { this.emit('radio', { text, urgent }); }
+    start() {
+      if (this.status !== 'briefing') return false;
+      this.status = 'playing';
+      this.radio(this.config.intro);
+      return true;
+    }
+    pause() {
+      if (this.status !== 'playing') return false;
+      this.status = 'paused'; this.holdRequested = false; return true;
+    }
+    resume() {
+      if (this.status !== 'paused') return false;
+      this.status = 'playing'; return true;
+    }
+    fire(index, x, y) {
+      if (this.status !== 'playing') return { ok: false, reason: 'inactive' };
+      if (!Number.isInteger(index) || !WEAPONS[index] || !Number.isFinite(x) || !Number.isFinite(y))
+        return { ok: false, reason: 'invalid' };
+      if (x < 0 || x > WORLD.width || y < 0 || y > WORLD.height) return { ok: false, reason: 'offmap' };
+      if (this.cooldowns[index] > 0.000001) return { ok: false, reason: 'cooldown' };
+      if (index === 0 && this.overheated) return { ok: false, reason: 'overheated' };
+      if (index === 1 && this.mediumAmmo < 1) return { ok: false, reason: 'recharging' };
+      if (index === 2 && this.heavyAmmo < 1) return { ok: false, reason: 'empty' };
+      const w = WEAPONS[index];
+      this.cooldowns[index] = w.interval;
+      if (index === 0) {
+        this.heat = Math.min(100, this.heat + w.heat);
+        if (this.heat >= 100) {
+          this.overheated = true;
+          this.radio('NEEDLE overheated. Switch weapons while it cools.', true);
+        }
+      }
+      if (index === 1) this.mediumAmmo -= 1;
+      if (index === 2) this.heavyAmmo -= 1;
+      const shot = { id: this.nextId++, faction: 'friendly', weapon: index,
+        x, y, remaining: w.flight, duration: w.flight };
+      this.shots.push(shot); this.stats.shots[index]++;
+      this.emit('fire', { ...shot });
+      return { ok: true, id: shot.id };
+    }
+    spawnEnemy(kind, x, y) {
+      const def = ENEMIES[kind];
+      if (!def || !this.terrain.canStand(x, y, def.radius + 3)) return null;
+      const e = { id: this.nextId++, kind, x: clamp(x, 15, WORLD.width - 15),
+        y: clamp(y, 15, WORLD.height - 15), hp: def.hp, maxHp: def.hp,
+        radius: def.radius, angle: 0, grace: RULES.spawnGrace,
+        attack: 1.8 + this.rng() * 1.2, age: 0, path: [], repath: 0, terrainVersion: -1 };
+      this.enemies.push(e); return e;
+    }
+    spawnWave() {
+      if (this.enemies.length >= RULES.enemyCap) return;
+      this.wave++;
+      let count = this.time < 45 ? 2 : this.time < 110 ? 3 : 4;
+      if (this.phase === 'extraction') count = 4;
+      count = Math.min(count, RULES.enemyCap - this.enemies.length);
+      const lanes = this.config.entries.map(([x,y]) => ({x,y})).filter(p => {
+        const d = distance(p, this.courier); return d >= 260 && d <= 610;
+      });
+      const lane = lanes.length ? lanes[Math.floor(this.rng()*lanes.length)] : null;
+      const angle = this.rng() * Math.PI * 2;
+      const radius = 320 + this.rng() * 50;
+      let spawned = 0;
+      for (let i = 0; i < count; i++) {
+        let x = lane ? lane.x + i * 18 : clamp(this.courier.x + Math.cos(angle)*radius+i*20,35,1765);
+        let y = lane ? lane.y + i * 12 : clamp(this.courier.y + Math.sin(angle)*radius+i*13,35,965);
+        let kind = 'runner';
+        if (this.time > (this.config.id === 'floodgate' ? 22 : 40) && i === 0 && this.wave % 3 === 0) kind = 'launcher';
+        if (this.time > (this.config.id === 'floodgate' ? 50 : 80) && i === count - 1 && this.wave % 3 === 1) kind = 'raider';
+        const p = this.terrain.spawnPoint(x,y,ENEMIES[kind].radius,this.courier);
+        if (!p) continue;
+        this.spawnEnemy(kind,p.x,p.y); spawned++;
+        if (kind !== 'runner' && !this.radioFlags.has(kind)) {
+          this.radioFlags.add(kind);
+          this.radio(kind === 'launcher' ? 'CONTROL: Long-range team. Watch for the charging ring.' :
+            'CONTROL: Armored raider. Use Hammer or Thunder.', true);
+        }
+      }
+      if (this.wave === 1) this.radio('CONTROL: Heat signatures inbound. White marks are hostile.');
+      this.emit('wave', { count: spawned, wave: this.wave });
+    }
+    damageCourier(amount, source) {
+      const scale = this.difficulty === 'relaxed' ? 0.55 : 1;
+      const actual = Math.min(this.courier.hp, Math.max(0, amount * scale));
+      this.courier.hp -= actual;
+      if (source === 'friendly') {
+        this.stats.friendlyDamage += actual;
+        this.stats.penalty = Math.round(this.stats.friendlyDamage * 30);
+        if (!this.radioFlags.has('friendly') || this.time - this.lastFriendlyRadio > 6) {
+          this.radioFlags.add('friendly'); this.lastFriendlyRadio = this.time;
+          this.radio('ROOK-1: Too close! Move that fire away from us!', true);
+        }
+      } else this.stats.enemyDamage += actual;
+      if (this.courier.hp <= 35 && !this.radioFlags.has('critical')) {
+        this.radioFlags.add('critical'); this.radio('ROOK-1: We are barely holding together!', true);
+      }
+      this.emit('damage', { amount: actual, source });
+    }
+    impact(shot) {
+      if (shot.faction === 'enemy') {
+        const source = {x:shot.fromX ?? shot.x,y:shot.fromY ?? shot.y};
+        if (distance(shot, this.courier) <= 26 && this.terrain.segmentFree(source, shot, 0, true) && this.terrain.segmentFree(shot, this.courier, 0, true)) this.damageCourier(shot.damage, 'enemy');
+        this.emit('incomingImpact', { x: shot.x, y: shot.y });
+        return;
+      }
+      const w = WEAPONS[shot.weapon];
+      // Overhead rounds may land anywhere, but roofs/gates absorb a direct impact.
+      if (this.terrain.coverAt(shot.x, shot.y)) {
+        this.emit('impact', {x:shot.x,y:shot.y,weapon:shot.weapon,radius:w.radius,hit:false,blocked:true});
+        return;
+      }
+      let hit = false;
+      for (const e of this.enemies) {
+        if (e.hp <= 0) continue;
+        const strength = falloff(distance(shot, e), w.radius + e.radius);
+        if (!strength || !this.terrain.segmentFree(shot, e, 0, true)) continue;
+        hit = true;
+        e.hp -= w.damage * strength * (e.kind === 'raider' ? w.armor : 1);
+        if (e.hp <= 0) {
+          const points = ENEMIES[e.kind].points;
+          this.stats.kills++; this.stats.killPoints += points;
+          this.emit('kill', { x: e.x, y: e.y, kind: e.kind, points });
+        }
+      }
+      if (hit) this.stats.hits++;
+      const friendlyStrength = falloff(distance(shot, this.courier), w.radius + this.courier.radius);
+      if (friendlyStrength > 0 && this.terrain.segmentFree(shot, this.courier, 0, true)) this.damageCourier(w.friendly * friendlyStrength, 'friendly');
+      this.enemies = this.enemies.filter(e => e.hp > 0);
+      this.emit('impact', { x: shot.x, y: shot.y, weapon: shot.weapon, radius: w.radius, hit });
+      if (this.stats.kills > 0 && !this.radioFlags.has('firstKill')) {
+        this.radioFlags.add('firstKill'); this.radio('ROOK-1: Good hit. Keep us moving.');
+      }
+    }
+    moveCourier(dt) {
+      if (this.phase === 'checkpoint') {
+        this.wait = Math.max(0, this.wait - dt);
+        if (this.wait <= 0) {
+          if (this.checkpoints[this.checkpointIndex-1]?.opensGate && this.terrain.openGate()) {
+            this.emit('gateOpen'); this.radio('ROOK-1: Gate repaired! Bridge is open. Moving across.', true);
+          } else this.radio('ROOK-1: All clear. Moving again.');
+          this.phase = 'transit';
+        }
+        return;
+      }
+      if (this.phase === 'extraction') { this.extraction = Math.max(0, this.extraction - dt); return; }
+      if (this.holdRequested && this.holdRemaining > 0) {
+        const held = Math.min(dt, this.holdRemaining);
+        this.holdRemaining -= held;
+        dt -= held;
+        if (dt <= 0) return;
+      }
+      const cp = this.checkpoints[this.checkpointIndex];
+      let next = Math.min(this.routeLength, this.courier.distance + this.config.speed * dt);
+      const target = pointOnRoute(Math.min(next, cp ? cp.at : Infinity), this.config);
+      this.routeBlocked = !this.terrain.segmentFree(this.courier, target, this.courier.radius);
+      if (this.routeBlocked) return;
+      if (cp && next >= cp.at) {
+        next = cp.at; this.phase = 'checkpoint'; this.wait = cp.wait; this.checkpointIndex++;
+        this.radio(`ROOK-1: Stopped at ${cp.name.toLowerCase()}. Cover us for ${cp.wait} seconds.`, true);
+      }
+      this.courier.distance = next;
+      Object.assign(this.courier, pointOnRoute(next, this.config));
+      if (next >= this.routeLength && this.phase !== 'checkpoint') {
+        this.phase = 'extraction';
+        this.radio(`ROOK-1: At extraction. Give us ${this.config.extractTime} more seconds!`, true);
+        this.nextWave = Math.min(this.nextWave, this.time + 0.5);
+      }
+    }
+    update(dt) {
+      if (this.status !== 'playing' || !Number.isFinite(dt) || dt <= 0) return;
+      dt = Math.min(dt, 0.05);
+      this.time += dt;
+      this.cooldowns = this.cooldowns.map(v => Math.max(0, v - dt));
+      this.heat = Math.max(0, this.heat - RULES.heatCool * dt);
+      if (this.overheated && this.heat <= RULES.heatUnlock) this.overheated = false;
+      this.mediumAmmo = Math.min(RULES.mediumMax, this.mediumAmmo + dt / RULES.mediumRecharge);
+      this.moveCourier(dt);
+      if (this.enableSpawns && this.time >= this.nextWave) {
+        this.spawnWave();
+        this.nextWave = this.time + (this.phase === 'extraction' ? 3.3 : this.time < 45 ? 7.0 : this.time < 110 ? 6.0 : 5.2);
+      }
+      for (const e of this.enemies) {
+        const def = ENEMIES[e.kind];
+        e.age += dt; e.grace = Math.max(0, e.grace - dt);
+        const dx = this.courier.x - e.x, dy = this.courier.y - e.y, d = Math.hypot(dx, dy);
+        e.angle = Math.atan2(dy, dx);
+        if (e.grace > 0) continue;
+        const lineOfSight = this.terrain.segmentFree(e, this.courier, 0, true);
+        if ((d > def.range || !lineOfSight) && d > 0) {
+          e.repath -= dt;
+          let target = this.courier;
+          if (!this.terrain.segmentFree(e, this.courier, e.radius > 6 ? 12 : 8)) {
+            if (e.repath <= 0 || e.terrainVersion !== this.terrain.version) {
+              e.path = this.terrain.findPath(e, this.courier, e.radius);
+              e.repath = 1.2 + (e.id % 5)*0.08; e.terrainVersion = this.terrain.version;
+            }
+            while(e.path.length && distance(e,e.path[0]) < 2) e.path.shift();
+            if (!e.path.length) continue;
+            target = e.path[0];
+          } else e.path = [];
+          const td=distance(e,target),step=Math.min(td,def.speed*dt);
+          if(td>0) {e.angle=Math.atan2(target.y-e.y,target.x-e.x);this.terrain.move(e,(target.x-e.x)/td*step,(target.y-e.y)/td*step);}
+        } else {
+          e.attack -= dt;
+          if (e.attack <= 0) {
+            e.attack = def.interval;
+            this.shots.push({ id: this.nextId++, faction: 'enemy', x: this.courier.x,
+              y: this.courier.y, fromX: e.x, fromY: e.y, remaining: 0.65, duration: 0.65,
+              damage: def.damage });
+            this.emit('incoming', { x: e.x, y: e.y, kind: e.kind });
+          }
+        }
+      }
+      const pending = [];
+      for (const shot of this.shots) {
+        shot.remaining -= dt;
+        if (shot.remaining <= 0) this.impact(shot); else pending.push(shot);
+      }
+      this.shots = pending;
+      this.score = Math.max(0, this.stats.killPoints - this.stats.penalty);
+      // Impact resolution precedes extraction: a fatal final-tick hit cannot become a victory.
+      if (this.courier.hp <= 0) this.finish(false, 'Rook-1 was destroyed.');
+      else if (this.phase === 'extraction' && this.extraction <= 0) this.finish(true, 'Rook-1 is home.');
+      else if (this.time >= this.config.maxTime) this.finish(false, 'The extraction window closed.');
+    }
+    finish(won, reason) {
+      if (this.status !== 'playing') return;
+      this.status = won ? 'won' : 'lost'; this.reason = reason; this.holdRequested = false;
+      this.stats.escortBonus = won ? 5000 + Math.round(this.courier.hp * 30) : 0;
+      this.score = Math.max(0, this.stats.killPoints + this.stats.escortBonus - this.stats.penalty);
+      this.emit('end', { won, reason, score: this.score });
+    }
+    summary() {
+      const shots = this.stats.shots.reduce((a, b) => a + b, 0);
+      return { version: VERSION, mission: this.config.id, missionNumber: this.config.number, seed: this.seed, difficulty: this.difficulty, status: this.status,
+        time: this.time, hp: this.courier.hp, score: this.score, reason: this.reason,
+        accuracy: shots ? this.stats.hits / shots : 0, ...this.stats, shots: [...this.stats.shots] };
+    }
+  }
+  return { VERSION, WORLD, ROUTE, ROUTE_LENGTH, CHECKPOINTS, WEAPONS, ENEMIES, RULES,
+    MISSIONS: T.MISSIONS, getMission: T.getMission, Terrain: T.Terrain, Mission, makeRng, pointOnRoute, falloff, distance, clamp };
+});
+
+</script>
+<script>
+/* Night Relay — Canvas renderer, browser input, local preferences and synthesized audio. */
+(function () {
+  'use strict';
+  const C = window.NightRelay;
+  if (!C) return;
+  const $ = id => document.getElementById(id);
+  const canvas = $('game'), ctx = canvas.getContext('2d', { alpha: false });
+  if (!ctx) { $('briefing').textContent = 'This browser could not initialize the 2D game view.'; return; }
+  const mini = $('minimap'), mc = mini.getContext('2d');
+  let W = canvas.width, H = canvas.height;
+  const palette = { white: '#f0f2dd', cyan: '#9ce4d2', amber: '#efbd79', red: '#f29280', dim: '#99b3b0' };
+  const SAVE_KEY = 'night-relay-v2';
+  const mediaReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let prefs = {version:2,muted:true,reduced:Boolean(mediaReduced),best:{home:{standard:0,relaxed:0},floodgate:{standard:0,relaxed:0}}};
+  let storageOK = true;
+  try {
+    const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+    const legacy=saved?null:JSON.parse(localStorage.getItem('night-relay-v1')||'null');
+    const source=saved||legacy;
+    if(source){
+      if(typeof source.muted==='boolean')prefs.muted=source.muted;
+      if(typeof source.reduced==='boolean')prefs.reduced=source.reduced;
+      for(const id of ['home','floodgate'])for(const mode of ['standard','relaxed']){
+        const value=source.version===2?source.best?.[id]?.[mode]:id==='home'?source.best?.[mode]:0;
+        if(Number.isFinite(value)&&value>=0)prefs.best[id][mode]=value;
+      }
+    }
+  }catch(_){storageOK=false;}
+  function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(prefs));}catch(_){storageOK=false;}
+    $('save-status').textContent=storageOK?'NO ACCOUNT · LOCAL ONLY':'LOCAL SAVE UNAVAILABLE';}
+  let touchMode = matchMedia('(pointer:coarse)').matches;
+  let selectedMission='home', touchFire=false, touchHold=false, panMode=false, hasAim=false;
+  let aimId=null,fireId=null,mouseId=null,panLast=null,touchTarget=null;
+  let audio = null, noiseBuffer = null;
+  function initAudio() {
+    if (prefs.muted) return;
+    try {
+      if (!audio) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioClass) return;
+        audio = new AudioClass();
+        noiseBuffer = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
+        const samples = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+      }
+      if (audio.state === 'suspended') audio.resume().catch(() => {});
+    } catch (_) { audio = null; }
+  }
+  function sound(kind, weapon = 0) {
+    if (prefs.muted || !audio || audio.state !== 'running') return;
+    try {
+      const t = audio.currentTime;
+      const duration = kind === 'impact' ? [0.09, 0.22, 0.42][weapon] : kind === 'radio' ? 0.07 : 0.08;
+      const gain = audio.createGain();
+      gain.connect(audio.destination);
+      gain.gain.setValueAtTime(kind === 'radio' ? 0.025 : kind === 'impact' ? [0.04, 0.08, 0.13][weapon] : 0.025, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      const osc = audio.createOscillator();
+      osc.type = kind === 'radio' ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(kind === 'radio' ? 850 : kind === 'impact' ? [155, 88, 48][weapon] : [340, 175, 95][weapon], t);
+      osc.frequency.exponentialRampToValueAtTime(kind === 'radio' ? 650 : 35, t + duration);
+      osc.connect(gain); osc.start(t); osc.stop(t + duration);
+      if (kind === 'impact' && noiseBuffer) {
+        const noise = audio.createBufferSource(), filter = audio.createBiquadFilter();
+        noise.buffer = noiseBuffer; filter.type = 'lowpass'; filter.frequency.value = 500 + weapon * 250;
+        noise.connect(filter); filter.connect(gain); noise.start(t); noise.stop(t + duration);
+        noise.onended = () => { noise.disconnect(); filter.disconnect(); };
+      }
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+    } catch (_) { /* Audio must never block a mission. */ }
+  }
+  let mission, selected = 0, zoomed = false, follow = true;
+  let camera = { x: 330, y: 680, zoom: 0.8 };
+  let pointer = { x: W / 2, y: H / 2, down: false, inside: false };
+  let keys = new Set(), particles = [], rings = [], wrecks = [], floaters = [];
+  let recoil = 0, damageFlash = 0, flashUntil = 0, lastFrame = 0, accumulator = 0;
+  let uiTimer = 0, lastHint = -100, lastResultSaved = false;
+  let frameCounter = 0, fpsSum = 0, fpsFrames = 0, lastFPS = 60;
+  const visualRng = C.makeRng(51731);
+  const clock = n => `${Math.floor(Math.max(0, n) / 60).toString().padStart(2, '0')}:${Math.floor(Math.max(0, n) % 60).toString().padStart(2, '0')}`;
+  const terrain = document.createElement('canvas');
+  terrain.width=C.WORLD.width;terrain.height=C.WORLD.height;
+  const tc=terrain.getContext('2d');let terrainVersion=-1;
+  function drawTerrain(){
+    const m=mission.config,rng=C.makeRng(m.terrainSeed+9),flood=m.id==='floodgate';
+    tc.fillStyle=flood?'#243136':'#233135';tc.fillRect(0,0,1800,1000);
+    for(let i=0;i<110;i++){
+      const x=Math.floor(rng()*1750),y=Math.floor(rng()*960),w=30+Math.floor(rng()*110),h=25+Math.floor(rng()*70);
+      tc.fillStyle=['#26363a','#293b3e','#213236','#2c3a3b'][i%4];tc.fillRect(x,y,w,h);
+      tc.fillStyle='#1b2b2e';for(let yy=y+4;yy<y+h;yy+=8)tc.fillRect(x+3,yy,w-6,1);
+    }
+    for(const c of m.canals){
+      tc.fillStyle='#14282f';tc.fillRect(c.x,0,c.w,1000);tc.fillStyle='#536466';tc.fillRect(c.x-3,0,3,1000);tc.fillRect(c.x+c.w,0,3,1000);
+      tc.fillStyle='#28474e';for(let y=12;y<1000;y+=26)tc.fillRect(c.x+8+(y%3)*7,y,c.w-30,2);
+    }
+    tc.lineJoin='round';tc.strokeStyle='#4a5b5a';tc.lineWidth=46;tc.beginPath();
+    m.route.forEach((p,i)=>i?tc.lineTo(p.x,p.y):tc.moveTo(p.x,p.y));tc.stroke();
+    tc.strokeStyle='#34464a';tc.lineWidth=35;tc.stroke();tc.strokeStyle='#788176';tc.lineWidth=2;tc.setLineDash([13,17]);tc.stroke();tc.setLineDash([]);
+    for(const b of mission.terrain.bridges){
+      tc.fillStyle='#435653';tc.fillRect(b.x,b.y,b.w,b.h);
+      tc.fillStyle='#687f77';tc.fillRect(b.x,b.y,b.w,3);tc.fillRect(b.x,b.y+b.h-3,b.w,3);
+      tc.fillStyle='#354944';for(let x=b.x+5;x<b.x+b.w;x+=12)tc.fillRect(x,b.y+5,2,b.h-10);
+      tc.fillStyle='#b0ad80';for(let x=b.x+5;x<b.x+b.w;x+=24){tc.fillRect(x,b.y,9,3);tc.fillRect(x,b.y+b.h-3,9,3);}
+    }
+    // Only these drawn roof rectangles are solid buildings. Small terrain specks are decorative.
+    for(const b of mission.terrain.buildings){const {x,y,w,h}=b;
+      tc.fillStyle='#142427';tc.fillRect(x+6,y+8,w,h);tc.fillStyle=flood?'#56605a':'#465856';tc.fillRect(x,y,w,h);
+      tc.fillStyle='#344644';tc.fillRect(x+3,y+4,w-6,h-8);tc.fillStyle='#7b8470';tc.fillRect(x,y,w,2);tc.fillRect(x,y,2,h);
+      tc.fillStyle='#243739';tc.fillRect(x+8,y+8,9,8);
+      if(w>45){tc.fillStyle='#536b61';for(let yy=y+8;yy<y+h-6;yy+=8)tc.fillRect(x+23,yy,w-30,2);}
+    }
+    for(const cp of m.checkpoints){const p=C.pointOnRoute(cp.at,m);
+      tc.strokeStyle='#859180';tc.lineWidth=2;tc.strokeRect(p.x-30,p.y-30,60,60);
+      tc.fillStyle='#a5ad83';tc.font='9px monospace';tc.textAlign='center';tc.fillText(cp.short,p.x,p.y-40);
+    }
+    const end=m.route.at(-1);tc.fillStyle='#30443f';tc.fillRect(end.x-54,end.y-45,108,90);
+    tc.strokeStyle='#96aa91';tc.lineWidth=3;tc.strokeRect(end.x-46,end.y-35,92,70);
+    tc.fillStyle='#728d77';tc.font='bold 33px monospace';tc.textAlign='center';tc.fillText('H',end.x,end.y+10);
+    for(const g of mission.terrain.gates){
+      tc.fillStyle=g.open?'#9ce4d2':'#efbd79';
+      if(g.open){tc.fillRect(g.x,g.y,10,9);tc.fillRect(g.x,g.y+g.h-9,10,9);}
+      else{tc.fillRect(g.x,g.y,g.w,g.h);tc.fillStyle='#25302e';for(let y=g.y+4;y<g.y+g.h;y+=10)tc.fillRect(g.x,y,g.w,4);}
+      tc.font='9px monospace';tc.textAlign='center';tc.fillStyle=g.open?'#9ce4d2':'#efbd79';tc.fillText(g.open?'GATE OPEN':'SEALED',g.x+5,g.y-12);
+    }
+    terrainVersion=mission.terrain.version;
+  }
+  function clearInputs(){keys.clear();pointer.down=false;touchFire=false;touchHold=false;aimId=null;fireId=null;mouseId=null;panLast=null;mission && (mission.holdRequested=false);$('touch-fire').classList.remove('pressed');}
+  function inputUI(){
+    document.body.classList.toggle('touch-mode',touchMode);$('touch-mode').setAttribute('aria-pressed',String(touchMode));
+    $('touch-pan').setAttribute('aria-pressed',String(panMode));
+    $('brief-controls').innerHTML=touchMode?'<span>DRAG TO AIM</span><span>HOLD FIRE TO SHOOT</span><span>◇ PROTECT ROOK-1</span>':'<span><kbd>CLICK</kbd> Fire</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Weapons</span><span><kbd>SPACE</kbd> Hold escort</span>';
+    canvas.setAttribute('aria-label',touchMode?'Night Relay playfield. Tap or drag to aim. Use the Fire button to shoot. PAN changes dragging to camera movement.':'Night Relay playfield. Mouse aims, click fires. 1, 2, 3 select weapons. Space holds escort. Q zooms. WASD pans.');
+  }
+  function resizeFeed(){
+    const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
+    const newH=Math.round(768*r.height/r.width);
+    if(Math.abs(H-newH)<2)return;
+    W=768;H=newH;canvas.width=W;canvas.height=H;
+    pointer.x=W/2;pointer.y=H/2;clearInputs();hasAim=false;touchTarget=null;
+    cameraClamp();if(mission?.status==='playing')pause(true);
+  }
+  function setPreferencesUI() {
+    $('sound').textContent = prefs.muted ? 'SOUND OFF' : 'SOUND ON';
+    $('sound').setAttribute('aria-pressed', String(!prefs.muted));
+    $('motion').textContent = prefs.reduced ? 'FX OFF' : 'FX ON';
+    $('motion').setAttribute('aria-pressed', String(!prefs.reduced));
+    document.body.classList.toggle('fx-off', prefs.reduced);
+    $('save-status').textContent = storageOK ? 'NO ACCOUNT · LOCAL ONLY' : 'LOCAL SAVE UNAVAILABLE';
+  }
+  function toWorld(x, y) { return { x: (x - W / 2) / camera.zoom + camera.x, y: (y - H / 2) / camera.zoom + camera.y }; }
+  function toScreen(x, y) { return { x: (x - camera.x) * camera.zoom + W / 2, y: (y - camera.y) * camera.zoom + H / 2 }; }
+  function cameraClamp() {
+    const halfW = W / camera.zoom / 2, halfH = H / camera.zoom / 2;
+    camera.x = C.clamp(camera.x, halfW, C.WORLD.width - halfW);
+    camera.y = C.clamp(camera.y, halfH, C.WORLD.height - halfH);
+  }
+  function reset(mode = 'standard', begin = false) {
+    mission = new C.Mission({ difficulty: mode, mission:selectedMission });
+    drawTerrain();inputUI();
+    document.querySelectorAll('[data-mission]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mission===selectedMission)));
+    $('mission-tag').textContent=`MISSION 0${mission.config.number}`;
+    $('mission-title').textContent=mission.config.title;$('mission-subtitle').textContent=mission.config.subtitle;
+    $('brief-headline').textContent=mission.config.headline;
+    $('brief-description').textContent=mission.config.brief;$('mission-intel').textContent=mission.config.intel;
+    $('brief-fine').textContent=`${mission.config.number===1?'About 4':'About 4½'} minutes · Friendly fire is on`;
+    $('cp0').textContent=`01 ${mission.checkpoints[0].short}`;$('cp1').textContent=`02 ${mission.checkpoints[1].short}`;
+    touchTarget=null;hasAim=false;panMode=false;inputUI();
+    selected = 0; zoomed = false; follow = true; camera.zoom = 0.8;
+    camera.x = mission.courier.x + 90; camera.y = mission.courier.y - 20; cameraClamp();
+    clearInputs();
+    particles = []; rings = []; wrecks = []; floaters = [];
+    recoil = 0; damageFlash = 0; accumulator = 0; lastResultSaved = false; lastHint = -100; flashUntil = 0;
+    $('pause').innerHTML = 'PAUSE <kbd>P</kbd>';
+    $('radio').innerHTML = '<p class="radio-empty">Waiting for your signal.</p>';
+    $('flash-message').classList.remove('visible');
+    selectWeapon(0); showOverlay('briefing'); updateUI();
+    if (begin) {
+      mission.start(); hideOverlay(); initAudio(); canvas.focus({preventScroll:true}); processEvents();
+    }
+  }
+  function showOverlay(name) {
+    $('overlay').hidden = false;
+    for (const id of ['briefing', 'pause-card', 'results']) $(id).hidden = id !== name;
+    clearInputs();
+    canvas.style.cursor = 'default';
+  }
+  function hideOverlay() { $('overlay').hidden = true; canvas.style.cursor = 'none'; }
+  function selectWeapon(index) {
+    selected = C.clamp(index, 0, 2);
+    document.querySelectorAll('.weapon').forEach((b, i) => {
+      b.classList.toggle('selected', i === selected); b.setAttribute('aria-pressed', String(i === selected));
+    });
+  }
+  function pause(auto = false) {
+    if (mission.status === 'playing') {
+      mission.pause(); clearInputs(); accumulator = 0;
+      showOverlay('pause-card'); $('pause').innerHTML = 'RESUME <kbd>P</kbd>';
+      if (!auto) $('resume').focus();
+    } else if (mission.status === 'paused' && !auto) {
+      mission.resume(); accumulator = 0; hideOverlay(); $('pause').innerHTML = 'PAUSE <kbd>P</kbd>'; canvas.focus({preventScroll:true});
+    }
+  }
+  function flash(text) {
+    $('flash-message').textContent = text; $('flash-message').classList.add('visible'); flashUntil = performance.now() + 1900;
+  }
+  function radio(text, urgent = false, time = mission.time) {
+    const log = $('radio');
+    log.querySelector('.radio-empty')?.remove();
+    const p = document.createElement('p'), stamp = document.createElement('time');
+    if (urgent) p.className = 'urgent'; stamp.textContent = clock(time); p.append(stamp, document.createTextNode(text));
+    $('mobile-radio').textContent=text;
+    log.prepend(p); while (log.children.length > 5) log.lastElementChild.remove();
+  }
+  function addParticles(x, y, weapon) {
+    const n = prefs.reduced ? 5 : [12, 30, 65][weapon];
+    for (let i = 0; i < n; i++) {
+      const angle = visualRng() * Math.PI * 2, speed = (15 + visualRng() * 80) * (1 + weapon * 0.8);
+      const life = 0.2 + visualRng() * (0.35 + weapon * 0.18);
+      particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        life, max: life, size: 1 + Math.floor(visualRng() * (weapon + 2)), bright: visualRng() > 0.25 });
+    }
+    if (particles.length > 420) particles.splice(0, particles.length - 420);
+  }
+  function processEvents() {
+    for (const e of mission.drainEvents()) {
+      if (e.type === 'radio') { radio(e.text, e.urgent, e.time); sound('radio'); }
+      if (e.type === 'fire') { sound('fire', e.weapon); recoil = Math.max(recoil, 0.15 + e.weapon * 0.15); }
+      if (e.type === 'gateOpen') {drawTerrain();flash('FLOODGATE OPEN · COVER THE CROSSING');}
+      if (e.type === 'impact') {
+        addParticles(e.x, e.y, e.blocked?0:e.weapon);
+        rings.push({ x: e.x, y: e.y, life: 0.38 + e.weapon * 0.15, max: 0.38 + e.weapon * 0.15, radius: e.radius, enemy: false });
+        recoil = Math.max(recoil, [0.3, 1.3, 3.0][e.weapon]); sound('impact', e.weapon);
+      }
+      if (e.type === 'incomingImpact') rings.push({ x: e.x, y: e.y, life: 0.28, max: 0.28, radius: 15, enemy: true });
+      if (e.type === 'damage') {
+        damageFlash = e.source === 'friendly' ? 0.65 : 0.25;
+        if (e.source === 'friendly') flash('FRIENDLY FIRE · WATCH YOUR BLAST RADIUS');
+      }
+      if (e.type === 'kill') {
+        wrecks.push({ x: e.x, y: e.y, kind: e.kind });
+        if (wrecks.length > 140) wrecks.shift();
+        floaters.push({ x: e.x, y: e.y - 9, life: 0.9, text: `+${e.points}` });
+      }
+      if (e.type === 'end') showResults();
+    }
+  }
+  function showResults() {
+    if (lastResultSaved) return;
+    lastResultSaved = true;
+    const won = mission.status === 'won', s = mission.summary();
+    const best=prefs.best[mission.config.id];
+    const oldBest = best[mission.difficulty];
+    if (won && s.score > oldBest) { best[mission.difficulty] = s.score; save(); }
+    $('result-label').textContent = won ? 'EXTRACTION CONFIRMED / MISSION COMPLETE' : 'SIGNAL LOST / MISSION FAILED';
+    $('result-title').textContent = won ? 'You brought them home.' : 'Rook-1 is gone.';
+    $('result-detail').textContent = `${clock(s.time)} elapsed · ${mission.difficulty === 'relaxed' ? 'Relaxed' : 'Standard'} run. ` +
+      (won ? `Escort bonus +${s.escortBonus.toLocaleString()}. ` : `${s.reason} `) +
+      `Friendly fire: ${s.friendlyDamage.toFixed(1)} damage (−${s.penalty} points).`;
+    $('result-stats').innerHTML = `<div><strong>${s.score.toLocaleString()}</strong><span>FINAL SCORE</span></div><div><strong>${Math.ceil(s.hp)}%</strong><span>HULL REMAINING</span></div><div><strong>${s.kills}</strong><span>THREATS STOPPED</span></div>`;
+    $('result-best').textContent = `${won && s.score > oldBest ? 'NEW LOCAL BEST · ' : ''}${mission.difficulty.toUpperCase()} BEST: ${best[mission.difficulty].toLocaleString()} · R retries the same mission`;
+    $('next-mission').hidden=!(won && mission.config.number===1);
+    showOverlay('results'); $('retry').focus({preventScroll:true});
+  }
+  function updateUI() {
+    const hp = Math.ceil(mission.courier.hp), progress = mission.courier.distance / mission.routeLength;
+    $('health').innerHTML = `${hp}<span>%</span>`;
+    $('health-fill').style.width = `${hp}%`; $('health-fill').style.background = hp <= 35 ? palette.red : palette.cyan;
+    $('clock').textContent = clock(mission.config.maxTime - mission.time);
+    $('hold-budget').textContent = `${mission.holdRemaining.toFixed(1)}s`;
+    $('score').textContent = String(mission.score).padStart(5, '0');
+    $('threats').textContent = String(mission.enemies.length).padStart(2, '0');
+    $('progress-fill').style.width = `${progress * 100}%`; $('progress').textContent = `${Math.floor(progress * 100)}%`;
+    $('heat-fill').style.width = `${mission.heat}%`;
+    $('needle-status').textContent = mission.overheated ? 'OVERHEATED' : `HEAT ${Math.round(mission.heat)}%`;
+    $('hammer-fill').style.width = `${mission.mediumAmmo / C.RULES.mediumMax * 100}%`;
+    $('hammer-status').textContent = `${Math.floor(mission.mediumAmmo)} / 8 · RECHARGING`;
+    $('thunder-fill').style.width = `${mission.heavyAmmo / C.RULES.heavyAmmo * 100}%`;
+    $('thunder-status').textContent = `${mission.heavyAmmo} ROUNDS LEFT`;
+    $('camera-label').textContent = `${zoomed ? 'ZOOM' : 'WIDE'} · ${follow ? 'AUTO TRACK' : 'MANUAL / F TO FOLLOW'}`;
+    let status = 'MOVING', objective = 'Cover the courier';
+    if (mission.status === 'briefing') status = 'STANDING BY';
+    if (mission.phase === 'checkpoint') { status = 'STOPPED'; objective = `Defend stop · ${Math.ceil(mission.wait)}s`; }
+    if (mission.phase === 'extraction') { status = 'EXTRACTING'; objective = `Hold extraction · ${Math.ceil(mission.extraction)}s`; }
+    if (mission.holdRequested && mission.holdRemaining > 0 && mission.phase === 'transit') status = 'HOLDING';
+    if (mission.status === 'won') { status = 'SAFE'; objective = 'Extraction complete'; }
+    if (mission.status === 'lost') { status = 'LOST'; objective = 'Mission failed'; }
+    $('escort-status').textContent = status; $('objective').textContent = objective;
+    $('feed-status').textContent = mission.status === 'briefing' ? 'AWAITING DEPLOYMENT' :
+      `${mission.difficulty.toUpperCase()} / ${status} / ${clock(mission.time)}`;
+    const si=progress<.3?0:progress<.65?1:progress<.9?2:3;
+    const sector=`0${si+1} / ${mission.config.sectors[si]}`;
+    $('sector-label').textContent = `SECTOR ${sector}`;
+    for (let i = 0; i < 2; i++) $('cp' + i).classList.toggle('done', mission.checkpointIndex > i);
+    $('cp2').classList.toggle('done', mission.status === 'won');
+    const playing=mission.status==='playing';
+    $('pause').disabled = !['playing', 'paused'].includes(mission.status);
+    document.querySelectorAll('[data-mission]').forEach(b=>b.disabled=['playing','paused'].includes(mission.status));
+    $('mobile-hp').textContent=`◇ ${hp}%`;$('mobile-hp').style.color=hp<=35?palette.red:palette.cyan;
+    $('mobile-objective').textContent=objective;$('mobile-clock').textContent=clock(mission.config.maxTime-mission.time);
+    if(mission.holdRemaining<=0 || mission.phase!=='transit')touchHold=false;
+    $('touch-hold').setAttribute('aria-pressed',String(touchHold));
+    $('touch-hold').innerHTML=`${touchHold?'MOVE':'HOLD'} <small>${Math.ceil(mission.holdRemaining)}s</small>`;
+    $('touch-hold').disabled=!playing || mission.phase!=='transit' || mission.holdRemaining<=0;
+    $('touch-fire').disabled=!playing;
+    $('touch-fire').classList.toggle('pressed',touchFire);
+    $('touch-pan').setAttribute('aria-pressed',String(panMode));
+    $('touch-zoom').textContent=zoomed?'WIDE':'ZOOM';
+    $('touch-hint').textContent=panMode?'PAN MODE · Drag to move the camera. Tap PAN again to aim.':hasAim?'Aim locked to the ground. Hold FIRE; lift to stop.':'Tap / drag the feed to aim, then hold FIRE.';
+
+  }
+  function updateCamera(dt) {
+    const panning = keys.has('w') || keys.has('a') || keys.has('s') || keys.has('d') ||
+      keys.has('arrowup') || keys.has('arrowleft') || keys.has('arrowdown') || keys.has('arrowright');
+    if (panning && mission.status === 'playing') {
+      follow = false;
+      const v = 330 / camera.zoom * dt;
+      if (keys.has('w') || keys.has('arrowup')) camera.y -= v;
+      if (keys.has('s') || keys.has('arrowdown')) camera.y += v;
+      if (keys.has('a') || keys.has('arrowleft')) camera.x -= v;
+      if (keys.has('d') || keys.has('arrowright')) camera.x += v;
+    }
+    if (follow) {
+      const targetX = mission.courier.x + Math.cos(mission.courier.angle) * 65;
+      const targetY = mission.courier.y + Math.sin(mission.courier.angle) * 30;
+      const factor = prefs.reduced ? 1 : 1 - Math.exp(-dt * 4);
+      camera.x += (targetX - camera.x) * factor; camera.y += (targetY - camera.y) * factor;
+    }
+    cameraClamp();
+  }
+  function fire() {
+    const aim = toWorld(pointer.x, pointer.y);
+    const result = mission.fire(selected, aim.x, aim.y);
+    if (!result.ok && mission.time - lastHint > 2 && ['overheated', 'recharging', 'empty'].includes(result.reason)) {
+      lastHint = mission.time;
+      flash(result.reason === 'overheated' ? 'NEEDLE COOLING · SWITCH TO 2 OR 3' : result.reason === 'empty' ? 'THUNDER EMPTY · SWITCH TO 1 OR 2' : 'HAMMER RECHARGING · SWITCH TO NEEDLE');
+    }
+  }
+  function simTick(dt) {
+    mission.holdRequested = keys.has(' ') || touchHold;
+    if(touchMode && touchTarget){const p=toScreen(touchTarget.x,touchTarget.y);pointer.x=p.x;pointer.y=p.y;pointer.inside=p.x>=0&&p.x<=W&&p.y>=0&&p.y<=H;}
+    if ((pointer.down || (touchFire && hasAim && !panMode)) && pointer.inside && mission.status === 'playing') fire();
+    mission.update(dt); processEvents(); updateCamera(dt);
+    for (const p of particles) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.94; p.vy *= 0.94; }
+    for (const r of rings) r.life -= dt;
+    for (const f of floaters) { f.life -= dt; f.y -= dt * 13; }
+    particles = particles.filter(p => p.life > 0); rings = rings.filter(r => r.life > 0); floaters = floaters.filter(f => f.life > 0);
+    recoil = Math.max(0, recoil - dt * 9); damageFlash = Math.max(0, damageFlash - dt);
+  }
+  function pixelText(text, x, y, color = palette.dim, align = 'left', size = 9) {
+    ctx.font = `${size}px monospace`; ctx.textAlign = align; ctx.fillStyle = '#0b1c21'; ctx.fillText(text, Math.round(x) + 1, Math.round(y) + 1);
+    ctx.fillStyle = color; ctx.fillText(text, Math.round(x), Math.round(y)); ctx.textAlign = 'left';
+  }
+  function drawPerson(e) {
+    const x = Math.round(e.x), y = Math.round(e.y), gait = Math.floor(e.age * 7) % 2;
+    ctx.fillStyle = '#11292e'; ctx.fillRect(x - 3, y + 4, 8, 3);
+    ctx.fillStyle = e.grace > 0 ? '#aebcaf' : palette.white;
+    ctx.fillRect(x - 1, y - 6, 3, 3); ctx.fillRect(x - 3, y - 2, 6, 5);
+    ctx.fillRect(x - 3, y + 3, 2, 3 + gait); ctx.fillRect(x + 1, y + 3, 2, 4 - gait);
+    ctx.fillStyle = '#b7c5b8'; ctx.fillRect(x + 3, y - 1, 4, 2);
+    if (e.kind === 'launcher') { ctx.fillStyle = palette.amber; ctx.fillRect(x - 6, y - 4, 2, 8); }
+  }
+  function drawVehicle(x, y, angle, friendly = false) {
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y));
+    ctx.rotate(Math.round(angle / (Math.PI / 2)) * Math.PI / 2);
+    ctx.fillStyle = '#10272c'; ctx.fillRect(-12, -9, 24, 19);
+    ctx.fillStyle = '#172a30'; ctx.fillRect(-8, -10, 6, 3); ctx.fillRect(4, -10, 5, 3); ctx.fillRect(-8, 7, 6, 3); ctx.fillRect(4, 7, 5, 3);
+    ctx.fillStyle = friendly ? '#78bfae' : '#acbdb0'; ctx.fillRect(-12, -6, 23, 12);
+    ctx.fillStyle = friendly ? '#c0f1d9' : palette.white; ctx.fillRect(5, -5, 6, 10);
+    ctx.fillStyle = '#334948'; ctx.fillRect(4, -4, 2, 8); ctx.fillRect(-9, -4, 11, 8);
+    ctx.fillStyle = friendly ? '#9ce4d2' : '#d9ddbf'; ctx.fillRect(-7, -2, 7, 4);
+    if (!friendly) { ctx.fillStyle = '#e4e9d0'; ctx.fillRect(-2, -2, 4, 4); ctx.fillRect(1, -1, 10, 2); }
+    ctx.restore();
+  }
+  function draw() {
+    frameCounter++;
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#192a2f'; ctx.fillRect(0, 0, W, H);
+    const shakeX = prefs.reduced ? 0 : Math.sin(frameCounter * 2.6) * recoil;
+    const shakeY = prefs.reduced ? 0 : Math.cos(frameCounter * 3.1) * recoil * 0.7;
+    ctx.save();
+    ctx.translate(Math.round(W / 2 - camera.x * camera.zoom + shakeX), Math.round(H / 2 - camera.y * camera.zoom + shakeY));
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.drawImage(terrain, 0, 0);
+    // Abstract wreckage only: no bodies or gore.
+    for (const w of wrecks) {
+      ctx.fillStyle = '#17272a'; ctx.fillRect(w.x - (w.kind === 'raider' ? 12 : 4), w.y - 3, w.kind === 'raider' ? 25 : 9, w.kind === 'raider' ? 12 : 5);
+      ctx.fillStyle = '#536355'; ctx.fillRect(w.x, w.y, 3, 2);
+    }
+    for (const e of mission.enemies) {
+      const s = toScreen(e.x, e.y);
+      if (s.x < -40 || s.x > W + 40 || s.y < -40 || s.y > H + 40) continue;
+      if (e.grace > 0) {
+        ctx.strokeStyle = '#cfdec188'; ctx.lineWidth = 1 / camera.zoom;
+        ctx.setLineDash([3, 4]); ctx.strokeRect(e.x - 15, e.y - 15, 30, 30); ctx.setLineDash([]);
+      }
+      if (e.kind === 'raider') drawVehicle(e.x, e.y, e.angle); else drawPerson(e);
+      if (e.hp < e.maxHp) {
+        ctx.fillStyle = '#173035'; ctx.fillRect(e.x - 9, e.y - 15, 18, 2);
+        ctx.fillStyle = palette.amber; ctx.fillRect(e.x - 9, e.y - 15, 18 * e.hp / e.maxHp, 2);
+      }
+      if (e.kind === 'launcher' && e.grace <= 0 && e.attack < 1.8 && C.distance(e, mission.courier) <= C.ENEMIES.launcher.range) {
+        ctx.strokeStyle = palette.amber; ctx.lineWidth = 2 / camera.zoom;
+        ctx.beginPath(); ctx.arc(e.x, e.y, 17, -Math.PI / 2, -Math.PI / 2 + (1 - e.attack / 1.8) * Math.PI * 2); ctx.stroke();
+      }
+    }
+    drawVehicle(mission.courier.x, mission.courier.y, mission.courier.angle, true);
+    for (const shot of mission.shots) {
+      const p = 1 - shot.remaining / shot.duration;
+      if (shot.faction === 'enemy') {
+        const x = shot.fromX + (shot.x - shot.fromX) * p, y = shot.fromY + (shot.y - shot.fromY) * p;
+        ctx.strokeStyle = palette.amber; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - (shot.x - shot.fromX) * 0.06, y - (shot.y - shot.fromY) * 0.06); ctx.stroke();
+      } else {
+        const w = C.WEAPONS[shot.weapon];
+        ctx.strokeStyle = shot.weapon === 0 ? '#e4edcb80' : '#edc17e9a'; ctx.lineWidth = 1 / camera.zoom;
+        ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(shot.x, shot.y, Math.max(3, w.radius * (1 - p * 0.25)), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        if (p > 0.68) {
+          ctx.strokeStyle = palette.white; ctx.lineWidth = (shot.weapon ? 2 : 1) / camera.zoom;
+          ctx.beginPath(); ctx.moveTo(shot.x - 140 * (1 - p), shot.y - 250 * (1 - p)); ctx.lineTo(shot.x - 140 * Math.max(0, 0.93 - p), shot.y - 250 * Math.max(0, 0.93 - p)); ctx.stroke();
+        }
+      }
+    }
+    for (const r of rings) {
+      const age = 1 - r.life / r.max;
+      ctx.globalAlpha = r.life / r.max;
+      ctx.strokeStyle = r.enemy ? palette.red : palette.white; ctx.lineWidth = (1 + (1 - age) * 3) / camera.zoom;
+      ctx.beginPath(); ctx.arc(r.x, r.y, Math.max(1, r.radius * (0.3 + age * 0.8)), 0, Math.PI * 2); ctx.stroke();
+      if (age < 0.22) { ctx.fillStyle = '#eef4d6'; ctx.fillRect(r.x - 5, r.y - 5, 10, 10); }
+    }
+    for (const p of particles) {
+      ctx.globalAlpha = p.life / p.max; ctx.fillStyle = p.bright ? '#e5e9c7' : '#748171';
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+    // Screen-space identification never scales down into unreadability.
+    const courierS = toScreen(mission.courier.x, mission.courier.y);
+    const isOnscreen = courierS.x >= 25 && courierS.x <= W - 25 && courierS.y >= 35 && courierS.y <= H - 30;
+    const cx = C.clamp(courierS.x, 28, W - 28), cy = C.clamp(courierS.y, 38, H - 32);
+    ctx.strokeStyle = palette.cyan; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(cx, cy - 19); ctx.lineTo(cx + 23, cy); ctx.lineTo(cx, cy + 19); ctx.lineTo(cx - 23, cy); ctx.closePath(); ctx.stroke();
+    pixelText(isOnscreen ? 'ROOK-1' : 'ROOK-1 / F TO FOLLOW', cx, cy - 26, palette.cyan, 'center');
+    if (mission.phase !== 'transit' && isOnscreen) pixelText(`${mission.phase === 'extraction' ? 'EXFIL' : 'HOLD'} ${Math.ceil(mission.phase === 'extraction' ? mission.extraction : mission.wait)}s`, cx, cy + 34, palette.cyan, 'center', 8);
+    // Edge alerts preserve awareness while the player is zoomed or panning.
+    for (const e of mission.enemies) {
+      const s = toScreen(e.x, e.y);
+      if (s.x > 12 && s.x < W - 12 && s.y > 12 && s.y < H - 12) continue;
+      const x = C.clamp(s.x, 12, W - 12), y = C.clamp(s.y, 35, H - 25);
+      ctx.fillStyle = e.kind === 'launcher' ? palette.amber : '#d1d9bf';
+      ctx.fillRect(x - 2, y - 2, 4, 4);
+    }
+    for (const f of floaters) {
+      const s = toScreen(f.x, f.y); ctx.globalAlpha = Math.min(1, f.life * 2); pixelText(f.text, s.x, s.y, palette.cyan, 'center', 8);
+    }
+    ctx.globalAlpha = 1;
+    // Minimal viewfinder marks; no continuous full-screen flashing.
+    ctx.strokeStyle = '#b3c3b533'; ctx.lineWidth = 1;
+    for (let x = 48; x < W - 30; x += 48) { ctx.beginPath(); ctx.moveTo(x, 12); ctx.lineTo(x, x % 96 ? 16 : 20); ctx.stroke(); }
+    pixelText('N', W / 2, 28, '#aebfb1', 'center', 8);
+    pixelText(`${C.WEAPONS[selected].name.toUpperCase()} / ${C.WEAPONS[selected].role}`, 19, H - 27, '#cedbc6');
+    pixelText(`FEED 07  |  ${zoomed ? '1.25' : '0.80'}x  |  ${Math.floor(camera.x)},${Math.floor(camera.y)}`, 19, H - 14, '#9bb0a6', 'left', 8);
+    pixelText('ROOK-1 / PROTECT', W - 18, H - 15, palette.cyan, 'right', 8);
+    if (pointer.inside && mission.status === 'playing' && (!touchMode || hasAim)) {
+      const aim = toWorld(pointer.x, pointer.y), w = C.WEAPONS[selected];
+      const danger = C.distance(aim, mission.courier) <= w.radius + mission.courier.radius;
+      const covered=Boolean(mission.terrain.coverAt(aim.x,aim.y));
+      const radius = w.radius * camera.zoom, color = danger ? palette.red : covered?palette.amber:palette.white;
+      ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.arc(pointer.x, pointer.y, radius, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(pointer.x - 17, pointer.y); ctx.lineTo(pointer.x - 5, pointer.y);
+      ctx.moveTo(pointer.x + 5, pointer.y); ctx.lineTo(pointer.x + 17, pointer.y);
+      ctx.moveTo(pointer.x, pointer.y - 17); ctx.lineTo(pointer.x, pointer.y - 5);
+      ctx.moveTo(pointer.x, pointer.y + 5); ctx.lineTo(pointer.x, pointer.y + 17); ctx.stroke();
+      ctx.fillStyle = color; ctx.fillRect(pointer.x - 1, pointer.y - 1, 2, 2);
+      const labelX = C.clamp(pointer.x, 95, W - 95), labelY = C.clamp(pointer.y + radius + 16, 45, H - 42);
+      if (danger) pixelText('DANGER CLOSE', labelX, labelY, palette.red, 'center', 9);
+      else if (covered) pixelText('ROOF / SHOT ABSORBED',labelX,labelY,palette.amber,'center',8);
+      else if (selected > 0) pixelText(`${w.flight.toFixed(2)}s TO IMPACT`, labelX, labelY, '#d5c7a7', 'center', 8);
+      const remaining = mission.cooldowns[selected] / w.interval;
+      if (remaining > 0) { ctx.strokeStyle = palette.amber; ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 6, -Math.PI / 2, -Math.PI / 2 + (1 - remaining) * Math.PI * 2); ctx.stroke(); }
+    }
+    if (damageFlash > 0) { ctx.strokeStyle = palette.red; ctx.globalAlpha = Math.min(0.7, damageFlash); ctx.lineWidth = 4; ctx.strokeRect(2, 2, W - 4, H - 4); ctx.globalAlpha = 1; }
+    drawMinimap();
+  }
+  function drawMinimap() {
+    if (!mc) return;
+    mc.imageSmoothingEnabled = false; mc.fillStyle = '#1d2e32'; mc.fillRect(0, 0, mini.width, mini.height);
+    const sx = mini.width / C.WORLD.width, sy = mini.height / C.WORLD.height;
+    for(const r of mission.terrain.water){mc.fillStyle='#0e2029';mc.fillRect(r.x*sx,r.y*sy,r.w*sx,r.h*sy);}
+    for(const r of mission.terrain.buildings){mc.fillStyle='#3d514e';mc.fillRect(r.x*sx,r.y*sy,r.w*sx,r.h*sy);}
+    mc.strokeStyle = '#6b8278'; mc.lineWidth = 2; mc.beginPath();
+    mission.route.forEach((p, i) => i ? mc.lineTo(p.x * sx, p.y * sy) : mc.moveTo(p.x * sx, p.y * sy)); mc.stroke();
+    for (const cp of mission.checkpoints) { const p = C.pointOnRoute(cp.at, mission.config); mc.fillStyle = '#d7b87a'; mc.fillRect(p.x * sx - 2, p.y * sy - 2, 4, 4); }
+    mc.strokeStyle = '#b1d0bd66'; mc.lineWidth = 1;
+    mc.strokeRect((camera.x - W / camera.zoom / 2) * sx, (camera.y - H / camera.zoom / 2) * sy, W / camera.zoom * sx, H / camera.zoom * sy);
+    for (const e of mission.enemies) { mc.fillStyle = e.kind === 'launcher' ? palette.amber : palette.white; mc.fillRect(Math.floor(e.x * sx), Math.floor(e.y * sy), 2, 2); }
+    mc.fillStyle = palette.cyan; mc.fillRect(mission.courier.x * sx - 3, mission.courier.y * sy - 3, 6, 6);
+    const end=mission.route.at(-1);
+    mc.strokeStyle = '#b5caa3'; mc.strokeRect(end.x * sx - 4, end.y * sy - 4, 8, 8);
+  }
+  function frame(now) {
+    const dt = lastFrame ? Math.min((now - lastFrame) / 1000, 0.1) : 0;
+    lastFrame = now;
+    if (dt > 0) { fpsSum += 1 / dt; fpsFrames++; if (fpsFrames >= 60) { lastFPS = fpsSum / fpsFrames; fpsSum = 0; fpsFrames = 0; } }
+    if (mission.status === 'playing') {
+      accumulator += dt;
+      let steps = 0;
+      while (accumulator >= 1 / 60 && steps < 6 && mission.status === 'playing') {
+        simTick(1 / 60); accumulator -= 1 / 60; steps++;
+      }
+      if (steps >= 6) accumulator = 0;
+    } else accumulator = 0;
+    if (now > flashUntil) $('flash-message').classList.remove('visible');
+    uiTimer += dt; if (uiTimer >= 0.09) { uiTimer = 0; updateUI(); }
+    if(terrainVersion!==mission.terrain.version)drawTerrain();
+    draw(); requestAnimationFrame(frame);
+  }
+  function pointerMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = (e.clientX - rect.left) * W / rect.width;
+    pointer.y = (e.clientY - rect.top) * H / rect.height;
+    pointer.inside = pointer.x >= 0 && pointer.x <= W && pointer.y >= 0 && pointer.y <= H;
+  }
+  function aimAt(e){pointerMove(e);hasAim=true;touchTarget=toWorld(pointer.x,pointer.y);}
+  canvas.addEventListener('pointermove',e=>{
+    if(e.pointerType==='touch' || touchMode){
+      if(e.pointerId!==aimId)return;
+      if(panMode && panLast){const r=canvas.getBoundingClientRect();camera.x-=(e.clientX-panLast.x)*W/r.width/camera.zoom;camera.y-=(e.clientY-panLast.y)*H/r.height/camera.zoom;follow=false;cameraClamp();panLast={x:e.clientX,y:e.clientY};}
+      else aimAt(e);
+    }else if(!touchMode || mouseId===e.pointerId){pointerMove(e);}
+  });
+  canvas.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch'){pointerMove(e);pointer.inside=true;}});
+  canvas.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch' && mouseId===null){pointer.inside=false;pointer.down=false;}});
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.button!==0 || mission.status!=='playing')return;
+    e.preventDefault();canvas.focus({preventScroll:true});initAudio();
+    if(e.pointerType==='touch' || touchMode){
+      if(aimId!==null)return;
+      if(!touchMode){touchMode=true;inputUI();}
+      aimId=e.pointerId;
+      if(panMode)panLast={x:e.clientX,y:e.clientY};else aimAt(e);
+    }else{mouseId=e.pointerId;pointerMove(e);pointer.down=true;}
+    try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  // Explicit touch activation avoids relying on compatibility mouse clicks after
+  // a captured drag. Ignore its follow-up click, but preserve keyboard activation.
+  function activateButton(button,action){
+    let press=null,ignoreClickUntil=0;
+    button.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!button.disabled)press={id:e.pointerId,x:e.clientX,y:e.clientY};});
+    button.addEventListener('pointerup',e=>{
+      if(!press||e.pointerId!==press.id)return;
+      const ok=Math.hypot(e.clientX-press.x,e.clientY-press.y)<18;press=null;
+      if(!ok||button.disabled)return;e.preventDefault();ignoreClickUntil=performance.now()+750;action();
+    });
+    button.addEventListener('pointercancel',()=>{press=null;});
+    button.addEventListener('pointerleave',()=>{press=null;});
+    button.addEventListener('click',e=>{if(e.detail>0&&performance.now()<ignoreClickUntil){e.preventDefault();return;}action();});
+  }
+  function releasePointer(e){
+    if(e.pointerId===mouseId){mouseId=null;pointer.down=false;}
+    if(e.pointerId===aimId){aimId=null;panLast=null;}
+    // Lifting the aiming finger MUST NOT release a different finger on FIRE.
+    if(e.pointerId===fireId){fireId=null;touchFire=false;$('touch-fire').classList.remove('pressed');}
+  }
+  window.addEventListener('pointerup',releasePointer);
+  window.addEventListener('pointercancel',releasePointer);
+  canvas.addEventListener('lostpointercapture',releasePointer);
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  $('touch-fire').addEventListener('pointerdown',e=>{
+    if(e.button!==0 || mission.status!=='playing' || fireId!==null)return;
+    e.preventDefault();
+    if(!hasAim || panMode){flash(panMode?'TAP PAN TO RETURN TO AIM':'TAP THE FEED TO AIM FIRST');return;}
+    fireId=e.pointerId;touchFire=true;initAudio();$('touch-fire').classList.add('pressed');
+    try{$('touch-fire').setPointerCapture(e.pointerId);}catch(_){}
+  });
+  $('touch-fire').addEventListener('lostpointercapture',releasePointer);
+  $('touch-fire').addEventListener('contextmenu',e=>e.preventDefault());
+  activateButton($('touch-hold'),()=>{if(mission.status==='playing'&&mission.phase==='transit'&&mission.holdRemaining>0){touchHold=!touchHold;updateUI();}});
+  activateButton($('touch-pan'),()=>{panMode=!panMode;touchFire=false;fireId=null;inputUI();updateUI();});
+  activateButton($('touch-follow'),()=>{follow=true;panMode=false;inputUI();});
+  activateButton($('touch-zoom'),()=>{zoomed=!zoomed;camera.zoom=zoomed?1.25:.8;cameraClamp();});
+  activateButton($('touch-mode'),()=>{clearInputs();hasAim=false;touchTarget=null;touchMode=!touchMode;inputUI();});
+  mini.addEventListener('pointerdown', e => {
+    if (mission.status !== 'playing') return;
+    const r = mini.getBoundingClientRect();
+    camera.x = (e.clientX - r.left) / r.width * C.WORLD.width;
+    camera.y = (e.clientY - r.top) / r.height * C.WORLD.height; follow = false; cameraClamp(); canvas.focus({preventScroll:true});
+  });
+  window.addEventListener('keydown', e => {
+    const key = e.key.toLowerCase();
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+    // Preserve keyboard activation of focused DOM buttons (Space / Enter).
+    if (e.target.tagName === 'BUTTON' && (key === ' ' || key === 'enter')) return;
+    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key) && mission.status === 'playing') e.preventDefault();
+    if (e.repeat) return;
+    if (key === 'p' || key === 'escape') { pause(); return; }
+    if (key === 'm') { prefs.muted = !prefs.muted; initAudio(); setPreferencesUI(); save(); return; }
+    if (key === 'r' && ['won', 'lost'].includes(mission.status)) { reset(mission.difficulty, true); return; }
+    if (mission.status !== 'playing') return;
+    keys.add(key);
+    if (['1', '2', '3'].includes(key)) selectWeapon(Number(key) - 1);
+    if (key === 'q') { zoomed = !zoomed; camera.zoom = zoomed ? 1.25 : 0.8; cameraClamp(); }
+    if (key === 'f') follow = true;
+  });
+  window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+  window.addEventListener('blur', () => { clearInputs(); pause(true); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
+  document.querySelectorAll('[data-mission]').forEach(b=>activateButton(b,()=>{if(['playing','paused'].includes(mission.status))return;selectedMission=b.dataset.mission;reset();}));
+  activateButton($('next-mission'),()=>{selectedMission='floodgate';reset();});
+  activateButton($('start'), () => reset('standard', true));
+  activateButton($('training'), () => reset('relaxed', true));
+  activateButton($('retry'), () => reset(mission.difficulty, true));
+  activateButton($('briefing-again'), () => reset());
+  activateButton($('abort'), () => reset());
+  activateButton($('pause'), () => pause()); activateButton($('resume'), () => pause());
+  activateButton($('sound'), () => { prefs.muted = !prefs.muted; initAudio(); setPreferencesUI(); save(); });
+  activateButton($('motion'), () => { prefs.reduced = !prefs.reduced; setPreferencesUI(); save(); });
+  document.querySelectorAll('.weapon').forEach(b => activateButton(b, () => { selectWeapon(Number(b.dataset.weapon)); if (mission.status === 'playing') canvas.focus({preventScroll:true}); }));
+  // Read-only diagnostics used by the smoke test; no score upload / online ranking.
+  window.NightRelayDebug = Object.freeze({
+    snapshot: () => ({ ...mission.summary(), phase: mission.phase, courier: { ...mission.courier },
+      selected, heat: mission.heat, mediumAmmo: mission.mediumAmmo, heavyAmmo: mission.heavyAmmo,
+      overheated: mission.overheated, holdRemaining: mission.holdRemaining, camera: { ...camera },
+      touch:{enabled:touchMode,fire:touchFire,hold:touchHold,pan:panMode,hasAim,aimId,fireId}, terrain:{version:mission.terrain.version,buildings:mission.terrain.buildings.length,gateOpen:mission.terrain.gates.every(g=>g.open)}, routeBlocked:mission.routeBlocked, threats: mission.enemies.length, pendingShots: mission.shots.length, fps: lastFPS }),
+    enemies: () => mission.enemies.map(e => ({ ...e })),
+    obstacles: () => mission.terrain.obstacles.map(o=>({...o})),
+    worldToScreen: (x, y) => toScreen(x, y)
+  });
+  setPreferencesUI(); reset();
+  new ResizeObserver(resizeFeed).observe($('viewport'));
+  requestAnimationFrame(frame);
+})();
+
+</script>
+</body>
+</html>

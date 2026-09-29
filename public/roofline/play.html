@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17243b">
+<meta name="description" content="Roofline: an original, tiny rooftop skate game. Jump, grind, trick. Bank the combo or chase the next roof.">
+<title>ROOFLINE — One more line.</title>
+<style>:root{color-scheme:dark;--bg:#111b2c;--panel:#19273c;--ink:#17243b;--cream:#f9e6c2;--muted:#93a5ac;--peach:#f2aa79;--mint:#a6d5b4;--line:#334457;--danger:#f18a94;font-family:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--cream);min-height:100dvh;background-image:radial-gradient(ellipse at 50% -30%,#30344c 0%,transparent 65%)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,canvas:focus-visible{outline:3px solid var(--mint);outline-offset:4px}button{transition:background .14s,transform .1s}button:active{transform:translateY(1px)}[hidden]{display:none!important}.app{max-width:1200px;margin:0 auto;padding:22px 30px 16px}.masthead{display:flex;align-items:center;justify-content:space-between;padding:0 0 18px;gap:12px}.brand{display:flex;gap:12px;align-items:center}.brand-mark{width:37px;height:37px;background:var(--peach);color:var(--ink);font-size:27px;font-weight:900;line-height:37px;text-align:center;position:relative}.brand-mark span{position:absolute;font-size:15px;right:1px;top:-9px}.brand strong{font-size:17px;letter-spacing:3.5px}.brand-sub{display:block;color:var(--muted);font-size:9px;letter-spacing:1.25px;margin-top:5px}.toolbar{display:flex;gap:6px}.tool{background:transparent;color:var(--muted);border:1px solid var(--line);padding:10px 11px;font-size:10px;letter-spacing:.6px}.tool span{color:var(--cream);margin-left:5px}.tool:hover{background:var(--panel);border-color:var(--muted)}.stage{position:relative;aspect-ratio:16/9;isolation:isolate;overflow:hidden;border:1px solid #516075;box-shadow:0 18px 70px #080f2070;background:#9692b1}canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;outline:none}.hud{position:absolute;left:20px;right:20px;top:17px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;text-shadow:0 2px #19283d55;gap:15px}.score-block,.record-block{min-width:132px;position:relative}.eyebrow{display:block;font-size:9px;font-weight:700;letter-spacing:1.5px}.score-block>.eyebrow,.record-block>.eyebrow{color:#26334a;text-shadow:none}.score-block strong{display:block;font-size:32px;line-height:1.15;letter-spacing:-1px;color:var(--cream);text-shadow:2px 2px var(--ink)}.record-block{text-align:right}.record-block strong{font-size:22px;line-height:1.45;display:block;color:var(--cream);text-shadow:2px 2px var(--ink)}.route-block{text-align:center;width:220px;max-width:35%;color:#293b52}.route-block .eyebrow{font-size:9px}.mini-map{height:13px;position:relative;margin:8px 0 3px;background:repeating-linear-gradient(90deg,#2c445866 0,#2c445866 19px,transparent 19px,transparent 23px);border-bottom:2px solid #e9dbc8a6}.mini-map i{position:absolute;top:-1px;left:0;width:7px;height:13px;background:var(--peach);box-shadow:0 0 0 1px var(--ink)}.route-meta{font-size:8px;letter-spacing:1px}.bank-feedback{position:absolute;left:0;top:52px;color:#244c48;background:var(--mint);font-size:12px;font-weight:bold;padding:4px 7px;opacity:0;transition:opacity .18s;white-space:nowrap}.bank-feedback.show{opacity:1}.timer{font-size:15px;padding:3px 6px;background:var(--ink);color:var(--cream);display:inline-block}.timer.urgent{color:var(--peach)}.combo-area{position:absolute;bottom:17px;left:19px;min-width:260px;max-width:60%;background:#142339eb;border:1px solid #738d9580;box-shadow:3px 3px #17243b70;padding:10px 13px 10px;border-left:3px solid var(--peach);pointer-events:none}.combo-top{display:flex;align-items:center;justify-content:space-between;gap:30px}.combo-top .eyebrow{color:var(--peach);font-size:8px}.mult{color:var(--ink);background:var(--peach);padding:2px 6px;font-size:13px;font-weight:bold}.combo-number{font-size:31px;line-height:1.15;font-weight:800;letter-spacing:-1px}.combo-actions{font-size:8px;color:#c3d2cf;line-height:1.5;max-width:380px;margin-top:3px}.combo-note{display:block;font-size:8px;color:var(--muted);margin-top:5px}.bank-track{height:3px;background:#354658;margin-top:7px}.bank-track i{display:block;height:3px;background:var(--mint);width:0}.combo-area.danger{border-left-color:var(--danger)}.combo-area.danger .combo-top .eyebrow{color:var(--danger)}.combo-area.danger .mult{background:var(--danger)}.riding-state{position:absolute;bottom:20px;right:20px;pointer-events:none;text-align:right;text-shadow:1px 1px var(--ink);color:var(--cream)}.riding-state>span:first-child{display:block;font-size:10px;letter-spacing:1px;font-weight:bold}.speed-track{width:92px;height:4px;background:#18283a99;margin:6px 0 4px auto}.speed-track i{display:block;height:4px;background:var(--mint)}.speed-label{font-size:7px;letter-spacing:.8px}.message{position:absolute;left:50%;top:90px;transform:translateX(-50%);text-align:center;pointer-events:none;max-width:90%;white-space:nowrap;background:#17243be6;padding:8px 14px;color:var(--mint);border-bottom:2px solid var(--mint);font-size:11px;letter-spacing:.8px;opacity:0;transition:opacity .12s}.message.show{opacity:1}.message.bad{color:var(--danger);border-color:var(--danger)}.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#12203480;padding:18px;z-index:5}.start-card,.pause-card{background:#15243aef;border:1px solid #617787;padding:28px 32px;box-shadow:6px 6px #17243b88;width:430px;max-width:100%}.start-card{margin-right:25%;position:relative}.start-card:before{content:"";position:absolute;top:-1px;left:-1px;height:3px;width:64px;background:var(--peach)}.kicker{font-size:9px;letter-spacing:1.4px;color:var(--mint);display:flex;align-items:center;gap:7px}.kicker i{width:5px;height:5px;background:var(--mint);display:inline-block}h1{font-size:clamp(35px,4.8vw,58px);letter-spacing:-4px;margin:12px 0 0;line-height:1;font-weight:900;white-space:nowrap}h1 span{color:var(--peach)}h1 b{font-weight:400;letter-spacing:-3px;color:var(--mint);font-size:36px;margin-left:8px}.tagline{font-size:14px;letter-spacing:-.5px;margin:14px 0 0;line-height:1.5}.intro-copy{font-size:10px;line-height:1.9;color:#b3c2c5;margin:10px 0 16px}.intro-keys{display:flex;justify-content:space-between;gap:10px;font-size:9px;margin-bottom:22px;align-items:center}.intro-keys>span{display:flex;align-items:center;gap:6px}kbd{font:inherit;display:inline-block;min-width:21px;text-align:center;background:#24394d;border:1px solid #617380;border-bottom-width:2px;padding:3px 5px;font-size:9px;color:var(--cream);white-space:nowrap}.primary,.secondary{display:flex;justify-content:space-between;align-items:center;width:100%;padding:13px 14px;font-size:11px;letter-spacing:1px;font-weight:bold;text-align:left}.primary{background:var(--peach);color:var(--ink);border:1px solid var(--peach);box-shadow:0 3px 0 #9b6c63;margin-bottom:12px}.primary:hover{background:#ffc596}.primary span,.secondary span{font-size:18px;line-height:10px}.secondary{border:1px solid #536a78;background:transparent;color:var(--cream)}.secondary:hover{background:#273b51}.intro-foot{font-size:7px;color:var(--muted);text-align:center;letter-spacing:.8px;margin-top:18px}.pause-card{text-align:center;width:390px}.pause-card .kicker{justify-content:center}.pause-card h2{font-size:27px;letter-spacing:-1px;margin:16px 0}.pause-card p{font-size:11px;line-height:1.8;color:#b3c2c5;margin-bottom:25px}.quiet{background:transparent;border:0;padding:18px 2px 0;color:var(--muted);font-size:8px;text-decoration:underline;letter-spacing:1px}.result-score{font-size:46px;color:var(--peach);font-weight:bold}.result-details{font-size:10px;color:var(--muted);line-height:1.9;margin:15px 0 22px}.below-stage{border-left:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.controls-legend{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;padding:13px 17px;background:#18273c}.controls-legend>span{font-size:10px;display:flex;gap:6px;align-items:center;white-space:nowrap}.controls-legend>span>span{color:var(--muted);font-size:8px}.controls-legend em{font-style:normal;color:var(--muted);font-size:8px;display:none}.minor-controls{color:var(--muted);font-size:8px!important}.line-guide{display:flex;align-items:center;gap:24px;padding:19px 20px 21px;border-top:1px solid var(--line);background:#121f32}.guide-heading{min-width:205px;max-width:215px}.guide-heading .eyebrow{color:var(--peach);font-size:8px;letter-spacing:1px}.guide-heading p{font-size:10px;color:var(--muted);line-height:1.7;margin:6px 0 0}.goals{display:flex;flex:1;justify-content:space-between;gap:16px}.goal{display:flex;align-items:flex-start;gap:9px}.goal b{font-size:10px;color:#8ca4aa;border:1px solid #41576a;min-width:23px;height:23px;line-height:22px;text-align:center}.goal>span{font-size:10px;line-height:1.2;padding-top:2px}.goal small{display:block;font-size:8px;color:var(--muted);line-height:1.5;margin-top:5px;max-width:150px}.goal.done b{background:var(--mint);color:var(--ink);border-color:var(--mint)}.goal.done>span{color:var(--mint)}footer{display:flex;justify-content:space-between;gap:15px;color:#758c99;font-size:7px;letter-spacing:.7px;margin-top:15px}.touch-controls{display:none;gap:9px;align-items:center;padding:12px 9px 10px;background:#15243a;border:1px solid var(--line);border-top:0;touch-action:none;user-select:none;-webkit-user-select:none}.touch{touch-action:none;user-select:none;-webkit-user-select:none;width:87px;height:66px;border:1px solid #7e9499;border-bottom:4px solid #425769;background:#284052;color:var(--cream);border-radius:3px}.touch>span{font-size:24px;line-height:23px;display:block}.touch small{font-size:9px;letter-spacing:1px;display:block;margin-top:6px}.touch.jump{background:#b28168;border-color:#f2aa79;color:#15243a}.touch.grind{background:#437873;border-color:#a6d5b4}.touch.trick{background:#665774;border-color:#b2a0c9}.touch.brake{width:66px;color:var(--muted)}.touch.active{filter:brightness(1.35);transform:translateY(2px);border-bottom-width:2px}.touch-space{flex:1}.playing .overlay[hidden]{display:none}.menu .hud,.menu .riding-state{opacity:.45}
+@media(min-width:1120px){.controls-legend em{display:inline}}
+@media(any-pointer:coarse){.touch-controls{display:flex}.controls-legend{display:none}}
+@media(max-width:800px){.app{padding:14px 12px}.start-card{padding:21px 24px;margin-right:12%;width:375px}.intro-copy{margin-bottom:13px}.intro-keys{margin-bottom:17px}.intro-foot{margin-top:13px}.intro-copy{font-size:9px}.kicker{font-size:8px}h1{font-size:46px}.tagline{font-size:12px}.primary,.secondary{padding:11px 12px;font-size:10px}.hud{left:12px;right:12px;top:12px}.score-block strong{font-size:25px}.record-block strong{font-size:19px}.eyebrow{font-size:8px}.route-block{width:160px}.combo-area{bottom:12px;left:12px;min-width:220px;padding:8px 10px;max-width:64%}.combo-number{font-size:26px}.combo-note{font-size:7px}.combo-actions{font-size:7px}.riding-state{right:12px;bottom:14px}.line-guide{gap:12px;padding:15px;display:block}.guide-heading{max-width:100%;margin-bottom:14px;display:flex;gap:15px;align-items:center}.guide-heading p{margin:0;font-size:9px}.goal small{max-width:155px}.toolbar .tool{font-size:9px;padding:9px 8px}.brand-sub{font-size:8px}.minor-controls{display:none!important}.message{top:70px;font-size:9px}}
+@media(max-width:600px){.app{padding:10px 7px}.brand-mark{width:28px;height:28px;font-size:21px;line-height:28px}.brand{gap:8px}.brand strong{font-size:12px;letter-spacing:2px}.brand-sub{font-size:6px;letter-spacing:.5px}.masthead{padding-bottom:10px}.tool{font-size:8px!important;padding:7px!important;letter-spacing:0}.tool span{margin-left:2px}#motionButton{display:none}.stage{aspect-ratio:16/11}.stage canvas{height:100%;object-fit:cover;object-position:center}.hud{left:9px;right:9px;top:9px}.score-block,.record-block{min-width:80px}.score-block strong{font-size:23px}.record-block strong{font-size:17px}.record-block .eyebrow,.score-block .eyebrow{font-size:7px;letter-spacing:.7px}.route-block{display:none}.overlay{padding:12px 10px}.start-card{padding:18px 20px;margin-right:0;max-width:330px;width:100%}.start-card .kicker{font-size:6px;letter-spacing:1px}h1{font-size:41px;letter-spacing:-3px;margin:9px 0 0}h1 b{font-size:28px}.tagline{font-size:11px;margin-top:8px}.intro-copy{font-size:8px;line-height:1.6;margin:7px 0 10px}.intro-keys{font-size:8px;margin-bottom:12px}.intro-keys kbd{font-size:8px;padding:2px 4px}.primary,.secondary{padding:9px 11px;font-size:9px}.primary{margin-bottom:9px}.intro-foot{font-size:6px;margin-top:11px}.touch-controls{display:flex}.controls-legend{display:none}.touch{height:66px;width:78px}.touch.brake{width:54px}.line-guide{padding:13px 12px}.guide-heading{display:block}.guide-heading p{margin-top:6px}.goals{gap:10px}.goal{gap:5px}.goal b{font-size:8px;min-width:18px;height:18px;line-height:17px}.goal>span{font-size:8px}.goal small{font-size:7px;line-height:1.5}.combo-area{padding:7px 9px;left:9px;bottom:9px;max-width:69%;min-width:190px}.combo-number{font-size:22px}.combo-actions{font-size:6px;max-width:220px}.combo-note{font-size:6px}.combo-top .eyebrow{font-size:7px}.mult{font-size:10px}.riding-state{right:9px;bottom:12px}.riding-state>span:first-child{font-size:7px}.speed-track{width:56px}.speed-label{font-size:5px;letter-spacing:.3px}.message{font-size:7px;top:61px;padding:6px 8px}.bank-feedback{top:42px;font-size:9px}.pause-card{padding:18px 23px;max-width:300px}.pause-card h2{font-size:24px;margin:13px 0}.pause-card p{font-size:9px;margin:10px 0 18px}.result-score{font-size:32px}.result-details{font-size:8px;margin:10px 0 15px}footer{font-size:5px;letter-spacing:.4px;line-height:1.7;margin-top:11px;gap:14px}footer span{max-width:50%}.timer{font-size:11px}}
+@media(max-height:520px) and (orientation:landscape){.app{padding:6px 10px;max-width:1080px}.masthead{padding-bottom:6px}.brand-sub{display:none}.brand-mark{height:25px;width:25px;line-height:25px;font-size:20px}.brand strong{font-size:13px}.tool{padding:5px 7px!important}.stage{height:calc(100dvh - 50px);width:100%;aspect-ratio:auto}.stage canvas{object-fit:contain}.below-stage,footer{display:none}.touch-controls{position:fixed;bottom:12px;left:15px;right:15px;z-index:6;background:transparent;border:0;padding:0;pointer-events:none;gap:9px}.touch{pointer-events:auto;opacity:.82;width:67px;height:59px}.touch.brake{width:52px}.touch-space{flex:1}.playing .combo-area{left:85px;bottom:13px;min-width:200px;max-width:40%}.playing .riding-state{bottom:84px}.menu .touch-controls,.paused .touch-controls,.finished .touch-controls{visibility:hidden}.start-card{padding:17px 22px;margin-right:0;width:366px}h1{font-size:43px}.intro-copy{font-size:9px;margin:7px 0 10px}.intro-keys{margin-bottom:12px}.intro-foot{margin-top:10px}.tagline{margin-top:8px}.primary,.secondary{padding:9px 12px}.message{top:69px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Small-screen score feedback lives in the sky, never on top of the skater's landing line. */
+@media(max-width:600px){.combo-area{left:auto;right:9px;top:55px;bottom:auto;min-width:160px;max-width:54%;padding:6px 8px}.combo-number{font-size:20px}.combo-note{display:none}.combo-actions{max-width:185px}.combo-area:not([hidden])~.message{top:auto;bottom:6px;font-size:6px;padding:4px 7px}}
+@media(max-height:520px) and (orientation:landscape){.playing .combo-area{left:auto;right:20px;top:67px;bottom:auto;min-width:185px;max-width:32%;padding:7px 9px}.combo-note{display:none}.combo-number{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><div><strong>ROOFLINE</strong><span class="brand-sub">ONE COURSE. ONE MORE LINE.</span></div></div>
+    <nav class="toolbar" aria-label="Game settings">
+      <button id="soundButton" class="tool" aria-pressed="false" title="Toggle sound (M)">SOUND <span>OFF</span></button>
+      <button id="motionButton" class="tool" aria-pressed="false" title="Reduce camera shake and effects">MOTION <span>FULL</span></button>
+      <button id="pauseButton" class="tool" title="Pause (P / Escape)">PAUSE <span>Ⅱ</span></button>
+    </nav>
+  </header>
+  <main>
+    <section class="stage" id="stage" aria-label="Roofline skate game">
+      <canvas id="game" width="768" height="432" tabindex="0" aria-label="Side-scrolling rooftop skate game. Space or Z to jump, hold X to grind, C to trick. Left to brake. P to pause.">Your browser needs Canvas 2D to play Roofline.</canvas>
+      <div class="hud" id="hud">
+        <div class="score-block"><span class="eyebrow">BANKED SCORE</span><strong id="score">0</strong><span id="bankFeedback" class="bank-feedback"></span></div>
+        <div class="route-block"><span class="eyebrow" id="zone">THE DEPOT</span><div class="mini-map" id="miniMap"><i id="mapMarker"></i></div><span class="route-meta" id="routeMeta">FREE SKATE · CIRCUIT 01</span></div>
+        <div class="record-block"><span class="eyebrow" id="recordLabel">BEST COMBO</span><strong id="record">0</strong><span id="timer" class="timer" hidden></span></div>
+      </div>
+      <div class="combo-area" id="comboArea" hidden>
+        <div class="combo-top"><span class="eyebrow" id="comboLabel">UNBANKED</span><span class="mult" id="multiplier">×1</span></div>
+        <div class="combo-number" id="comboValue">0</div>
+        <div class="combo-actions" id="comboActions"></div>
+        <div class="bank-track"><i id="bankProgress"></i></div>
+        <span class="combo-note" id="comboNote">Land to bank. Keep the line to risk it.</span>
+      </div>
+      <div class="riding-state" id="ridingState"><span id="stateText">ROLLING</span><div class="speed-track"><i id="speedFill"></i></div><span class="speed-label" id="speedLabel">AUTO-PUSH ON</span></div>
+      <div class="message" id="message" role="status" aria-live="polite"></div>
+      <div class="overlay" id="intro">
+        <div class="start-card">
+          <div class="kicker"><i></i> A TINY ROOFTOP SKATE GAME</div>
+          <h1>ROOF<span>LINE</span><b aria-hidden="true">↗</b></h1>
+          <p class="tagline">The next roof is always tempting.</p>
+          <p class="intro-copy">Find a rail. Carry the speed. Link a trick.<br>Land to keep the points — or go for one more.</p>
+          <div class="intro-keys"><span><kbd>SPACE</kbd> JUMP</span><span><kbd>X</kbd> GRIND</span><span><kbd>C</kbd> TRICK</span></div>
+          <button id="startFree" class="primary">LET’S SKATE <span>↗</span></button>
+          <button id="startTimed" class="secondary">90-SECOND SCORE RUN <span>→</span></button>
+          <div class="intro-foot">AUTO-ROLL · NO UPGRADES · JUST YOUR LINE</div>
+        </div>
+      </div>
+      <div class="overlay" id="pauseOverlay" hidden>
+        <div class="pause-card">
+          <div class="kicker">TAKE A BREATHER</div><h2>Hold that line.</h2>
+          <p>Your run is paused. Nothing moves until you do.</p>
+          <button class="primary" id="resume">KEEP ROLLING <span>↗</span></button>
+          <button class="secondary" id="restartPaused">RESTART THIS RUN <span>↺</span></button>
+          <button class="quiet" id="backToMenu">BACK TO THE ROOFTOPS MENU</button>
+        </div>
+      </div>
+      <div class="overlay" id="finishOverlay" hidden>
+        <div class="pause-card">
+          <div class="kicker">THAT’S A WRAP</div><h2>One more line?</h2>
+          <div class="result-score" id="resultScore">0</div><span class="eyebrow">POINTS BANKED</span>
+          <div class="result-details" id="resultDetails"></div>
+          <button class="primary" id="playAgain">RUN IT BACK <span>↗</span></button>
+          <button class="secondary" id="freeAfter">JUST FREE SKATE <span>→</span></button>
+        </div>
+      </div>
+    </section>
+    <div class="touch-controls" id="touchControls" aria-label="Touch controls">
+      <button class="touch brake" data-action="brake" aria-label="Hold to brake"><span>◀</span><small>BRAKE</small></button>
+      <span class="touch-space"></span>
+      <button class="touch jump" data-action="jump" aria-label="Jump; hold for height"><span>↑</span><small>JUMP</small></button>
+      <button class="touch grind" data-action="grind" aria-label="Hold to grind"><span>═</span><small>GRIND</small></button>
+      <button class="touch trick" data-action="trick" aria-label="Tap for an airborne trick"><span>↻</span><small>TRICK</small></button>
+    </div>
+    <div class="below-stage">
+      <div class="controls-legend">
+        <span><kbd>SPACE</kbd><span>or</span><kbd>Z</kbd> Jump <em>hold for height</em></span>
+        <span><kbd>X</kbd> Grind <em>hold to catch a rail</em></span>
+        <span><kbd>C</kbd> Trick <em>tap while airborne</em></span>
+        <span class="minor-controls"><kbd>←</kbd> Brake <kbd>→</kbd> Push <kbd>R</kbd> Restart</span>
+      </div>
+      <div class="line-guide"><div class="guide-heading"><span class="eyebrow">FIND YOUR FIRST LINE</span><p>There’s a shortcut beside the air conditioner.</p></div>
+        <div class="goals"><div class="goal" id="goalGrind"><b>01</b><span>Catch a rail<small>Hold grind as you come down</small></span></div><div class="goal" id="goalBank"><b>02</b><span>Bank 1,000<small>A clean landing keeps the points</small></span></div><div class="goal" id="goalAC"><b>03</b><span>Find the AC express<small>Pop off the rail to the high roof</small></span></div></div>
+      </div>
+    </div>
+  </main>
+  <footer><span>ORIGINAL PIXEL ART &amp; PROCEDURAL SOUND</span><span>NO ACCOUNT. NO NETWORK. SAVED ON THIS DEVICE.</span></footer>
+</div>
+<script>/* Roofline — deterministic, DOM-free game simulation. All art and rules are original. */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.RooflineCore = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const C = Object.freeze({
+    width: 768, height: 432, courseLength: 4200, step: 1 / 120,
+    gravity: 900, jumpSpeed: 362, railJumpSpeed: 355,
+    cruise: 218, pushSpeed: 282, maxSpeed: 345, brakeSpeed: 78,
+    groundAccel: 150, airAccel: 30, grindAccel: 48,
+    coyoteTime: 0.11, jumpBuffer: 0.14, bankDelay: 0.22,
+    railSnap: 7, railIgnoreTime: 0.19, railEndPop: 126,
+    trickDuration: 0.40, trickCatchGrace: 0.045, maxAirTricks: 2,
+    respawnDelay: 0.80, multiplierCap: 8, grindPointsPerSecond: 90,
+    scoreRunSeconds: 90, overtimeLimit: 12, deathY: 482,
+  });
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const approach = (v, t, d) => v < t ? Math.min(t, v + d) : Math.max(t, v - d);
+  const mod = (n, d) => ((n % d) + d) % d;
+  const yAt = (s, x) => s.y1 + (s.y2 - s.y1) * clamp((x - s.x1) / (s.x2 - s.x1), 0, 1);
+  const deck = (id, x1, x2, y1, y2 = y1, kind = 'roof', palette = 0) =>
+    ({id, x1, x2, y1, y2, kind, palette});
+  const SURFACES = Object.freeze([
+    deck('depot', 0, 600, 314, 314, 'roof', 0),
+    deck('machine', 685, 1160, 314, 314, 'roof', 1),
+    deck('service-a', 1150, 1400, 358, 358, 'catwalk', 0),
+    deck('service-ramp-a', 1400, 1640, 358, 300, 'catwalk', 0),
+    deck('service-join-a', 1640, 1700, 300, 300, 'catwalk', 0),
+    deck('relay', 1270, 1580, 262, 262, 'roof', 2),
+    deck('garden', 1690, 2060, 300, 300, 'roof', 3),
+    deck('laundry', 2170, 2510, 300, 300, 'roof', 1),
+    deck('rise', 2510, 2650, 300, 270, 'roof', 1),
+    deck('launch', 2650, 2780, 270, 270, 'roof', 1),
+    deck('service-b', 2768, 2900, 348, 348, 'catwalk', 0),
+    deck('service-ramp-b', 2900, 3100, 348, 314, 'catwalk', 0),
+    deck('service-join-b', 3100, 3340, 314, 314, 'catwalk', 0),
+    deck('tower', 2940, 3300, 278, 278, 'roof', 2),
+    deck('descent', 3300, 3400, 278, 314, 'roof', 2),
+    deck('home', 3400, 3820, 314, 314, 'roof', 0),
+    deck('finish', 3910, 4200, 314, 314, 'roof', 0),
+  ]);
+  const RAILS = Object.freeze([
+    {...deck('warmup', 300, 520, 284), name: 'DEPOT RAIL'},
+    {...deck('ac', 840, 1160, 276, 248), name: 'AC EXPRESS'},
+    {...deck('relay-rail', 1330, 1550, 234, 230), name: 'ANTENNA RAIL'},
+    {...deck('garden-rail', 1790, 1990, 272), name: 'GARDEN RAIL'},
+    {...deck('laundry-rail', 2210, 2430, 269, 248), name: 'CLOTHESLINE'},
+    {...deck('launch-rail', 2540, 2760, 256, 232), name: 'HIGH LINE'},
+    {...deck('tower-rail', 3050, 3260, 250, 250), name: 'TOWER RAIL'},
+    {...deck('home-a', 3440, 3600, 286), name: 'HOME RAIL'},
+    {...deck('home-b', 3670, 3820, 274), name: 'LAST CALL'},
+  ]);
+  const GAPS = Object.freeze([
+    {id: 'alley', x1: 600, x2: 685, maxY: 320, name: 'ALLEY OOP', points: 180},
+    {id: 'ac-gap', x1: 1160, x2: 1270, maxY: 270, name: 'AC EXPRESS GAP', points: 350},
+    {id: 'antenna-gap', x1: 1580, x2: 1690, maxY: 306, name: 'ANTENNA TRANSFER', points: 250},
+    {id: 'laundry-gap', x1: 2060, x2: 2170, maxY: 306, name: 'LAUNDRY LEAP', points: 230},
+    {id: 'tower-gap', x1: 2780, x2: 2940, maxY: 286, name: 'WATER TOWER GAP', points: 400},
+    {id: 'last-gap', x1: 3820, x2: 3910, maxY: 320, name: 'ONE MORE ROOF', points: 200},
+  ]);
+  const ZONES = Object.freeze([
+    {x: 0, name: 'THE DEPOT'}, {x: 685, name: 'MACHINE ROOM'},
+    {x: 1270, name: 'THE RELAY'}, {x: 1690, name: 'ROOFTOP GARDEN'},
+    {x: 2170, name: 'LAUNDRY LANE'}, {x: 2540, name: 'THE HIGH LINE'},
+    {x: 2940, name: 'WATER TOWER'}, {x: 3400, name: 'HOME STRETCH'},
+  ]);
+  function nearby(list, x1, x2) {
+    const result = [];
+    for (let lap = Math.floor(x1 / C.courseLength) - 1; lap <= Math.floor(x2 / C.courseLength) + 1; lap++) {
+      const offset = lap * C.courseLength;
+      for (const s of list) {
+        if (s.x2 + offset >= x1 && s.x1 + offset <= x2)
+          result.push({...s, localId: s.id, id: `${lap}:${s.id}`, x1: s.x1 + offset, x2: s.x2 + offset, lap});
+      }
+    }
+    return result;
+  }
+  function makeCombo() {
+    return {base: 0, multiplier: 0, actions: [], railIds: new Set(), gapIds: new Set(), tricks: 0};
+  }
+  class Game {
+    constructor(options = {}) { this.reset(options.mode || 'free'); }
+    reset(mode = 'free') {
+      this.mode = mode === 'timed' ? 'timed' : 'free';
+      this.time = 0; this.timeLeft = C.scoreRunSeconds; this.overtime = 0; this.ending = false; this.finished = false;
+      this.score = 0; this.bestCombo = 0; this.lastBank = 0; this.bails = 0; this.banks = 0; this.laps = 0;
+      this.combo = makeCombo(); this.events = []; this.jumpBuffer = 0; this.bankClock = 0;
+      this.achievements = {grind: false, bank: false, ac: false};
+      const surface = nearby(SURFACES, 100, 100).find(s => s.localId === 'depot');
+      this.p = {x: 110, y: 314, vx: 190, vy: 0, state: 'ground', surface, rail: null,
+        coyote: C.coyoteTime, ignoreRail: null, ignoreClock: 0, trick: 0, trickTotal: C.trickDuration,
+        trickName: '', airTricks: 0, airStartX: 110, bailClock: 0, flash: 0, groundAge: 0,
+        checkpoint: {x: 110, y: 314, surface}};
+      this.emit('reset', {mode: this.mode});
+    }
+    get comboValue() { return Math.floor(this.combo.base * this.combo.multiplier); }
+    get speed() { return this.p.vx; }
+    get zone() {
+      const x = mod(this.p.x, C.courseLength);
+      return [...ZONES].reverse().find(z => x >= z.x).name;
+    }
+    emit(type, data = {}) { this.events.push({type, ...data}); }
+    drainEvents() { const out = this.events; this.events = []; return out; }
+    action(name, points, link = true) {
+      this.combo.base += points;
+      if (link) this.combo.multiplier = Math.min(C.multiplierCap, this.combo.multiplier + 1);
+      if (name) {
+        this.combo.actions.push(name);
+        if (this.combo.actions.length > 5) this.combo.actions.shift();
+        this.emit('action', {name, points, multiplier: this.combo.multiplier});
+      }
+    }
+    bank() {
+      const value = this.comboValue;
+      if (value > 0) {
+        this.score += value; this.bestCombo = Math.max(this.bestCombo, value);
+        this.lastBank = value; this.banks++;
+        if (value >= 1000) this.achievements.bank = true;
+        this.emit('bank', {value, bestCombo: this.bestCombo, x: this.p.x, y: this.p.y});
+      }
+      this.combo = makeCombo(); this.bankClock = 0;
+      if (this.ending) this.finish();
+    }
+    bail(reason = 'MISSED THE ROOF') {
+      if (this.p.state === 'bail' || this.finished) return;
+      const lost = this.comboValue;
+      this.combo = makeCombo(); this.bankClock = 0; this.jumpBuffer = 0; this.bails++;
+      this.p.state = 'bail'; this.p.bailClock = C.respawnDelay; this.p.trick = 0;
+      this.p.vy = -125;
+      this.emit('bail', {reason, lost, x: this.p.x, y: Math.min(this.p.y, 422)});
+      if (this.ending) this.finish();
+    }
+    respawn() {
+      const p = this.p, cp = p.checkpoint;
+      Object.assign(p, {x: cp.x, y: cp.y, vx: 190, vy: 0, state: 'ground', surface: cp.surface,
+        rail: null, trick: 0, airTricks: 0, airStartX: cp.x, coyote: C.coyoteTime,
+        ignoreRail: null, ignoreClock: 0, groundAge: 0, flash: 0.65});
+      this.jumpBuffer = 0; this.bankClock = 0;
+      this.emit('respawn', {x: p.x});
+    }
+    finish() { if (!this.finished) { this.finished = true; this.emit('finish', {score: this.score, bestCombo: this.bestCombo}); } }
+    startJump() {
+      const p = this.p, wasRail = p.state === 'grind';
+      if (p.state === 'ground') p.airStartX = p.x;
+      if (wasRail) { p.ignoreRail = p.rail.id; p.ignoreClock = C.railIgnoreTime; p.vx = Math.min(C.maxSpeed, p.vx + 22); }
+      p.state = 'air'; p.vy = -(wasRail ? C.railJumpSpeed : C.jumpSpeed);
+      p.surface = null; p.rail = null; p.coyote = 0; p.airTricks = 0;
+      this.bankClock = 0; this.jumpBuffer = 0;
+      this.emit('jump', {x: p.x, y: p.y, rail: wasRail});
+    }
+    startTrick() {
+      const p = this.p;
+      if (p.state !== 'air' || p.trick > 0 || p.airTricks >= C.maxAirTricks) return false;
+      p.airTricks++; p.trick = C.trickDuration; p.trickTotal = C.trickDuration;
+      p.trickName = p.airTricks === 1 ? 'KICKFLIP' : 'SHUV-IT';
+      this.combo.tricks++;
+      // Repetition still scores, but variety across rails and gaps is more valuable.
+      const repeat = this.combo.actions.filter(n => n === p.trickName).length;
+      this.action(p.trickName, Math.max(70, (p.airTricks === 1 ? 150 : 210) - repeat * 25));
+      this.emit('trick', {name: p.trickName});
+      return true;
+    }
+    awardGaps(landingY) {
+      const p = this.p;
+      for (const g of nearby(GAPS, p.airStartX, p.x)) {
+        if (p.airStartX <= g.x1 + 3 && p.x >= g.x2 - 3 && landingY <= g.maxY && !this.combo.gapIds.has(g.id)) {
+          this.combo.gapIds.add(g.id); this.action(g.name, g.points);
+          if (g.localId === 'ac-gap') this.achievements.ac = true;
+          this.emit('gap', {name: g.name, x: p.x, y: p.y});
+        }
+      }
+    }
+    land(surface) {
+      const p = this.p;
+      if (p.trick > C.trickCatchGrace) { this.bail('TRICK TOO LATE'); return; }
+      p.y = yAt(surface, p.x); p.vy = 0; p.trick = 0;
+      this.awardGaps(p.y);
+      p.state = 'ground'; p.surface = surface; p.rail = null; p.airTricks = 0;
+      p.coyote = C.coyoteTime; p.groundAge = 0; this.bankClock = 0;
+      p.vx *= 0.99;
+      this.emit('land', {x: p.x, y: p.y});
+      // A buffered ollie can link a roof touch without introducing a fourth/manual input.
+      if (this.jumpBuffer > 0) this.startJump();
+    }
+    catchRail(rail) {
+      const p = this.p;
+      if (p.trick > C.trickCatchGrace) { this.bail('BOARD NOT READY'); return; }
+      p.y = yAt(rail, p.x); p.vy = 0; p.trick = 0; p.state = 'grind';
+      p.rail = rail; p.surface = null; p.coyote = 0; p.airTricks = 0; this.bankClock = 0;
+      this.awardGaps(p.y);
+      if (!this.combo.railIds.has(rail.id)) {
+        this.combo.railIds.add(rail.id); this.action(rail.name, 160);
+      }
+      this.achievements.grind = true;
+      this.emit('grind', {x: p.x, y: p.y, name: rail.name});
+    }
+    step(dt = C.step, input = {}) {
+      if (this.finished) return;
+      if (!Number.isFinite(dt) || dt <= 0 || dt > 1 / 20) throw new RangeError('Use fixed simulation steps of 0 < dt <= 0.05 seconds.');
+      const p = this.p;
+      this.time += dt;
+      if (this.mode === 'timed') {
+        if (!this.ending) {
+          this.timeLeft = Math.max(0, this.timeLeft - dt);
+          if (this.timeLeft <= 1e-7) {
+            this.timeLeft = 0;
+            if (this.comboValue > 0) { this.ending = true; this.emit('overtime'); }
+            else { this.finish(); return; }
+          }
+        } else {
+          this.overtime += dt;
+          if (this.overtime >= C.overtimeLimit) { this.bail('OVERTIME ENDED'); return; }
+        }
+      }
+      if (p.state === 'bail') {
+        p.bailClock -= dt; p.x += p.vx * dt * 0.22; p.vy += C.gravity * dt; p.y += p.vy * dt;
+        if (p.bailClock <= 1e-7) this.respawn();
+        return;
+      }
+      p.flash = Math.max(0, p.flash - dt);
+      p.ignoreClock = Math.max(0, p.ignoreClock - dt);
+      p.coyote = Math.max(0, p.coyote - dt);
+      p.trick = Math.max(0, p.trick - dt);
+      this.jumpBuffer = input.jumpPressed ? C.jumpBuffer : Math.max(0, this.jumpBuffer - dt);
+      if (this.jumpBuffer > 0 && (p.state === 'ground' || p.state === 'grind' || p.coyote > 0)) this.startJump();
+      if (input.jumpReleased && p.state === 'air' && p.vy < -150) p.vy *= 0.57;
+      if (input.trickPressed) this.startTrick();
+      const ox = p.x, oy = p.y;
+      if (p.state === 'grind') {
+        const rail = p.rail;
+        if (!input.grind) {
+          p.state = 'air'; p.ignoreRail = rail.id; p.ignoreClock = C.railIgnoreTime;
+          p.rail = null; p.vy = 26;
+        } else {
+          if (input.brake) p.vx = approach(p.vx, 115, 250 * dt);
+          else p.vx = Math.min(C.maxSpeed, p.vx + (C.grindAccel + (rail.y2 - rail.y1) / (rail.x2 - rail.x1) * 90) * dt);
+          p.x += p.vx * dt; p.y = yAt(rail, p.x);
+          this.combo.base += C.grindPointsPerSecond * dt;
+          if (p.x > rail.x2) {
+            p.state = 'air'; p.ignoreRail = rail.id; p.ignoreClock = C.railIgnoreTime;
+            p.rail = null; p.vy = -C.railEndPop; this.emit('railEnd', {x: p.x, y: p.y});
+          }
+          this.laps = Math.max(this.laps, Math.floor(p.x / C.courseLength));
+          return;
+        }
+      }
+      if (p.state === 'ground') {
+        const target = input.brake ? C.brakeSpeed : (input.push ? C.pushSpeed : C.cruise);
+        // Coasting only bleeds excess grind momentum slowly; auto-push is not a speed reset.
+        const accel = input.brake ? 370 : (p.vx > target ? 26 : C.groundAccel);
+        p.vx = approach(p.vx, target, accel * dt);
+        const oldSurface = p.surface;
+        if (oldSurface) p.vx = clamp(p.vx + ((oldSurface.y2 - oldSurface.y1) / (oldSurface.x2 - oldSurface.x1)) * 140 * dt, C.brakeSpeed, C.maxSpeed);
+        p.x += p.vx * dt;
+        let surface = oldSurface;
+        if (!surface || p.x > surface.x2 + 1 || p.x < surface.x1 - 1) {
+          surface = nearby(SURFACES, p.x - 2, p.x + 2)
+            .filter(s => p.x >= s.x1 - 1 && p.x <= s.x2 + 1 && Math.abs(yAt(s, p.x) - p.y) < 8)
+            .sort((a, b) => yAt(a, p.x) - yAt(b, p.x))[0];
+        }
+        if (surface) {
+          p.surface = surface; p.y = yAt(surface, p.x); p.vy = 0; p.coyote = C.coyoteTime;
+          p.groundAge += dt;
+          if (this.comboValue > 0) { this.bankClock += dt; if (this.bankClock >= C.bankDelay) this.bank(); }
+          // Leave enough runway at a checkpoint to make the next decision after respawning.
+          if (p.groundAge > 0.28 && surface.x2 - p.x > 135 && surface.x2 - surface.x1 > 195) {
+            const cx = clamp(p.x - 46, surface.x1 + 28, surface.x2 - 150);
+            p.checkpoint = {x: cx, y: yAt(surface, cx), surface};
+          }
+        } else {
+          p.state = 'air'; p.surface = null; p.vy = 0; p.coyote = C.coyoteTime;
+          p.airStartX = ox; p.airTricks = 0; this.bankClock = 0;
+        }
+      } else if (p.state === 'air') {
+        if (input.brake) p.vx = approach(p.vx, C.brakeSpeed, 95 * dt);
+        else if (input.push && p.vx < C.pushSpeed) p.vx = approach(p.vx, C.pushSpeed, C.airAccel * dt);
+        p.x += p.vx * dt; p.vy += C.gravity * dt; p.y += p.vy * dt;
+        if (p.vy >= 0) {
+          const collisions = [];
+          for (const s of nearby(SURFACES, ox - 6, p.x + 6)) {
+            // Do not re-land on the trailing edge just walked off.
+            if (ox >= s.x2 && p.x > s.x2) continue;
+            const slope = (s.y2 - s.y1) / (s.x2 - s.x1);
+            const sy0 = s.y1 + (ox - s.x1) * slope;
+            const sy1 = s.y1 + (p.x - s.x1) * slope;
+            const d0 = oy - sy0, d1 = p.y - sy1;
+            if (d0 <= 0.8 && d1 >= 0 && d1 > d0) {
+              const t = clamp(-d0 / (d1 - d0), 0, 1), hitX = ox + (p.x - ox) * t;
+              if (hitX >= s.x1 - 5 && hitX <= s.x2 + 5) collisions.push({t, surface: s});
+            }
+          }
+          if (input.grind) for (const r of nearby(RAILS, ox - 7, p.x + 7)) {
+            if (p.ignoreClock > 0 && p.ignoreRail === r.id) continue;
+            const slope = (r.y2 - r.y1) / (r.x2 - r.x1);
+            const d0 = oy - (r.y1 + (ox - r.x1) * slope), d1 = p.y - yAt(r, p.x);
+            if (p.x >= r.x1 - 6 && p.x <= r.x2 + 3 && d0 <= C.railSnap && d1 >= -C.railSnap && d1 >= d0 - 0.5) {
+              const t = d1 === d0 ? 0 : clamp((-C.railSnap - d0) / (d1 - d0), 0, 1);
+              collisions.push({t, rail: r});
+            }
+          }
+          collisions.sort((a, b) => a.t - b.t || (a.rail ? -1 : 1));
+          if (collisions.length) {
+            const hit = collisions[0];
+            if (hit.rail) this.catchRail(hit.rail); else this.land(hit.surface);
+          }
+        }
+        if (p.y > C.deathY && p.state !== 'bail') this.bail('MISSED THE ROOF');
+      }
+      this.laps = Math.max(this.laps, Math.floor(p.x / C.courseLength));
+    }
+    snapshot() {
+      return {mode: this.mode, score: this.score, combo: this.comboValue, multiplier: this.combo.multiplier,
+        base: this.combo.base, actions: [...this.combo.actions], state: this.p.state,
+        x: this.p.x, y: this.p.y, vx: this.p.vx, vy: this.p.vy, trick: this.p.trick,
+        rail: this.p.rail && this.p.rail.localId, time: this.time, timeLeft: this.timeLeft,
+        ending: this.ending, finished: this.finished, bails: this.bails, laps: this.laps,
+        bestCombo: this.bestCombo, achievements: {...this.achievements}};
+    }
+  }
+  return {C, SURFACES, RAILS, GAPS, ZONES, Game, nearby, yAt, clamp, mod, approach};
+});
+</script>
+<script>/* Original, code-drawn pixel art. No image downloads, sprite licences or web fonts. */
+(function () {
+  'use strict';
+  const {C, SURFACES, RAILS, GAPS, nearby, yAt, clamp, mod} = RooflineCore;
+  const P = {ink:'#17243b', deepest:'#121c31', sky:'#9c93b3', skyLight:'#cec0c2', sunset:'#e9a999',
+    cream:'#f9e6c2', white:'#fcf1d9', peach:'#f2aa79', orange:'#ee935b', purple:'#666681',
+    back:'#827a99', far:'#9e8eaa', teal:'#538e91', mint:'#a6d5b4', rail:'#bfd6be',
+    darkTeal:'#386775', yellow:'#f8cc84', brick:'#6b666f', danger:'#f18a94'};
+  const GLYPHS = {
+    A:['01110','10001','10001','11111','10001','10001','10001'],B:['11110','10001','10001','11110','10001','10001','11110'],
+    C:['01111','10000','10000','10000','10000','10000','01111'],D:['11110','10001','10001','10001','10001','10001','11110'],
+    E:['11111','10000','10000','11110','10000','10000','11111'],F:['11111','10000','10000','11110','10000','10000','10000'],
+    G:['01111','10000','10000','10111','10001','10001','01111'],H:['10001','10001','10001','11111','10001','10001','10001'],
+    I:['111','010','010','010','010','010','111'],J:['00111','00010','00010','00010','10010','10010','01100'],
+    K:['10001','10010','10100','11000','10100','10010','10001'],L:['10000','10000','10000','10000','10000','10000','11111'],
+    M:['10001','11011','10101','10101','10001','10001','10001'],N:['10001','11001','10101','10011','10001','10001','10001'],
+    O:['01110','10001','10001','10001','10001','10001','01110'],P:['11110','10001','10001','11110','10000','10000','10000'],
+    Q:['01110','10001','10001','10001','10101','10010','01101'],R:['11110','10001','10001','11110','10100','10010','10001'],
+    S:['01111','10000','10000','01110','00001','00001','11110'],T:['11111','00100','00100','00100','00100','00100','00100'],
+    U:['10001','10001','10001','10001','10001','10001','01110'],V:['10001','10001','10001','10001','10001','01010','00100'],
+    W:['10001','10001','10001','10101','10101','10101','01010'],X:['10001','10001','01010','00100','01010','10001','10001'],
+    Y:['10001','10001','01010','00100','00100','00100','00100'],Z:['11111','00001','00010','00100','01000','10000','11111'],
+    '0':['01110','10001','10011','10101','11001','10001','01110'],'1':['010','110','010','010','010','010','111'],
+    '2':['01110','10001','00001','00010','00100','01000','11111'],'3':['11110','00001','00001','01110','00001','00001','11110'],
+    '4':['00010','00110','01010','10010','11111','00010','00010'],'5':['11111','10000','10000','11110','00001','00001','11110'],
+    '6':['01110','10000','10000','11110','10001','10001','01110'],'7':['11111','00001','00010','00100','01000','01000','01000'],
+    '8':['01110','10001','10001','01110','10001','10001','01110'],'9':['01110','10001','10001','01111','00001','00001','01110'],
+    '-':['00000','00000','00000','11111','00000','00000','00000'],'+':['00000','00100','00100','11111','00100','00100','00000'],
+    '.':['0','0','0','0','0','1','1'],':':['0','1','1','0','1','1','0'],'/':['00001','00001','00010','00100','01000','10000','10000'],
+    '!':['1','1','1','1','1','0','1'],'?':['01110','10001','00001','00010','00100','00000','00100'],
+    '>':['100','010','001','010','100','000','000'],'<':['001','010','100','010','001','000','000'],
+    ' ':['000','000','000','000','000','000','000'],
+  };
+  function hash(n) { n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; }
+  class Renderer {
+    constructor(canvas) {
+      this.canvas = canvas; this.ctx = canvas.getContext('2d', {alpha:false});
+      this.ctx.imageSmoothingEnabled = false; this.camera = -70; this.particles = []; this.floats = [];
+      this.shake = 0; this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.time = 0; this.lastX = 110;
+    }
+    rect(x,y,w,h,color) { this.ctx.fillStyle=color; this.ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h)); }
+    line(x1,y1,x2,y2,color,width=1) {
+      // Stair-stepped raster lines retain the low-resolution look at every zoom level.
+      const steps = Math.max(1, Math.ceil(Math.max(Math.abs(x2-x1),Math.abs(y2-y1)) / 2));
+      for(let i=0;i<=steps;i++) this.rect(x1+(x2-x1)*i/steps,y1+(y2-y1)*i/steps,width,width,color);
+    }
+    text(text,x,y,color=P.white,scale=1,align='left') {
+      text=String(text).toUpperCase();
+      const width=[...text].reduce((s,c)=>s+((GLYPHS[c]||GLYPHS['?'])[0].length+1)*scale,0)-scale;
+      if(align==='center') x-=width/2; if(align==='right') x-=width;
+      let px=x;
+      for(const char of text) {
+        const glyph=GLYPHS[char]||GLYPHS['?'];
+        glyph.forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==='1') this.rect(px+xx*scale,y+yy*scale,scale,scale,color);}));
+        px+=(glyph[0].length+1)*scale;
+      }
+      return width;
+    }
+    poly(points,color) { const ctx=this.ctx; ctx.fillStyle=color; ctx.beginPath(); points.forEach(([x,y],i)=>i?ctx.lineTo(Math.round(x),Math.round(y)):ctx.moveTo(Math.round(x),Math.round(y)));ctx.closePath();ctx.fill(); }
+    burst(x,y,color,n=10,power=1) {
+      if(this.reducedMotion){n=Math.ceil(n*.35);power*=.5;}
+      for(let i=0;i<n;i++) this.particles.push({x,y,vx:(Math.random()-.55)*105*power,vy:(Math.random()-.85)*100*power,life:.35+Math.random()*.3,max:.65,color,size:Math.random()>.6?3:2});
+    }
+    event(e) {
+      if(e.type==='reset') { this.camera=-70;this.particles=[];this.floats=[];this.shake=0; }
+      if(e.type==='respawn') this.camera=e.x-208;
+      if(e.type==='jump') this.burst(e.x,e.y,P.skyLight,6,.5);
+      if(e.type==='land') { this.burst(e.x,e.y,P.skyLight,7,.55);this.shake=Math.max(this.shake,1); }
+      if(e.type==='grind') this.burst(e.x,e.y,P.yellow,11,.9);
+      if(e.type==='bank') { this.floats.push({x:e.x,y:e.y-54,text:`+${e.value.toLocaleString('en-US').replaceAll(',',' ')}`,color:P.mint,life:1.5});this.burst(e.x,e.y-15,P.mint,16,1.2); }
+      if(e.type==='gap') this.floats.push({x:e.x,y:e.y-78,text:e.name,color:P.yellow,life:1.6});
+      if(e.type==='bail') {this.shake=5;this.burst(e.x,e.y-13,P.peach,18,1.5);this.floats.push({x:e.x,y:e.y-55,text:e.reason,color:P.danger,life:1.2});}
+    }
+    sky() {
+      const c=this.ctx;
+      const bands=['#8585aa','#9391b0','#a69ab4','#bba6bb','#cfb2be','#e2bdbe','#e5c3be'];
+      bands.forEach((color,i)=>this.rect(0,i*46,768,47,color));
+      // A stepped sunset disk, with deliberate horizontal cloud cut-outs.
+      const sx=570-this.camera*.018,sy=139;
+      this.rect(sx-41,sy-48,82,96,P.sunset);this.rect(sx-49,sy-35,98,70,P.sunset);
+      this.rect(sx-53,sy-20,106,40,P.sunset);this.rect(sx-27,sy-54,54,108,P.sunset);
+      this.rect(sx-54,sy+17,109,3,'#d9b1ba');this.rect(sx-51,sy+30,103,4,'#d9b1ba');
+      for(let i=0;i<7;i++) {
+        const x=mod(i*157-this.camera*.08-this.time*1.5,1040)-130,y=75+(i%3)*41;
+        this.rect(x,y,64,3,'#c6b4c5');this.rect(x+20,y-3,55,3,'#c6b4c5');this.rect(x+38,y+3,48,2,'#c6b4c5');
+      }
+      // Distant mountains and two independently moving city layers.
+      this.poly([[0,272],[90,230],[160,253],[271,209],[330,246],[460,207],[575,245],[675,216],[768,254],[768,432],[0,432]],'#aaa1b6');
+      this.city(.16,280,92,P.far,126);
+      this.city(.32,334,122,P.back,94);
+      this.city(.52,400,150,P.purple,74);
+      // Tiny birds supply scale without consuming the interactive visual language.
+      for(let i=0;i<4;i++){const bx=mod(i*203+370-this.camera*.1+this.time*5,900)-50,by=119+Math.sin(i*2)*19;this.line(bx,by,bx+4,by+2,P.back);this.line(bx+4,by+2,bx+8,by,P.back);}
+    }
+    city(parallax,base,height,color,spacing) {
+      const cam=this.camera*parallax,start=Math.floor(cam/spacing)-2;
+      for(let n=start;n<start+Math.ceil(768/spacing)+5;n++) {
+        const h=Math.floor(30+hash(n+1827)*height),w=Math.floor(spacing*.55+hash(n+942)*spacing*.4),x=n*spacing-cam,y=base-h;
+        this.rect(x,y,w,h+200,color);
+        if(hash(n+350)>.5){this.rect(x+10,y-7,w*.45,7,color);this.rect(x+15,y-17,2,10,color);}
+        if(parallax>.2) {
+          for(let yy=y+12;yy<432;yy+=17) for(let xx=x+8;xx<x+w-4;xx+=14)
+            if(hash(Math.floor(xx+cam)*17+yy*31)>.39) this.rect(xx,yy,4,6,parallax>.4?'#a59bac':'#b9aab9');
+        }
+      }
+    }
+    surface(s) {
+      const x1=s.x1-this.camera,x2=s.x2-this.camera;
+      const palettes=[['#546f80','#455e71','#30485d'],['#66758a','#55667d','#394e64'],['#657c86','#536b79','#365062'],['#697d78','#53696b','#36545e']];
+      const [wall,shade,dark]=palettes[s.palette||0];
+      if(s.kind==='catwalk') {
+        this.line(x1,s.y1,x2,s.y2,P.ink,8);this.line(x1,s.y1,x2,s.y2,'#968995',4);this.line(x1,s.y1,x2,s.y2,P.peach,2);
+        for(let x=s.x1+13;x<s.x2;x+=44){const y=yAt(s,x);this.line(x-this.camera,y+5,x-this.camera+25,y+30,'#474b65',3);this.line(x-this.camera,y+5,x-this.camera,y+60,'#474b65',3);}
+        return;
+      }
+      this.poly([[x1,s.y1],[x2,s.y2],[x2,455],[x1,455]],wall);
+      this.poly([[x1,s.y1+10],[x2,s.y2+10],[x2,s.y2+22],[x1,s.y1+22]],shade);
+      this.rect(x1+7,Math.max(s.y1,s.y2)+25,6,220,shade);
+      this.rect(x2-13,Math.max(s.y1,s.y2)+25,9,220,dark);
+      // Brick seams and window bays are seeded by local course position, not frames.
+      const top=Math.max(s.y1,s.y2)+34;
+      for(let yy=top;yy<445;yy+=18){
+        this.rect(Math.max(-12,x1+14),yy,Math.min(800,x2-x1-31),1,shade);
+        for(let xx=x1+22+(Math.floor(yy/18)%2)*28;xx<x2-15;xx+=56) this.rect(xx,yy,1,17,shade);
+      }
+      for(let xx=x1+37;xx<x2-35;xx+=78) for(let yy=top+4;yy<442;yy+=58) {
+        this.rect(xx-3,yy-3,33,39,dark);this.rect(xx,yy,27,30,hash(Math.round(xx+this.camera)+yy)>.46?'#a59b94':'#658796');
+        this.rect(xx+12,yy,3,30,dark);this.rect(xx,yy+14,27,3,dark);this.rect(xx-4,yy+32,36,4,dark);
+        if(hash(Math.round(xx+this.camera))>.65) this.rect(xx+2,yy+2,7,9,P.yellow);
+      }
+      this.line(x1,s.y1,x2,s.y2,P.ink,8);
+      this.line(x1,s.y1,x2,s.y2,'#b2c1b3',3);
+      this.line(x1,s.y1+7,x2,s.y2+7,dark,3);
+      // Small warm edge markings distinguish safe roof from open air.
+      if(s.localId!=='finish'&&s.localId!=='rise'&&s.localId!=='descent') {
+        this.rect(x2-22,s.y2+1,6,3,P.yellow);this.rect(x2-11,s.y2+1,6,3,P.yellow);
+      }
+    }
+    ac(x,y,w=60) {
+      x-=this.camera;
+      this.rect(x+4,y-33,w-2,33,P.ink);this.rect(x,y-35,w-2,30,'#899d9f');this.rect(x+3,y-32,w-8,4,'#bdc9bc');
+      this.rect(x+5,y-23,25,15,'#455f71');
+      for(let i=0;i<5;i++) this.rect(x+7,y-21+i*3,21,1,'#849b9e');
+      this.rect(x+w-25,y-25,17,17,'#546f80');
+      const phase=Math.floor(this.time*8)%4;
+      this.rect(x+w-18,y-22,3,11,'#b4c3b6');this.rect(x+w-22,y-18,11,3,'#b4c3b6');
+      if(phase%2) {this.rect(x+w-21,y-21,3,3,'#546f80');this.rect(x+w-13,y-13,3,3,'#546f80');}
+      this.rect(x+8,y-5,5,5,P.ink);this.rect(x+w-15,y-5,5,5,P.ink);
+      this.rect(x+w-5,y-23,15,10,'#728b94');this.rect(x+w+6,y-14,4,14,'#728b94');
+    }
+    plant(x,y,seed) {
+      x-=this.camera;
+      this.rect(x-13,y-8,26,8,'#a98281');this.rect(x-15,y-10,30,4,'#dab396');
+      this.rect(x-1,y-24,3,14,'#597b78');
+      this.rect(x-12,y-21,12,6,'#6b9690');this.rect(x+1,y-30,12,8,'#7aa295');
+      this.rect(x-6,y-34,8,15,'#82aa98');this.rect(x+6,y-25,11,5,'#597b78');
+    }
+    sign(x,y,label,style='dark') {
+      x-=this.camera; const width=label.length*6+16;
+      this.rect(x-2,y-2,width+4,19,P.ink);this.rect(x,y,width,15,style==='warm'?'#b87d75':'#3c5b6d');
+      this.text(label,x+8,y+4,style==='warm'?P.white:P.mint,1);
+    }
+    landmark(local,offset) {
+      const a=(x)=>x+offset,visible=(x)=>a(x)>this.camera-150&&a(x)<this.camera+900;
+      if(visible(170)){this.ac(a(170),314,55);this.sign(a(56),350,'ROOFLINE');}
+      if(visible(300)){this.sign(a(286),250,'HOLD X', 'warm');this.rect(a(298)-this.camera,269,2,13,P.ink);}
+      if(visible(917)){this.ac(a(912),314,64);this.ac(a(992),314,44);this.sign(a(875),342,'MACHINE ROOM');}
+      if(visible(1120)){this.sign(a(1058),205,'UP AND OVER', 'warm');this.rect(a(1110)-this.camera,224,2,21,P.ink);}
+      if(visible(1440)){
+        const x=a(1470)-this.camera;this.rect(x,165,3,96,'#4b5e74');this.line(x-22,181,x+29,181,'#4b5e74',2);this.line(x-14,174,x+18,174,'#4b5e74',2);this.rect(x-1,163,5,4,P.peach);
+        this.sign(a(1302),290,'THE RELAY');this.ac(a(1385),262,43);
+      }
+      if(visible(1830)){this.plant(a(1745),300,1);this.plant(a(1890),300,2);this.plant(a(2020),300,3);this.sign(a(1780),332,'ROOFTOP GARDEN');}
+      if(visible(2320)){
+        const x=a(2240)-this.camera;this.rect(x,221,3,78,P.ink);this.rect(x+170,221,3,78,P.ink);
+        for(let i=0;i<170;i+=3)this.rect(x+i,221+Math.sin(i/170*Math.PI)*7,3,1,'#d5c5bb');
+        for(let i=0;i<5;i++){const fx=x+20+i*28,fy=229+Math.sin(i)*3;const cc=['#ac93a1','#d8baa2','#749497','#cc9b8c','#d3c1b0'][i];this.rect(fx,fy,18,22,cc);this.rect(fx-3,fy+2,24,7,cc);}
+        this.sign(a(2260),333,'LAST WASH');
+      }
+      if(visible(2690)){this.sign(a(2630),319,'HIGH LINE', 'warm');this.plant(a(2695),270,4);}
+      if(visible(3130)){
+        const x=a(3145)-this.camera,y=278;
+        this.line(x-31,y-60,x-45,y,P.ink,4);this.line(x+31,y-60,x+45,y,P.ink,4);this.line(x-40,y-7,x+34,y-48,'#4f596e',3);this.line(x+40,y-7,x-34,y-48,'#4f596e',3);
+        this.rect(x-43,y-113,86,63,'#8f8888');this.rect(x-37,y-119,74,6,'#a49994');this.poly([[x-46,y-113],[x,y-138],[x+46,y-113]],'#596678');
+        this.rect(x-44,y-108,88,4,'#5f6978');this.rect(x-44,y-62,88,5,'#5f6978');
+        for(let i=-34;i<40;i+=12)this.rect(x+i,y-103,2,40,'#79808a');this.text('RL',x-12,y-93,P.cream,2);
+      }
+      if(visible(3490)){this.ac(a(3520),314,49);this.sign(a(3450),350,'ONE MORE LINE', 'warm');}
+      if(visible(4030)){this.sign(a(4000),266,'KEEP ROLLING');this.rect(a(4030)-this.camera,285,2,27,P.ink);}
+      // Low route is visibly a foreground service walkway, not a hole through a building.
+      if(visible(1220))this.sign(a(1170),384,'SERVICE WAY');
+      if(visible(2840))this.sign(a(2780),379,'LOW ROAD');
+    }
+    rail(r,active) {
+      const x1=r.x1-this.camera,x2=r.x2-this.camera;
+      for(let x=r.x1+10;x<r.x2-5;x+=55) {
+        const y=yAt(r,x);let floor=nearby(SURFACES,x,x).filter(s=>yAt(s,x)>y+5).sort((a,b)=>yAt(a,x)-yAt(b,x))[0];
+        const bottom=floor?Math.min(yAt(floor,x),y+63):y+34;
+        this.rect(x-this.camera,y+5,3,bottom-y-4,P.ink);this.rect(x-this.camera+1,y+5,1,bottom-y-4,'#6e9591');
+      }
+      this.line(x1,r.y1+3,x2,r.y2+3,P.ink,5);
+      this.line(x1,r.y1,x2,r.y2,active?P.yellow:P.rail,3);
+      this.line(x1,r.y1,x2,r.y2,active?P.white:'#dce6c9',1);
+      this.rect(x1-3,r.y1-1,4,5,active?P.yellow:P.teal);this.rect(x2-2,r.y2-1,5,5,P.peach);
+    }
+    skater(p,ghost=false) {
+      const x=Math.round(p.x-this.camera),y=Math.round(p.y),c=this.ctx;
+      if(p.flash>0&&Math.floor(p.flash*15)%2===0)return;
+      c.save();if(ghost)c.globalAlpha=.4;
+      if(p.state==='bail') {
+        c.translate(x,y-10);c.rotate((C.respawnDelay-p.bailClock)*-5);this.drawBody(0,0,'air',0);
+        this.rect(-16,14,27,3,P.orange);c.restore();return;
+      }
+      let pose=p.state;
+      const crouch=pose==='ground'&&p.groundAge<.14?3:0;
+      if(pose==='air'&&p.trick>0) {
+        this.drawBody(x,y-5,pose,0);
+        const t=1-p.trick/p.trickTotal;
+        const bw=Math.max(3,Math.abs(Math.cos(t*Math.PI*2))*25);
+        const by=y-1-Math.sin(t*Math.PI)*5;
+        this.rect(x-bw/2,by,bw,3,Math.cos(t*Math.PI*2)>0?P.orange:P.mint);
+        if(Math.cos(t*Math.PI*2)>0){this.rect(x-bw/2+2,by+3,3,3,P.ink);this.rect(x+bw/2-5,by+3,3,3,P.ink);}
+      } else {
+        this.drawBody(x,y,pose,crouch);
+        const by=y-4;
+        this.rect(x-13,by,27,3,P.ink);this.rect(x-11,by,23,2,P.peach);this.rect(x-15,by-2,4,3,P.peach);this.rect(x+12,by-2,4,3,P.peach);
+        this.rect(x-9,y-1,4,3,P.ink);this.rect(x+7,y-1,4,3,P.ink);this.rect(x-8,y-1,2,1,P.cream);this.rect(x+8,y-1,2,1,P.cream);
+      }
+      c.restore();
+      if(p.trick>0){
+        this.rect(x-16,y-49,33,4,P.ink);this.rect(x-15,y-48,Math.ceil((1-p.trick/p.trickTotal)*31),2,P.peach);
+      } else if(p.state==='air') {this.rect(x-2,y-44,4,2,P.mint);}
+    }
+    drawBody(x,y,pose,crouch) {
+      const air=pose==='air',grind=pose==='grind',run=Math.sin(this.time*14);
+      const yy=y+crouch;
+      // Outline, shoes, wide trousers, peach jacket, satchel and a dark cap.
+      this.rect(x-9,yy-28,17,13,P.ink);this.rect(x-6,yy-34,11,8,P.ink);
+      this.rect(x-4,yy-32,8,8,'#e7b794');this.rect(x+4,yy-30,2,3,'#e7b794');
+      this.rect(x-6,yy-36,11,5,P.ink);this.rect(x+1,yy-33,8,2,P.ink);
+      this.rect(x-8,yy-26,14,12,'#e7a579');this.rect(x-7,yy-25,3,9,'#f4bd87');this.rect(x+4,yy-24,3,7,'#b77565');
+      this.rect(x-9,yy-25,3,10,'#6a8e8c');this.rect(x-8,yy-23,5,6,'#52747c');
+      if(grind) {this.line(x-7,yy-24,x-19,yy-29,'#e7b794',3);this.line(x+6,yy-23,x+18,yy-27,'#e7b794',3);}
+      else if(air){this.line(x-7,yy-24,x-15,yy-29,'#e7b794',3);this.line(x+6,yy-23,x+12,yy-28,'#e7b794',3);}
+      else {this.line(x-7,yy-24,x-12,yy-17,'#e7b794',3);this.line(x+6,yy-23,x+11,yy-18,'#e7b794',3);}
+      this.rect(x-7,yy-14,13,5,'#304459');
+      if(air) {
+        this.line(x-5,yy-12,x-10,yy-9,'#304459',4);this.line(x-10,yy-9,x-7,yy-5,'#304459',4);
+        this.line(x+3,yy-12,x+9,yy-8,'#304459',4);this.rect(x+8,yy-7,4,3,'#304459');
+        this.rect(x-9,yy-5,7,2,P.cream);this.rect(x+6,yy-4,8,2,P.cream);
+      }else{
+        this.line(x-5,yy-10,x-8,yy-5,'#304459',4);this.line(x+3,yy-10,x+7,yy-5,'#304459',4);
+        this.rect(x-10,yy-6,8,3,P.cream);this.rect(x+5,yy-6,9,3,P.cream);
+      }
+    }
+    render(game,dt=1/60,attract=false) {
+      this.time+=dt;
+      const p=game.p,target=p.x-216+(p.vx-C.cruise)*.14;
+      this.camera+=(target-this.camera)*(1-Math.exp(-dt*6.5));
+      if(Math.abs(target-this.camera)>700)this.camera=target;
+      this.shake=Math.max(0,this.shake-dt*18);
+      this.ctx.save();
+      if(!this.reducedMotion&&this.shake>0)this.ctx.translate(Math.round((Math.random()-.5)*this.shake),Math.round((Math.random()-.5)*this.shake));
+      this.sky();
+      const decks=nearby(SURFACES,this.camera-80,this.camera+850),rails=nearby(RAILS,this.camera-80,this.camera+850);
+      // Tall roofs first; lower catwalks later, so the alternate route is always visible.
+      decks.filter(s=>s.kind==='roof').forEach(s=>this.surface(s));
+      for(let lap=Math.floor(this.camera/C.courseLength)-1;lap<=Math.floor((this.camera+850)/C.courseLength)+1;lap++)this.landmark(null,lap*C.courseLength);
+      decks.filter(s=>s.kind==='catwalk').forEach(s=>this.surface(s));
+      rails.forEach(r=>this.rail(r,p.rail&&p.rail.id===r.id));
+      // Subtle landing shadow makes distance to the next surface readable.
+      if(p.state!=='bail'){
+        const below=decks.filter(s=>p.x>=s.x1&&p.x<=s.x2&&yAt(s,p.x)>=p.y-2).sort((a,b)=>yAt(a,p.x)-yAt(b,p.x))[0];
+        if(below){const fy=yAt(below,p.x),width=clamp(20-(fy-p.y)*.05,9,20);this.rect(p.x-this.camera-width/2,fy+3,width,2,'#374f61');}
+      }
+      if(p.state==='grind'&&!attract&&Math.random()<(this.reducedMotion?.2:.8)){this.particles.push({x:p.x-12,y:p.y-1,vx:-80-Math.random()*60,vy:-Math.random()*35,life:.25,max:.25,color:P.yellow,size:2});}
+      this.skater(p);
+      for(const pt of this.particles){pt.life-=dt;pt.x+=pt.vx*dt;pt.y+=pt.vy*dt;pt.vy+=180*dt;if(pt.life>0)this.rect(pt.x-this.camera,pt.y,pt.size,pt.size,pt.color);}
+      this.particles=this.particles.filter(pt=>pt.life>0).slice(-160);
+      for(const f of this.floats){f.life-=dt;f.y-=dt*19;if(f.life>0)this.text(f.text,f.x-this.camera,f.y,f.color,1,'center');}
+      this.floats=this.floats.filter(f=>f.life>0);
+      // Restrained vignette is a frame, not a CRT blur over the pixels.
+      this.rect(0,429,768,3,P.ink);
+      this.ctx.restore();
+    }
+  }
+  window.RooflineRenderer=Renderer;
+})();
+</script>
+<script>(function () {
+  'use strict';
+  const {C,Game,clamp,mod} = RooflineCore;
+  const $=id=>document.getElementById(id), fmt=n=>Math.floor(n).toLocaleString('en-US');
+  const game = new Game(), renderer = new RooflineRenderer($('game'));
+  let state='menu', lastTime=0, accumulator=0, messageClock=0, bankClock=0, uiClock=0;
+  const saveKey='roofline-v1-records';
+  let records={bestCombo:0,bestTimed:0,sound:false,reducedMotion:renderer.reducedMotion};
+  try {
+    const saved=JSON.parse(localStorage.getItem(saveKey)||'{}');
+    if(saved&&typeof saved==='object'){
+      for(const k of ['bestCombo','bestTimed'])if(Number.isFinite(saved[k])&&saved[k]>=0)records[k]=Math.min(1e12,Math.floor(saved[k]));
+      for(const k of ['sound','reducedMotion'])if(typeof saved[k]==='boolean')records[k]=saved[k];
+    }
+  }catch{/* Private mode and file:// storage restrictions must not block play. */}
+  function save(){try{localStorage.setItem(saveKey,JSON.stringify(records));}catch{}}
+  class Sound {
+    constructor(){this.ctx=null;this.enabled=records.sound;this.nextGrind=0;this.nextRoll=0;}
+    unlock(){
+      if(!this.enabled)return;
+      try{if(!this.ctx)this.ctx=new (window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});}catch{}
+    }
+    tone(freq,duration=.07,type='square',volume=.025,delay=0,slide=0){
+      if(!this.enabled||!this.ctx||this.ctx.state!=='running')return;
+      const ctx=this.ctx,t=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type=type;osc.frequency.setValueAtTime(freq,t);if(slide)osc.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),t+duration);
+      gain.gain.setValueAtTime(volume,t);gain.gain.exponentialRampToValueAtTime(.001,t+duration);
+      osc.connect(gain).connect(ctx.destination);osc.start(t);osc.stop(t+duration+.01);
+    }
+    event(e){
+      if(e.type==='jump')this.tone(165,.08,'triangle',.045,0,100);
+      if(e.type==='trick'){this.tone(520,.06,'square',.016);this.tone(780,.06,'square',.015,.045);}
+      if(e.type==='grind')this.tone(390,.07,'sawtooth',.02,0,-160);
+      if(e.type==='land')this.tone(90,.055,'triangle',.055,0,-45);
+      if(e.type==='bank')[392,494,587,784].forEach((f,i)=>this.tone(f,.12,'triangle',.05,i*.06));
+      if(e.type==='gap'){this.tone(740,.10,'square',.015);this.tone(988,.12,'square',.013,.08);}
+      if(e.type==='bail'){this.tone(150,.19,'sawtooth',.028,0,-110);this.tone(80,.11,'triangle',.05,.05,-40);}
+    }
+    tick(dt){
+      this.nextGrind-=dt;this.nextRoll-=dt;
+      if(game.p.state==='grind'&&this.nextGrind<=0){this.tone(140+Math.random()*220,.025,'sawtooth',.006);this.nextGrind=.08;}
+      if(game.p.state==='ground'&&this.nextRoll<=0){this.tone(80+Math.random()*35,.018,'triangle',.018);this.nextRoll=.14;}
+    }
+  }
+  const sound=new Sound();renderer.reducedMotion=records.reducedMotion;
+  const sources={jump:new Set(),grind:new Set(),trick:new Set(),brake:new Set(),push:new Set()};
+  let edges={jumpPressed:false,jumpReleased:false,trickPressed:false};
+  function setInput(action,on,source){
+    const s=sources[action],was=s.size>0;if(on)s.add(source);else s.delete(source);const is=s.size>0;
+    if(action==='jump'){if(is&&!was)edges.jumpPressed=true;if(was&&!is)edges.jumpReleased=true;}
+    if(action==='trick'&&is&&!was)edges.trickPressed=true;
+    document.querySelectorAll(`[data-action="${action}"]`).forEach(el=>el.classList.toggle('active',is));
+  }
+  function clearInputs(){for(const [action,s]of Object.entries(sources)){s.clear();document.querySelectorAll(`[data-action="${action}"]`).forEach(el=>el.classList.remove('active'));}edges={jumpPressed:false,jumpReleased:false,trickPressed:false};}
+  function inputFrame(){const frame={...edges,grind:sources.grind.size>0,brake:sources.brake.size>0,push:sources.push.size>0};edges={jumpPressed:false,jumpReleased:false,trickPressed:false};return frame;}
+  function setState(next){state=next;document.body.className=next;clearInputs();accumulator=0;
+    $('intro').hidden=next!=='menu';$('pauseOverlay').hidden=next!=='paused';$('finishOverlay').hidden=next!=='finished';
+    $('pauseButton').innerHTML=next==='paused'?'RESUME <span>▶</span>':'PAUSE <span>Ⅱ</span>';
+  }
+  function toast(text,bad=false,duration=2.1){$('message').textContent=text;$('message').classList.add('show');$('message').classList.toggle('bad',bad);messageClock=duration;}
+  function start(mode='free'){
+    game.reset(mode);setState('playing');renderer.event({type:'reset'});sound.unlock();
+    $('bankFeedback').classList.remove('show');bankClock=0;uiClock=0;updateHUD();
+    toast('AUTO-ROLL ON · JUMP + HOLD GRIND TO CATCH A RAIL',false,3.2);
+    $('game').focus({preventScroll:true});
+  }
+  function pause(){if(state==='playing'){setState('paused');$('resume').focus({preventScroll:true});}else if(state==='paused'){setState('playing');$('game').focus({preventScroll:true});sound.unlock();}}
+  function updateSettings(){
+    $('soundButton').innerHTML=`SOUND <span>${sound.enabled?'ON':'OFF'}</span>`;$('soundButton').setAttribute('aria-pressed',String(sound.enabled));
+    $('motionButton').innerHTML=`MOTION <span>${renderer.reducedMotion?'LOW':'FULL'}</span>`;$('motionButton').setAttribute('aria-pressed',String(renderer.reducedMotion));
+  }
+  function toggleSound(){sound.enabled=!sound.enabled;records.sound=sound.enabled;updateSettings();save();sound.unlock();if(sound.enabled)sound.tone(440,.12,'triangle',.04);}
+  $('soundButton').addEventListener('click',toggleSound);
+  $('motionButton').addEventListener('click',()=>{renderer.reducedMotion=!renderer.reducedMotion;records.reducedMotion=renderer.reducedMotion;save();updateSettings();});
+  $('pauseButton').addEventListener('click',pause);$('resume').addEventListener('click',pause);
+  $('startFree').addEventListener('click',()=>start('free'));$('startTimed').addEventListener('click',()=>start('timed'));
+  $('restartPaused').addEventListener('click',()=>start(game.mode));$('backToMenu').addEventListener('click',()=>{game.reset();setState('menu');updateHUD();});
+  $('playAgain').addEventListener('click',()=>start('timed'));$('freeAfter').addEventListener('click',()=>start('free'));
+  const keyMap={Space:'jump',KeyZ:'jump',KeyX:'grind',KeyC:'trick',ArrowLeft:'brake',ArrowDown:'brake',KeyA:'brake',KeyS:'brake',ArrowRight:'push',KeyD:'push'};
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const relevant=keyMap[e.code]||['KeyP','Escape','KeyR','KeyM'].includes(e.code);
+    if(!relevant)return;
+    // Buttons keep native Space activation in menus; global skating controls only own gameplay.
+    if(state!=='playing'&&e.code==='Space'&&document.activeElement?.tagName==='BUTTON')return;
+    e.preventDefault();
+    if(e.repeat)return;
+    if(e.code==='KeyM'){toggleSound();return;}
+    if(e.code==='KeyP'||e.code==='Escape'){pause();return;}
+    if(e.code==='KeyR'&&state!=='menu'){start(game.mode);return;}
+    if(state==='menu'&&(e.code==='Space'||e.code==='KeyZ')){start('free');return;}
+    if(state==='playing'&&keyMap[e.code]){sound.unlock();setInput(keyMap[e.code],true,`key:${e.code}`);}
+  });
+  document.addEventListener('keyup',e=>{const action=keyMap[e.code];if(action){if(state==='playing')e.preventDefault();setInput(action,false,`key:${e.code}`);}});
+  document.querySelectorAll('[data-action]').forEach(button=>{
+    const action=button.dataset.action;
+    button.addEventListener('pointerdown',e=>{
+      e.preventDefault();if(state!=='playing')return;sound.unlock();
+      try{button.setPointerCapture(e.pointerId);}catch{}
+      setInput(action,true,`pointer:${e.pointerId}`);
+    });
+    const release=e=>{e.preventDefault();setInput(action,false,`pointer:${e.pointerId}`);};
+    button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
+    button.addEventListener('contextmenu',e=>e.preventDefault());
+  });
+  window.addEventListener('blur',()=>{clearInputs();if(state==='playing')pause();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInputs();if(state==='playing')pause();}});
+  $('game').addEventListener('contextmenu',e=>e.preventDefault());
+  function handleEvents(){
+    for(const e of game.drainEvents()){
+      renderer.event(e);sound.event(e);
+      if(e.type==='bank'){
+        const record=e.value>records.bestCombo;if(record){records.bestCombo=e.value;save();}
+        $('bankFeedback').textContent=`+${fmt(e.value)} BANKED`;$('bankFeedback').classList.add('show');bankClock=1.65;
+        if(record&&e.value>=1000)toast('NEW BEST COMBO · '+fmt(e.value));
+      }
+      if(e.type==='bail')toast(e.lost?`${e.reason} · ${fmt(e.lost)} LOST`:`${e.reason} · BACK IN A BEAT`,true,1.2);
+      if(e.type==='overtime')toast('LAST LINE · LAND TO BANK IT',false,3);
+      if(e.type==='gap'&&e.name==='AC EXPRESS GAP')toast('FOUND IT · AC EXPRESS!',false,2.5);
+      if(e.type==='finish'){
+        records.bestTimed=Math.max(records.bestTimed,game.score);save();setState('finished');
+        $('resultScore').textContent=fmt(game.score);
+        $('resultDetails').textContent=`Best combo ${fmt(game.bestCombo)} · ${game.bails} bails · ${game.laps} circuits. Device best: ${fmt(records.bestTimed)}.`;
+        $('playAgain').focus({preventScroll:true});
+      }
+    }
+  }
+  function updateHUD(){
+    const p=game.p;
+    $('score').textContent=fmt(game.score);$('record').textContent=fmt(Math.max(records.bestCombo,game.bestCombo));
+    $('zone').textContent=game.zone;
+    $('mapMarker').style.left=`${mod(p.x,C.courseLength)/C.courseLength*96}%`;
+    $('routeMeta').textContent=`${game.mode==='free'?'FREE SKATE':'SCORE RUN'} · CIRCUIT ${String(game.laps+1).padStart(2,'0')}`;
+    $('timer').hidden=game.mode!=='timed';$('timer').classList.toggle('urgent',game.timeLeft<=15);
+    const remaining=Math.ceil(game.timeLeft);
+    $('timer').textContent=game.ending?'LAST LINE':`${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
+    const has=game.comboValue>0&&state!=='menu';$('comboArea').hidden=!has;
+    const risky=p.trick>C.trickCatchGrace;
+    if(has){
+      $('comboValue').textContent=fmt(game.comboValue);$('multiplier').textContent='×'+game.combo.multiplier;
+      $('comboActions').textContent=game.combo.actions.slice(-3).join('  ›  ');
+      $('comboLabel').textContent=risky?'TRICK IN PROGRESS':p.state==='ground'?'BANKING…':'UNBANKED';
+      $('comboArea').classList.toggle('danger',risky);
+      $('comboNote').textContent=risky?'Let the board finish before you land.':p.state==='ground'?'Jump now to extend. Stay down to bank.':'Land to bank. Keep the line to risk it.';
+      $('bankProgress').style.width=`${Math.min(1,game.bankClock/C.bankDelay)*100}%`;
+    }
+    const labels={ground:'ROLLING',air:risky?'FINISH THE FLIP':'READY TO LAND',grind:'LOCKED IN',bail:'BACK IN A BEAT'};
+    $('stateText').textContent=labels[p.state];$('stateText').style.color=risky?'#f18a94':p.state==='grind'?'#f8cc84':'#f9e6c2';
+    $('speedFill').style.width=`${clamp((p.vx-50)/(C.maxSpeed-50),0,1)*100}%`;
+    $('speedLabel').textContent=sources.brake.size?'BRAKING':p.state==='grind'?'HOLD GRIND · JUMP TO EXIT':sources.push.size?'PUSHING':'AUTO-PUSH ON';
+    for(const [id,key]of [['goalGrind','grind'],['goalBank','bank'],['goalAC','ac']]){
+      $(id).classList.toggle('done',game.achievements[key]);$(id).querySelector('b').textContent=game.achievements[key]?'✓':{grind:'01',bank:'02',ac:'03'}[key];
+    }
+  }
+  function frame(ts){
+    const dt=lastTime?Math.min(.05,(ts-lastTime)/1000):1/60;lastTime=ts;
+    if(state==='playing'){
+      accumulator+=dt;
+      while(accumulator>=C.step&&state==='playing'){
+        game.step(C.step,inputFrame());handleEvents();accumulator-=C.step;
+      }
+      sound.tick(dt);
+      messageClock=Math.max(0,messageClock-dt);if(messageClock===0)$('message').classList.remove('show');
+      bankClock=Math.max(0,bankClock-dt);if(bankClock===0)$('bankFeedback').classList.remove('show');
+    }
+    // Menus animate only the scenery; pause and results freeze the scene, including particles.
+    if(state==='playing'||state==='menu')renderer.render(game,dt,state==='menu');
+    uiClock+=dt;if(uiClock>.033){updateHUD();uiClock=0;}
+    requestAnimationFrame(frame);
+  }
+  // Opt-in test surface: no debug mutators or autoplay in normal play.
+  if(new URLSearchParams(location.search).has('debug')){
+    window.__roofline={game,renderer,start,pause,snapshot:()=>({...game.snapshot(),uiState:state,records:{...records}}),
+      input:(action,on)=>setInput(action,on,'debug'),advance:(steps,input={})=>{for(let i=0;i<steps;i++)game.step(C.step,input);handleEvents();updateHUD();},
+      setPlayer:values=>Object.assign(game.p,values),redraw:()=>{renderer.render(game,1/60);updateHUD();}};
+  }
+  setState('menu');updateSettings();updateHUD();handleEvents();renderer.render(game);requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

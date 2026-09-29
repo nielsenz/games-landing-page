@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171e27"><meta name="description" content="A compact pixel-art merchant game. Read the market, negotiate, and trade between three river towns without leaving your counter."><title>Riverward Exchange — A merchant's life</title><style>:root{color-scheme:dark;--ink:#f0e6cf;--muted:#b7b3ab;--gold:#e6bd70;--mint:#9ac5ad;--red:#ed9b84;--bg:#192521;--panel:#26322f;--line:#48534c;--deep:#182520;--serif:Georgia,'Times New Roman',serif;--mono:'Courier New',monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}button,input{font:inherit}button{cursor:pointer;color:var(--ink);background:#303b42;border:1px solid #546064;border-bottom:3px solid #111b23;padding:9px 13px;min-height:42px;border-radius:3px;transition:background .15s}button:hover:enabled{background:#45534f;border-color:var(--gold)}button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button:disabled{opacity:.42;cursor:not-allowed}button.primary{background:var(--gold);color:#28282a;font-weight:750;border-color:#f5d597;border-bottom-color:#917448}button.primary:hover:enabled{background:#f4d28e}button.quiet{background:transparent;border-color:var(--line);color:var(--muted)}button.selected{background:#486456;border-color:var(--mint);color:#fff}button.tiny{font-size:12px;padding:5px 9px;min-height:33px}h1,h2,h3,p{margin:0}h1{font:600 29px/1.1 var(--serif);letter-spacing:-.5px}h2{font:600 19px var(--serif)}h3{font-size:14px;font-weight:650}small,.small{font-size:12px}.muted{color:var(--muted)}.gold{color:var(--gold)}.good{color:var(--mint)}.bad{color:var(--red)}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:var(--gold);font-weight:700}a{color:var(--gold)}.app{max-width:1192px;margin:0 auto;padding:22px 24px 40px}.masthead{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 16px}.title-wrap{display:flex;align-items:center;gap:13px}.seal{height:45px;width:45px;image-rendering:pixelated}.masthead .eyebrow{margin-bottom:4px}.top-actions{display:flex;gap:8px}.scene-wrap{position:relative;background:#3a6967;overflow:hidden;border:1px solid #73725d;border-bottom:4px solid #a58c63;border-radius:5px 5px 0 0}#scene{display:block;width:100%;aspect-ratio:640/168;image-rendering:pixelated}.scene-caption{position:absolute;left:17px;bottom:13px;background:#18232bdc;border:1px solid #8d867055;padding:7px 12px;color:#f6e5bf;max-width:85%;font-size:12px;letter-spacing:.5px}.hud{display:grid;grid-template-columns:repeat(4,1fr);background:#263037;border:1px solid #58605a;border-top:0}.metric{padding:13px 18px;border-right:1px solid #495249}.metric:last-child{border:0}.metric-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;display:block}.metric-value{font:700 23px/1.3 var(--mono)}.metric small{display:block;color:var(--muted);font-size:11px}.hintbar{margin:14px 0;background:#30382f;border:1px solid #61705b;padding:11px 14px;display:flex;gap:10px;align-items:center;font-size:13px}.hintbar .badge{flex-shrink:0;color:var(--gold);font-size:10px;letter-spacing:1px;font-weight:bold}.main-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(315px,.85fr);gap:16px;align-items:start}.stack{display:grid;gap:16px}.panel{border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow:hidden}.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-head p{margin-top:4px;font-size:12px;color:var(--muted)}.pad{padding:14px 16px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:12px 12px 7px}.tabs button{font-size:13px;padding:8px 5px;background:var(--deep)}.tabs button.selected{color:var(--gold);border-color:var(--gold);background:#393b34}.tabs small{display:block;font-size:10px;color:var(--muted);font-weight:400}.market-sub{padding:0 15px 10px;font-size:11px;color:var(--muted);min-height:28px}.market-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}.market-table th{color:var(--muted);font-size:10px;font-weight:500;text-align:right;padding:8px 9px;background:#1b242c;text-transform:uppercase;letter-spacing:.6px}.market-table th:first-child{text-align:left;padding-left:16px;width:28%}.market-table th:last-child{width:16%}.market-table td{border-top:1px solid #3b4446;text-align:right;padding:8px 9px;vertical-align:middle;font-variant-numeric:tabular-nums}.market-table tr.active td{background:#354039}.market-table td:first-child{text-align:left;padding-left:13px}.good-select{display:flex;gap:8px;align-items:center;border:0;background:transparent!important;min-height:34px;padding:1px 0;color:inherit;width:100%;text-align:left;border-radius:0}.good-select:hover{color:var(--gold)}.good-icon{width:25px;height:25px;image-rendering:pixelated;flex-shrink:0}.substock{font-size:10px;color:var(--muted);display:block}.price-button{font:700 14px var(--mono);min-height:34px;padding:4px 6px;background:transparent;border:1px solid transparent;border-bottom:2px solid transparent;color:var(--gold)}.sell-price{color:var(--mint)}.spark{width:100%;height:25px;display:block}.trade-drawer{border-top:1px solid #5c665b;background:#1e292b;padding:14px 16px}.trade-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.trade-title h3{font-size:15px}.toggle{display:flex;gap:4px}.trade-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.trade-controls label{font-size:12px;color:var(--muted);margin-right:4px}.qty-input{width:61px;text-align:center}.field{background:#141f27;border:1px solid #5e6b67;border-radius:2px;color:var(--ink);padding:8px;min-height:40px;font:600 16px var(--mono)}.quote{margin-top:10px;display:flex;gap:10px;align-items:center;justify-content:space-between}.quote-detail{font-size:12px;line-height:1.65}.quote-detail strong{font-family:var(--mono);font-size:16px}.quote-note{color:var(--muted);font-size:11px;margin-top:8px;min-height:16px}.market-reasons{border-top:1px solid var(--line);padding:10px 15px;color:var(--muted);font-size:11px}.market-reasons summary{cursor:pointer;color:var(--gold);font-size:12px}.market-reasons p{margin-top:7px;line-height:1.6}.visitor-top{display:flex;gap:14px;align-items:center;padding:14px 16px 10px}.portrait-frame{border:2px solid #937557;background:#1b2530;width:76px;height:82px;flex-shrink:0;image-rendering:pixelated}.visitor-top h3{font:600 22px var(--serif)}.visitor-top .small{margin-top:2px}.visitor-goods{padding:0 16px;display:flex;gap:10px;align-items:center}.visitor-goods .good-icon{width:32px;height:32px}.speech{margin:10px 16px;font-size:13px;color:#d9d5c3;background:#1d252e;padding:10px 12px;border-left:3px solid #a58c63}.speech em{font-size:12px;color:var(--muted);display:block;margin-top:5px}.haggle-controls{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}.haggle-controls .field{width:75px}.visitor-status{padding:0 16px 14px;font-size:13px}.request{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}.request:last-child{border:0}.request .details{flex:1}.request h3{font-size:13px}.request p{font-size:12px;color:var(--muted);margin-top:3px}.request button{font-size:12px;min-width:92px;white-space:nowrap;padding:7px}.footer-grid{display:grid;grid-template-columns:1.35fr .85fr;gap:16px;margin-top:16px}.cargo-list{display:flex;flex-wrap:wrap;gap:8px}.cargo-chip{display:flex;align-items:center;gap:5px;border:1px solid #465351;background:#1d282e;padding:6px 9px;font-size:12px}.cargo-chip .good-icon{width:24px;height:24px}.ship-row{display:flex;gap:10px;align-items:center;font-size:12px;padding:9px 0;border-bottom:1px solid #3d4648}.ship-row:last-child{border:0}.ship-row .desc{flex:1}.ship-row small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.ship-row .arrival{color:var(--gold);white-space:nowrap;font:600 12px var(--mono)}.section-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin:13px 0 4px}.empty{color:var(--muted);font-size:12px;padding:4px 0}.upgrade-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.upgrade-row button{flex:1;font-size:12px;min-width:150px}.notice{border-bottom:1px solid var(--line);padding:12px 16px}.notice:last-child{border:0}.notice .when{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold)}.notice h3{margin:3px 0 4px}.notice p{font-size:12px;color:var(--muted)}.not-active{opacity:.78}.daybar{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px}.daybar p{font-size:12px;color:var(--muted);max-width:65%}.endday{min-width:205px;font-size:15px}.ledger{border-top:1px solid var(--line);padding-top:12px}.ledger summary{cursor:pointer;color:var(--gold);font-size:13px}.log-list{max-height:250px;overflow:auto;padding-top:12px}.log-entry{font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid #2f393e}.log-entry span{font-family:var(--mono);display:inline-block;min-width:48px;color:var(--gold)}.log-entry.good{color:var(--mint)}.log-entry.rival{color:#c3abcf}.credit{margin-top:20px;color:#8f9896;text-align:center;font-size:11px;letter-spacing:.3px}dialog{color:var(--ink);background:var(--panel);border:1px solid #a18b66;border-radius:5px;padding:0;max-width:520px;width:calc(100% - 30px);box-shadow:0 20px 80px #0009}dialog::backdrop{background:#071019cc;backdrop-filter:blur(3px)}.modal-top{height:6px;background:var(--gold)}.modal-body{padding:26px}.modal-body h2{font-size:28px;margin:5px 0 12px}.modal-body p{margin:10px 0;font-size:14px;color:#d2d1c3}.modal-body .step{display:flex;gap:13px;align-items:flex-start;margin:14px 0;font-size:13px;color:var(--muted)}.step .number{color:var(--gold);font:700 19px var(--mono);min-width:23px}.step strong{display:block;color:var(--ink);margin-bottom:2px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}.modal-body .field{width:100%;margin-top:8px}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:20;max-width:min(600px,90vw);background:#e9d7af;color:#283132;border:2px solid #fff0ce;padding:12px 20px;box-shadow:0 8px 35px #0006;font-size:13px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .2s}.toast.show{opacity:1}.toast.error{background:#efb39e}.save-warning{color:var(--red);font-size:12px;margin:10px 0}.progress{display:block;height:4px;background:#1c242a;margin-top:7px}.progress i{display:block;height:4px;background:var(--gold)}
+@media(min-width:1450px){.app{padding-top:26px}}@media(max-width:900px){.app{padding:15px 14px 30px}.main-grid,.footer-grid{grid-template-columns:1fr}.stack{grid-template-columns:1fr 1fr;align-items:start}.metric{padding:11px 12px}.metric-value{font-size:20px}.footer-grid{gap:14px}#news-list{display:grid;grid-template-columns:1fr 1fr}.notice{border-right:1px solid var(--line)}.market-table th:first-child{width:32%}.scene-caption{font-size:10px;padding:5px 8px;bottom:8px}.masthead{margin-bottom:12px}}@media(max-width:560px){.app{padding:12px 9px 24px}h1{font-size:23px}.seal{width:34px;height:34px}.title-wrap{gap:8px}.masthead .eyebrow{font-size:8px;letter-spacing:1.4px}.top-actions button{font-size:11px;padding:6px 9px;min-height:36px}.top-actions{gap:5px}.hud{grid-template-columns:1fr 1fr}.metric{padding:8px 11px;border-bottom:1px solid var(--line)}.metric:nth-child(2){border-right:0}.metric:nth-child(3),.metric:nth-child(4){border-bottom:0}.metric-value{font-size:20px}.metric small{font-size:10px}.scene-caption{font-size:9px;left:8px;bottom:6px;max-width:95%}.stack{grid-template-columns:1fr}.hintbar{font-size:12px;align-items:flex-start;margin:10px 0;padding:9px 10px}.hintbar .badge{display:none}.tabs{padding:9px 8px 7px}.tabs button{font-size:12px}.market-table th{font-size:9px;padding:7px 5px}.market-table th:first-child{padding-left:10px;width:30%}.market-table th:last-child{width:16%}.market-table td{padding:7px 5px}.market-table td:first-child{padding-left:8px}.good-select{gap:4px;font-size:12px}.good-icon{width:21px;height:21px}.price-button{font-size:13px;padding:4px;min-width:35px}.substock{font-size:9px}.trade-drawer{padding:12px}.quote{align-items:flex-end}.quote button{font-size:12px;min-width:120px}.quote-detail{font-size:11px}.quote-detail strong{font-size:14px}.trade-title h3{font-size:14px}.trade-controls{gap:5px}.trade-controls button{padding:7px 10px}.panel-head{padding:12px}.daybar{align-items:stretch;flex-direction:column;gap:10px;padding:15px 0}.daybar p{max-width:100%}.endday{width:100%;min-height:48px}.modal-body{padding:21px}.modal-body h2{font-size:26px}#news-list{grid-template-columns:1fr}.notice{border-right:0}.main-grid,.footer-grid,.stack{gap:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body><main class="app" id="app">
+<header class="masthead"><div class="title-wrap"><canvas id="seal" class="seal" width="24" height="24" aria-hidden="true"></canvas><div><div class="eyebrow">A merchant’s life, along the river</div><h1>Riverward Exchange</h1></div></div><nav class="top-actions" aria-label="Game controls"><button class="quiet" data-action="help">How to play</button><button class="quiet" data-action="new">New season</button></nav></header>
+<div class="scene-wrap"><canvas id="scene" width="640" height="168" role="img" aria-label="An animated pixel-art riverside trading house, with cargo barges, a ferry, a stone quay, and a canal town on the far bank. You stay at your counter while river freight travels between towns."></canvas><div class="scene-caption" id="scene-caption">Your counter. Three river towns. A world of opportunity.</div></div>
+<section class="hud" id="hud" aria-label="Your trading house"></section>
+<div id="save-warning" class="save-warning" hidden></div>
+<div class="hintbar"><span class="badge">AT THE COUNTER</span><span id="hint"></span></div>
+<div class="main-grid"><section class="panel" aria-labelledby="market-title"><div class="panel-head"><div><h2 id="market-title">The exchange</h2><p>Quotes are per unit. Your lot’s total includes price impact.</p></div><button class="quiet tiny" data-action="close-top" title="Advance to the next trading day">Close day →</button></div><div id="market"></div></section>
+<aside class="stack"><section class="panel" aria-labelledby="visitor-title"><div class="panel-head"><h2 id="visitor-title">A visitor at your counter</h2><span id="visitor-patience" class="small muted"></span></div><div id="visitor"></div></section><section class="panel" aria-labelledby="orders-title"><div class="panel-head"><div><h2 id="orders-title">Town requests</h2><p>Fixed-price, one-off sales. No penalty for passing.</p></div></div><div id="requests"></div></section></aside></div>
+<div class="footer-grid"><section class="panel" aria-labelledby="cargo-title"><div class="panel-head"><h2 id="cargo-title">Warehouse & river freight</h2><span class="small muted" id="inventory-value"></span></div><div id="cargo" class="pad"></div></section><section class="panel" aria-labelledby="news-title"><div class="panel-head"><h2 id="news-title">The river gazette</h2><span class="eyebrow">Confirmed news</span></div><div id="news-list"></div></section></div>
+<div class="daybar"><p><strong class="gold">The world advances only when you close the day.</strong><br>New stock, local demand, rival shipments, and arrivals resolve overnight. Freight capacity resets; your warehouse does not.</p><button class="primary endday" data-action="endday" id="endday">Close day 1 →</button></div>
+<details class="ledger"><summary id="ledger-summary">Open trading ledger</summary><div class="log-list" id="log"></div></details><footer class="credit">RIVER EDITION v0.2 · Original art & code · Local save only · No accounts, trackers, or downloads at runtime</footer>
+</main>
+<dialog id="help-dialog" aria-labelledby="help-heading"><div class="modal-top"></div><div class="modal-body"><div class="eyebrow">Welcome to your riverside shop</div><h2 id="help-heading">Make the right deal.</h2><p>You have <strong class="gold">360 coins</strong>, a little warehouse, and fourteen days to turn your stall into a chartered trading house. Reach <strong class="gold">900 coins in cash</strong>. Or simply keep trading afterward.</p><div class="step"><span class="number">01</span><div><strong>Read the difference.</strong>Riverward is your home quay. Mossmere’s farms are upstream; Emberforge’s ironworks sit beyond the canal locks. Buy and Sell are <em>your</em> actions.</div></div><div class="step"><span class="number">02</span><div><strong>Make a small first deal.</strong>Nara needs to clear some cloth. Try an offer around 80 coins, then compare buyers. The whole lot—not a single unit—is being negotiated.</div></div><div class="step"><span class="number">03</span><div><strong>Let the barges do the moving.</strong>Home trades settle now. River and canal cargo arrives in 1–2 days; remote sales pay on arrival. Sale prices are locked when booked; unsold inventory is not.</div></div><div class="step"><span class="number">04</span><div><strong>Watch why prices change.</strong>Buying drains stock. Selling fills it. Residents consume goods; producers replenish them; one rival chases gaps. Bulk trading changes your own price.</div></div><p class="small muted">No walking, restocking chores, timers, or punishment for taking your time. Incoming purchases reserve warehouse space. There is no upkeep bill in this prototype.</p><div class="modal-actions"><button class="primary" id="close-help">Open the shutters →</button></div></div></dialog>
+<dialog id="new-dialog" aria-labelledby="new-heading"><div class="modal-top"></div><div class="modal-body"><div class="eyebrow">A clean ledger</div><h2 id="new-heading">Start another season?</h2><p>This replaces the current local save. The same seed repeats the same world; different decisions still change its economy.</p><label for="seed" class="small muted">World seed</label><input id="seed" class="field" maxlength="40" value="RIVERWARD"><div class="modal-actions"><button id="cancel-new" class="quiet">Keep trading</button><button id="confirm-new" class="primary">Start fresh</button></div></div></dialog>
+<dialog id="report-dialog" aria-labelledby="report-heading"><div class="modal-top"></div><div class="modal-body" id="report-body"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>/* Riverward Exchange — deterministic, dependency-free economy.
+   Integer coins / integer physical units. See ECONOMY.md for accounting rules. */
+(function(root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.Riverward = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function() {
+  'use strict';
+  const VERSION = 1;
+  const GOODS = [
+    {id:'grain', name:'Grain', base:10, bulk:1, color:'#e7bc65', role:'Everyday food. Harvests swell supply; fairs fill hungry mouths.'},
+    {id:'timber', name:'Timber', base:16, bulk:2, color:'#b47a59', role:'Bulky raw material. Workshops consume it to make tools.'},
+    {id:'iron', name:'Iron', base:26, bulk:2, color:'#a4b6c7', role:'Bulky raw material. Mining output and toolmaking move its price.'},
+    {id:'cloth', name:'Cloth', base:32, bulk:1, color:'#c88ec2', role:'Riverward imports it. Outlying towns and festivals consume it.'},
+    {id:'tea', name:'Tea', base:45, bulk:1, color:'#88b598', role:'High-value, compact cargo. Small markets saturate quickly.'},
+    {id:'tools', name:'Tools', base:58, bulk:1, color:'#e0956c', role:'Made from one iron + one timber. Cheap inputs keep workshops running.'}
+  ];
+  const MARKETS = [
+    {id:'crosswind', name:'Riverward', short:'Your quay', days:0, freight:0, budget:1000,
+      blurb:'Your riverside quay. Coastal traders bring cloth and tea inland.',
+      target:[40,28,26,26,22,22], initial:[50,28,24,34,32,18],
+      production:[8,3,4,8,6,0], demand:[11,4,3,6,4,3], workshops:3},
+    {id:'mossmere', name:'Mossmere', short:'Farms & forests', days:1, freight:1, budget:800,
+      blurb:'Upstream farms and sawmills. One day by barge; hungry for finished goods.',
+      target:[60,46,20,18,15,18], initial:[100,78,11,15,8,10],
+      production:[17,12,2,3,2,0], demand:[11,5,3,4,3,4], workshops:1},
+    {id:'emberforge', name:'Emberforge', short:'Mines & workshops', days:2, freight:2, budget:1200,
+      blurb:'Mines and toolmakers along the canal. Two days through the locks.',
+      target:[30,30,38,18,14,30], initial:[18,17,65,11,9,46],
+      production:[4,4,13,3,1,0], demand:[7,5,3,5,3,3], workshops:6}
+  ];
+  const NAMES = ['Nara','Bram','Iona','Orin','Pella','Tamsin'];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const sum = a => a.reduce((x,y) => x+y, 0);
+  const copy = x => JSON.parse(JSON.stringify(x));
+  const fail = message => ({ok:false, message});
+  function hash(text) {
+    let x = 2166136261;
+    for (const c of String(text)) { x ^= c.charCodeAt(0); x = Math.imul(x,16777619); }
+    return x >>> 0;
+  }
+  function random(s) {
+    let a = s.rng = (s.rng + 0x6D2B79F5) >>> 0;
+    a = Math.imul(a ^ a >>> 15, a | 1);
+    a ^= a + Math.imul(a ^ a >>> 7, a | 61);
+    return ((a ^ a >>> 14) >>> 0) / 4294967296;
+  }
+  function log(s, text, kind='info') {
+    s.log.unshift({day:s.day, text, kind});
+    s.log = s.log.slice(0,80);
+  }
+  function createGame(seed='RIVERWARD') {
+    seed = String(seed).trim().slice(0,40) || 'RIVERWARD';
+    const s = {version:VERSION, seed, rng:hash(seed), day:1, cash:360, capacity:40,
+      freightCapacity:28, freightUsed:0, inventory:GOODS.map(()=>0), basis:GOODS.map(()=>0),
+      markets:MARKETS.map(m=>({stock:[...m.initial], budget:m.budget,
+        buying:m.target.map(n=>Math.ceil(n*.8)), history:GOODS.map(()=>[]),
+        last:GOODS.map(()=>({produced:0,consumed:0,workshop:0}))})),
+      shipments:[], rival:{cash:320, shipments:[]}, visitor:null, requests:[],
+      log:[], nextId:1, upgrades:{warehouse:false,berth:false},
+      stats:{sales:0,purchaseCost:0,realizedMargin:0,freight:0,requests:0,trades:0},
+      charter:false, seasonReport:null, introSeen:false};
+    // A shared opening teaches the loop; later event timing varies by seed.
+    const shift = Math.floor(random(s)*2);
+    s.events = [
+      {id:'fair', name:'Lantern Fair', start:3, end:5, announced:1,
+        text:'Riverward consumes 70% more grain, cloth, and tea. Demand moves stock, not a magic price bonus.'},
+      {id:'gale', name:'River storms', start:6+shift, end:8+shift, announced:4,
+        text:'Mossmere timber output halves. New Mossmere freight bookings take one extra day; booked arrivals stay fixed.'},
+      {id:'mine', name:'Mine maintenance', start:10, end:11, announced:7,
+        text:'Emberforge iron output falls to 30%. Toolmakers still need iron and timber.'},
+      {id:'harvest', name:'Great harvest', start:12, end:14, announced:9,
+        text:'Mossmere grain production doubles. Expect more supply, not a guaranteed resale price.'}
+    ];
+    s.requests = [
+      {id:s.nextId++,who:'Dockworkers’ kitchen',g:0,qty:8,pay:112,due:4,status:'open'},
+      {id:s.nextId++,who:'Canal lock repairs',g:5,qty:3,pay:216,due:6,status:'open'}
+    ];
+    makeVisitor(s);
+    snapshot(s);
+    log(s,'The shutters are open. Start with a small deal; keep some coins free.','good');
+    return s;
+  }
+  function active(s, id, day=s.day) {
+    return s.events.some(e=>e.id===id && day>=e.start && day<=e.end);
+  }
+  function route(s, m) {
+    return {days:MARKETS[m].days+(m===1 && active(s,'gale')?1:0), rate:MARKETS[m].freight};
+  }
+  function reservedInbound(s,m,g) {
+    return sum(s.shipments.filter(x=>x.kind==='sell'&&x.market===m&&x.g===g).map(x=>x.qty))+
+      sum(s.rival.shipments.filter(x=>x.to===m&&x.g===g).map(x=>x.qty));
+  }
+  function mid(s,m,g,stock=s.markets[m].stock[g]) {
+    const d = GOODS[g], target = MARKETS[m].target[g];
+    return d.base * clamp(Math.exp(.85*(target-stock)/target),.42,2.5);
+  }
+  function rawTotal(s,m,g,side,qty) {
+    let value=0;
+    const stock=s.markets[m].stock[g]+(side==='sell'?reservedInbound(s,m,g):0);
+    // Midpoint marginal pricing: buying then selling traverses the same stock interval.
+    for(let k=0;k<qty;k++) {
+      const at=stock+(side==='buy'?-k-.5:k+.5);
+      value += side==='buy' ? Math.ceil(mid(s,m,g,at)*1.09) : Math.max(1,Math.floor(mid(s,m,g,at)*.91));
+    }
+    return value;
+  }
+  function occupied(s) {
+    return sum(s.inventory.map((n,g)=>n*GOODS[g].bulk))+
+      sum(s.shipments.filter(x=>x.kind==='buy').map(x=>x.qty*GOODS[x.g].bulk));
+  }
+  function onHand(s) { return sum(s.inventory.map((n,g)=>n*GOODS[g].bulk)); }
+  function quote(s,m,g,side,qty) {
+    if(!Number.isInteger(m)||m<0||m>=3||!Number.isInteger(g)||g<0||g>=6||
+       !['buy','sell'].includes(side)||!Number.isInteger(qty)||qty<1||qty>1000)
+      return fail('Choose a whole, positive quantity.');
+    const slots=qty*GOODS[g].bulk, r=route(s,m);
+    const fee=m===0?0:2+slots*r.rate;
+    const goods=rawTotal(s,m,g,side,qty), total=side==='buy'?goods+fee:goods-fee;
+    const q={ok:true,m,g,side,qty,slots,fee,goods,total,days:r.days,arrival:s.day+r.days};
+    if(m!==0&&s.freightUsed+slots>s.freightCapacity) return {...q,...fail('Not enough freight space today.')};
+    if(side==='buy') {
+      if(s.markets[m].stock[g]<qty) return {...q,...fail('That market does not have enough stock.')};
+      if(occupied(s)+slots>s.capacity) return {...q,...fail('Warehouse full. Incoming purchases reserve space too.')};
+      if(s.cash<total) return {...q,...fail('Not enough coins for goods and freight.')};
+    } else {
+      if(s.inventory[g]<qty) return {...q,...fail('Not enough goods on hand. Incoming cargo cannot be resold yet.')};
+      if(s.markets[m].buying[g]<qty) return {...q,...fail('This buyer has filled today’s order for that good.')};
+      if(s.markets[m].budget<goods) return {...q,...fail('This market has used up today’s buying budget.')};
+      if(m!==0&&s.cash<fee) return {...q,...fail('You need coins to pay outward freight now.')};
+      if(total<=0) return {...q,...fail('Freight would exceed the sale proceeds.')};
+    }
+    return q;
+  }
+  function maxQuantity(s,m,g,side) {
+    const cap=side==='buy'?Math.min(s.markets[m].stock[g],Math.floor((s.capacity-occupied(s))/GOODS[g].bulk)):
+      Math.min(s.inventory[g],s.markets[m].buying[g]);
+    let best=0;
+    for(let n=1;n<=Math.min(cap,1000);n++) { if(quote(s,m,g,side,n).ok)best=n; }
+    return best;
+  }
+  function removeInventory(s,g,qty) {
+    const basis=s.inventory[g]?s.basis[g]*qty/s.inventory[g]:0;
+    s.inventory[g]-=qty;
+    s.basis[g]=s.inventory[g]?s.basis[g]-basis:0;
+    return basis;
+  }
+  function checkCharter(s) {
+    if(!s.charter&&s.cash>=900) {s.charter=true;log(s,'900 coins in cash! The guild awards your permanent trading charter.','good');}
+  }
+  function trade(s,m,g,side,qty) {
+    const q=quote(s,m,g,side,qty);
+    if(!q.ok)return q;
+    const market=s.markets[m];
+    if(m!==0) s.freightUsed+=q.slots;
+    s.stats.freight+=q.fee; s.stats.trades++;
+    if(side==='buy') {
+      s.cash-=q.total; market.stock[g]-=qty; market.budget+=q.goods;
+      s.stats.purchaseCost+=q.total;
+      if(m===0) {s.inventory[g]+=qty;s.basis[g]+=q.total;}
+      else s.shipments.push({id:s.nextId++,kind:'buy',market:m,g,qty,arrival:q.arrival,cost:q.total});
+    } else {
+      const basis=removeInventory(s,g,qty);
+      market.budget-=q.goods;market.buying[g]-=qty;
+      if(m===0) {
+        s.cash+=q.goods;market.stock[g]+=qty;
+        s.stats.sales+=q.goods;s.stats.realizedMargin+=q.goods-basis;
+      } else {
+        s.cash-=q.fee;
+        s.shipments.push({id:s.nextId++,kind:'sell',market:m,g,qty,arrival:q.arrival,pay:q.goods,basis,fee:q.fee});
+      }
+    }
+    const verb=side==='buy'?'Bought':'Sold';
+    const text=`${verb} ${qty} ${GOODS[g].name.toLowerCase()} ${side==='buy'?'from':'to'} ${MARKETS[m].name}: ${q.total}g ${side==='buy'?'landed cost':'net'}${m?`; settles day ${q.arrival}`:''}.`;
+    log(s,text,'trade');checkCharter(s);
+    return {...q,message:text};
+  }
+  function makeVisitor(s) {
+    if(s.day===1) {
+      s.visitor={id:s.nextId++,name:'Nara',title:'Cloth wholesaler',side:'sell',g:3,qty:4,ask:92,limit:78,
+        patience:2,status:'open',hint:'“I need the barge empty before tonight’s tea shipment.”',reply:'Four bolts, one lot. Make me an offer.'};return;
+    }
+    const n=Math.floor(random(s)*NAMES.length), sell=random(s)<.6, g=Math.floor(random(s)*GOODS.length);
+    const qty=2+Math.floor(random(s)*4), base=GOODS[g].base*qty;
+    const bargain=.67+random(s)*.4;
+    let ask=sell?Math.ceil(base*bargain):Math.floor(base*(.86+random(s)*.34));
+    const flexible=random(s)<.5;
+    let limit=sell?Math.floor(ask*(flexible?.78:.93)):Math.ceil(ask*(flexible?1.22:1.07));
+    s.visitor={id:s.nextId++,name:NAMES[n],title:sell?'Visiting wholesaler':'Travelling buyer',
+      side:sell?'sell':'buy',g,qty,ask,limit,patience:2,status:'open',
+      hint:sell?(flexible?'“My next cargo is waiting. I’d rather not leave with this.”':'“I have another buyer across the quay.”'):
+        (flexible?'“I promised to have this delivered before nightfall.”':'“No hurry. I can try the next landing.”'),
+      reply:sell?'Take the whole lot. What’s your offer?':'I’m buying the whole lot. Name your price.'};
+  }
+  function visitorQuote(s,offer) {
+    const v=s.visitor;
+    if(!v||v.status!=='open')return fail('This visitor has finished trading.');
+    if(!Number.isInteger(offer)||offer<1||offer>99999)return fail('Enter a positive whole-coin offer.');
+    if(v.side==='sell') {
+      if(s.cash<offer)return fail('Not enough coins.');
+      if(occupied(s)+v.qty*GOODS[v.g].bulk>s.capacity)return fail('Not enough warehouse space.');
+    } else if(s.inventory[v.g]<v.qty)return fail('You need the whole lot on hand.');
+    return {ok:true};
+  }
+  function negotiate(s,offer) {
+    const valid=visitorQuote(s,offer);if(!valid.ok)return valid;
+    const v=s.visitor;
+    const accepts=v.side==='sell'?offer>=v.limit:offer<=v.limit;
+    if(!accepts) {
+      v.patience--;
+      v.reply=v.patience?'“Not at that price. One more offer.”':'“No deal. Another time.”';
+      if(!v.patience) {v.status='left';log(s,`${v.name} left without a deal.`);}
+      return {ok:true,accepted:false,message:v.reply};
+    }
+    if(v.side==='sell') {
+      s.cash-=offer;s.inventory[v.g]+=v.qty;s.basis[v.g]+=offer;
+      s.stats.purchaseCost+=offer;
+    } else {
+      const basis=removeInventory(s,v.g,v.qty);
+      s.cash+=offer;s.stats.sales+=offer;s.stats.realizedMargin+=offer-basis;
+    }
+    s.stats.trades++;v.status='done';v.reply='“Agreed. Good doing business.”';v.final=offer;
+    log(s,`${v.name}: ${v.side==='sell'?'bought':'sold'} ${v.qty} ${GOODS[v.g].name.toLowerCase()} for ${offer}g.`, 'good');
+    checkCharter(s);return {ok:true,accepted:true,message:v.reply};
+  }
+  function passVisitor(s) {
+    if(s.visitor?.status==='open') {s.visitor.status='left';s.visitor.reply='“Safe waters, then.”';}
+  }
+  function fulfill(s,id) {
+    const r=s.requests.find(r=>r.id===id);
+    if(!r||r.status!=='open'||r.due<s.day)return fail('That request is no longer available.');
+    if(s.inventory[r.g]<r.qty)return fail('You need the full quantity on hand.');
+    const basis=removeInventory(s,r.g,r.qty);
+    s.cash+=r.pay;s.stats.sales+=r.pay;s.stats.realizedMargin+=r.pay-basis;s.stats.requests++;r.status='done';
+    log(s,`${r.who}: delivered ${r.qty} ${GOODS[r.g].name.toLowerCase()} for ${r.pay}g.`, 'good');
+    checkCharter(s);return {ok:true,message:'Delivered. Coins received.'};
+  }
+  function upgrade(s,which) {
+    if(!['warehouse','berth'].includes(which)||s.upgrades[which])return fail('That upgrade is already installed.');
+    const cost=which==='warehouse'?160:150;
+    if(s.cash<cost)return fail('Not enough coins.');
+    s.cash-=cost;s.upgrades[which]=true;
+    if(which==='warehouse')s.capacity+=20;else s.freightCapacity+=12;
+    log(s,which==='warehouse'?'Added a warehouse loft: +20 space.':'Rented another berth: +12 daily freight space.','good');
+    return {ok:true,message:'Upgrade installed.'};
+  }
+  function simulateLocalEconomies(s) {
+    for(let m=0;m<3;m++) {
+      const market=s.markets[m], def=MARKETS[m];
+      market.last=GOODS.map(()=>({produced:0,consumed:0,workshop:0}));
+      for(let g=0;g<6;g++) {
+        let rate=def.production[g];
+        if(m===1&&g===1&&active(s,'gale'))rate*=.5;
+        if(m===2&&g===2&&active(s,'mine'))rate*=.3;
+        if(m===1&&g===0&&active(s,'harvest'))rate*=2;
+        // Producers respond to price, but cannot summon instant infinite output.
+        rate*=clamp(mid(s,m,g)/GOODS[g].base,.55,1.5);
+        const produced=Math.floor(rate*(.92+random(s)*.16)+random(s));
+        market.stock[g]+=produced;market.last[g].produced=produced;
+      }
+      // One explicit physical production link, subject to capacity and profitability.
+      const inputCost=mid(s,m,1)+mid(s,m,2)+7;
+      if(mid(s,m,5)>=inputCost) {
+        const n=Math.min(def.workshops,market.stock[1],market.stock[2]);
+        market.stock[1]-=n;market.stock[2]-=n;market.stock[5]+=n;
+        market.last[1].workshop=-n;market.last[2].workshop=-n;market.last[5].workshop=n;
+      }
+      for(let g=0;g<6;g++) {
+        let rate=def.demand[g];
+        if(m===0&&[0,3,4].includes(g)&&active(s,'fair'))rate*=1.7;
+        // Residents buy fewer units when expensive. All consumption is stock-bounded.
+        rate*=clamp(Math.pow(mid(s,m,g)/GOODS[g].base,-.5),.45,1.5);
+        const n=Math.min(market.stock[g],Math.floor(rate*(.94+random(s)*.12)+random(s)));
+        market.stock[g]-=n;market.last[g].consumed=n;
+      }
+    }
+  }
+  function rivalTrade(s) {
+    let best=null;
+    for(let from=0;from<3;from++)for(let to=0;to<3;to++)if(from!==to)for(let g=0;g<6;g++) {
+      const qty=Math.min(4,Math.floor(6/GOODS[g].bulk),s.markets[from].stock[g],s.markets[to].buying[g]);
+      if(qty<1)continue;
+      const cost=rawTotal(s,from,g,'buy',qty),pay=rawTotal(s,to,g,'sell',qty);
+      const fee=2+qty*GOODS[g].bulk*(from===2||to===2?2:1);
+      const margin=pay-cost-fee;
+      if(cost+fee>s.rival.cash||pay>s.markets[to].budget||margin<5)continue;
+      if(!best||margin>best.margin)best={from,to,g,qty,cost,pay,fee,margin};
+    }
+    if(!best)return;
+    const b=best;
+    s.rival.cash-=b.cost+b.fee;s.markets[b.from].budget+=b.cost;s.markets[b.to].budget-=b.pay;
+    s.markets[b.from].stock[b.g]-=b.qty;s.markets[b.to].buying[b.g]-=b.qty;
+    const days=(b.from===2||b.to===2?2:1)+((b.from===1||b.to===1)&&active(s,'gale')?1:0);
+    s.rival.shipments.push({...b,id:s.nextId++,arrival:s.day+days});
+    log(s,`Lark Trading bought ${b.qty} ${GOODS[b.g].name.toLowerCase()}: ${MARKETS[b.from].name} → ${MARKETS[b.to].name}.`,'rival');
+  }
+  function arrivals(s) {
+    const keep=[];
+    for(const x of s.shipments) {
+      if(x.arrival>s.day) {keep.push(x);continue;}
+      if(x.kind==='buy') {
+        s.inventory[x.g]+=x.qty;s.basis[x.g]+=x.cost;
+        log(s,`${x.qty} ${GOODS[x.g].name.toLowerCase()} arrived from ${MARKETS[x.market].name}.`,'good');
+      } else {
+        s.markets[x.market].stock[x.g]+=x.qty;s.cash+=x.pay;
+        s.stats.sales+=x.pay;s.stats.realizedMargin+=x.pay-x.basis-x.fee;
+        log(s,`${MARKETS[x.market].name} received your ${GOODS[x.g].name.toLowerCase()}: ${x.pay}g paid.`,'good');
+      }
+    }
+    s.shipments=keep;
+    const rivals=[];
+    for(const x of s.rival.shipments) {
+      if(x.arrival>s.day)rivals.push(x);
+      else {s.markets[x.to].stock[x.g]+=x.qty;s.rival.cash+=x.pay;}
+    }
+    s.rival.shipments=rivals;
+  }
+  function newRequest(s) {
+    if(s.day%3!==0)return;
+    const g=Math.floor(random(s)*6),qty=3+Math.floor(random(s)*4);
+    const pay=Math.ceil(GOODS[g].base*qty*(1.2+random(s)*.18));
+    const who=['Canal builders','The Copper Kettle','Lock keepers','Weavers’ guild','Orchard co-op'][Math.floor(random(s)*5)];
+    s.requests.push({id:s.nextId++,g,qty,pay,who,due:s.day+3,status:'open'});
+  }
+  function snapshot(s) {
+    for(let m=0;m<3;m++)for(let g=0;g<6;g++) {
+      s.markets[m].history[g].push(Number(mid(s,m,g).toFixed(2)));
+      s.markets[m].history[g]=s.markets[m].history[g].slice(-14);
+    }
+  }
+  function endDay(s) {
+    // Quotes and events never change on a render, click, reload, or wall-clock timer.
+    simulateLocalEconomies(s);
+    rivalTrade(s);
+    if(s.day===14&&!s.seasonReport) {
+      s.seasonReport={cash:s.cash,charter:s.charter,margin:Math.round(s.stats.realizedMargin),
+        requests:s.stats.requests,inventoryCost:Math.round(sum(s.basis)),
+        receivables:sum(s.shipments.filter(x=>x.kind==='sell').map(x=>x.pay))};
+    }
+    s.day++;s.freightUsed=0;
+    arrivals(s);
+    s.markets.forEach((market,m)=>{
+      // The three outside dealer pools receive fresh daily buying allowances.
+      market.budget=MARKETS[m].budget;market.buying=MARKETS[m].target.map(n=>Math.ceil(n*.8));
+    });
+    s.requests.forEach(r=>{if(r.status==='open'&&r.due<s.day)r.status='expired';});
+    s.requests=s.requests.filter(r=>r.status==='open'||r.due>=s.day-3);
+    makeVisitor(s);newRequest(s);snapshot(s);checkCharter(s);
+    log(s,`Day ${s.day}: freight is ready; a new merchant is at the counter.`);
+    return {ok:true,message:`Day ${s.day}. The world has moved; check the new prices.`};
+  }
+  function cashOutValue(s) {
+    // Executable local liquidation only, sharing one budget across all six lots.
+    // Not counted toward the cash-only charter, and intentionally not called profit.
+    let budget=s.markets[0].budget,total=0;
+    for(let g=0;g<6;g++)for(let k=0;k<Math.min(s.inventory[g],s.markets[0].buying[g]);k++) {
+      const price=rawTotal(s,0,g,'sell',k+1)-rawTotal(s,0,g,'sell',k);
+      if(budget>=price){budget-=price;total+=price;}else break;
+    }
+    return total;
+  }
+  function validate(s) {
+    const nonnegative=x=>Number.isFinite(x)&&x>=0;
+    const units=x=>Number.isSafeInteger(x)&&x>=0;
+    if(!s||s.version!==VERSION||typeof s.seed!=='string'||s.seed.length>40||!units(s.rng)||
+       !units(s.day)||s.day<1||s.day>100000||!units(s.cash)||!units(s.capacity)||!units(s.freightCapacity)||
+       !units(s.freightUsed)||s.freightUsed>s.freightCapacity) return false;
+    if(!Array.isArray(s.inventory)||s.inventory.length!==6||!s.inventory.every(units)||
+       !Array.isArray(s.basis)||s.basis.length!==6||!s.basis.every(nonnegative))return false;
+    if(!Array.isArray(s.markets)||s.markets.length!==3)return false;
+    for(const m of s.markets)if(!Array.isArray(m.stock)||m.stock.length!==6||!m.stock.every(units)||
+      !units(m.budget)||!Array.isArray(m.buying)||m.buying.length!==6||!m.buying.every(units)||
+      !Array.isArray(m.history)||m.history.length!==6||!m.history.every(a=>Array.isArray(a)&&a.every(nonnegative))||
+      !Array.isArray(m.last)||m.last.length!==6||!m.last.every(x=>x&&units(x.produced)&&units(x.consumed)&&Number.isInteger(x.workshop)))return false;
+    if(!Array.isArray(s.shipments)||!s.rival||!units(s.rival.cash)||!Array.isArray(s.rival.shipments)||
+      !Array.isArray(s.requests)||!Array.isArray(s.events)||!Array.isArray(s.log)||!s.stats||!s.upgrades||
+      !Number.isSafeInteger(s.nextId))return false;
+    const lot=x=>x&&units(x.qty)&&x.qty>0&&units(x.g)&&x.g<6&&units(x.arrival)&&x.arrival>s.day;
+    for(const x of s.shipments)if(!lot(x)||!units(x.market)||x.market<1||x.market>2||
+      !['buy','sell'].includes(x.kind)||(x.kind==='buy'?!units(x.cost):(!units(x.pay)||!nonnegative(x.basis)||!units(x.fee))))return false;
+    for(const x of s.rival.shipments)if(!lot(x)||!units(x.from)||x.from>2||!units(x.to)||x.to>2||!units(x.pay))return false;
+    for(const r of s.requests)if(!r||!units(r.id)||!units(r.g)||r.g>5||!units(r.qty)||r.qty<1||!units(r.pay)||!units(r.due)||typeof r.who!=='string'||!['open','done','expired'].includes(r.status))return false;
+    for(const e of s.events)if(!e||typeof e.id!=='string'||typeof e.name!=='string'||typeof e.text!=='string'||!units(e.start)||!units(e.end)||!units(e.announced))return false;
+    const v=s.visitor;
+    if(!v||!units(v.g)||v.g>5||!units(v.qty)||v.qty<1||!units(v.ask)||!units(v.limit)||!units(v.patience)||
+      !['buy','sell'].includes(v.side)||!['open','done','left'].includes(v.status)||
+      !['name','title','hint','reply'].every(k=>typeof v[k]==='string'))return false;
+    if(!['sales','purchaseCost','realizedMargin','freight','requests','trades'].every(k=>Number.isFinite(s.stats[k]))||typeof s.upgrades.warehouse!=='boolean'||typeof s.upgrades.berth!=='boolean'||typeof s.charter!=='boolean'||typeof s.introSeen!=='boolean')return false;
+    if(s.log.some(x=>!x||!units(x.day)||typeof x.text!=='string'||typeof x.kind!=='string'))return false;
+    return occupied(s)<=s.capacity;
+  }
+  return {VERSION,GOODS,MARKETS,createGame,copy,quote,trade,maxQuantity,mid,rawTotal,route,occupied,onHand,
+    reservedInbound,negotiate,visitorQuote,passVisitor,fulfill,upgrade,endDay,active,cashOutValue,validate};
+});
+</script><script>/* Riverward Exchange — DOM controls and original programmatic pixel art. */
+(function(){
+'use strict';
+const E=window.Riverward, G=E.GOODS, M=E.MARKETS, KEY='riverward-exchange-v1', LEGACY_KEY='crosswind-exchange-v1';
+const $=id=>document.getElementById(id);
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=x=>Math.round(x).toLocaleString('en-US');
+let saveError='', s, toastTimer=0;
+try {const raw=localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);s=raw?JSON.parse(raw):null;if(s&&!E.validate(s)){s=null;saveError='An incompatible local save was reset.';}}
+catch(_){s=null;saveError='Local storage is unavailable. This session works, but it may not resume after closing.';}
+// Copy an accessible v1 save into the river edition without changing accounting,
+// RNG, dates, cargo, or the original save. Only stored presentation text changes.
+function refreshTheme(state){
+ const rename=text=>String(text).replaceAll('Crosswind','Riverward')
+  .replaceAll('Northern gales','River storms').replaceAll('Lighthouse repairs','Canal lock repairs')
+  .replaceAll('Skywatch keepers','Lock keepers').replaceAll('Fair winds','Safe waters')
+  .replaceAll('I need the hold empty','I need the barge empty')
+  .replaceAll('No hurry. I can try another port.','No hurry. I can try the next landing.');
+ for(const event of state.events){event.name=rename(event.name);event.text=rename(event.text);}
+ for(const request of state.requests)request.who=rename(request.who);
+ for(const entry of state.log)entry.text=rename(entry.text);
+ for(const key of ['title','hint','reply'])state.visitor[key]=rename(state.visitor[key]);
+ return state;
+}
+if(!s)s=E.createGame('RIVERWARD');else refreshTheme(s);
+let ui={market:0,g:4,side:'buy',qty:4,offer:null,visitorId:null};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(_){saveError='Your browser could not save this session. Keep the tab open to preserve your progress.';}}
+function toast(text,error=false){const el=$('toast');el.textContent=text;el.className='toast show'+(error?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3600);}
+function action(result){if(result)toast(result.message||'Done.',!result.ok);save();render();}
+function rect(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),w,h);}
+function ellipse(c,x,y,rx,ry,col){for(let yy=-ry;yy<=ry;yy++){const xx=Math.floor(rx*Math.sqrt(Math.max(0,1-yy*yy/(ry*ry))));rect(c,x-xx,y+yy,xx*2+1,1,col);}}
+function goodArt(c,g,x,y,scale=1){
+  c.save();c.translate(Math.round(x),Math.round(y));c.scale(scale,scale);
+  const r=(x,y,w,h,col)=>rect(c,x,y,w,h,col);
+  if(g===0){r(5,7,12,12,'#94613c');r(4,9,14,8,'#d8a75c');r(6,8,10,10,'#e4bd75');r(6,5,10,3,'#b0864d');r(8,3,6,3,'#f5d69a');r(8,11,2,5,'#b28043');r(11,10,2,7,'#b28043');r(14,11,1,5,'#b28043');}
+  else if(g===1){r(3,8,14,5,'#674336');r(4,7,13,4,'#bd865f');r(6,13,13,5,'#614437');r(7,12,12,4,'#9c6d4f');r(16,8,4,4,'#e9bc7e');r(18,13,3,4,'#d9ab71');r(7,5,12,4,'#9a6a4c');r(17,5,4,4,'#d5a870');r(11,5,2,13,'#53635a');}
+  else if(g===2){r(3,13,17,5,'#455467');r(5,10,13,5,'#9eadb9');r(7,8,9,3,'#dae1da');r(11,5,8,6,'#778b9d');r(12,4,7,3,'#c0ccd1');r(2,14,10,2,'#bac7ce');r(8,13,2,5,'#6f8094');}
+  else if(g===3){r(4,4,7,15,'#775675');r(5,4,6,13,'#c493bd');r(6,5,3,2,'#eed0d9');r(12,7,7,13,'#566f90');r(13,7,6,11,'#92b1c5');r(14,8,3,2,'#d6e4db');r(4,12,7,2,'#ead39b');r(12,14,7,2,'#ead39b');}
+  else if(g===4){r(5,7,13,13,'#486957');r(6,6,11,13,'#77a585');r(4,5,15,3,'#c4ab72');r(7,10,9,6,'#e0d3a0');r(10,9,2,9,'#a99360');r(10,2,3,3,'#bfc18b');r(13,1,4,3,'#77a77f');}
+  else{r(5,5,3,15,'#b08053');r(2,3,10,5,'#536778');r(3,2,9,3,'#c6ccd1');r(15,8,3,12,'#ad7d51');r(13,4,7,5,'#91a5ac');r(15,3,3,3,'#192831');r(12,16,2,4,'#d9b276');}
+  c.restore();
+}
+const icons=G.map((_,g)=>{const c=document.createElement('canvas');c.width=24;c.height=24;goodArt(c.getContext('2d'),g,0,0);return c.toDataURL();});
+function icon(g){return `<img class="good-icon" alt="" src="${icons[g]}">`;}
+function person(c,x,y,coat='#bc7658',flip=false,hat=true,blink=false){
+ c.save();c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);
+ rect(c,-6,18,5,12,'#263447');rect(c,2,18,5,12,'#263447');rect(c,-8,29,7,3,'#151f29');rect(c,2,29,7,3,'#151f29');
+ rect(c,-8,4,17,17,coat);rect(c,-11,6,4,11,coat);rect(c,9,6,4,11,coat);rect(c,-11,15,4,4,'#d9ac85');rect(c,9,15,4,4,'#d9ac85');
+ rect(c,-5,-7,12,13,'#d9ac85');rect(c,-6,-9,13,4,'#503a35');rect(c,-6,-5,3,7,'#503a35');rect(c,0,-1,2,blink?1:2,'#293039');rect(c,5,-1,2,blink?1:2,'#293039');
+ rect(c,0,4,5,1,'#946657');rect(c,-7,14,15,2,'#574539');rect(c,-1,14,3,3,'#e4c178');rect(c,-3,6,3,7,'#e3c697');
+ if(hat){rect(c,-10,-10,22,3,'#6d5540');rect(c,-6,-18,15,8,'#8d744e');rect(c,-6,-12,15,2,'#d8b66b');}
+ c.restore();
+}
+function portrait(v){const c=document.createElement('canvas');c.width=38;c.height=41;const a=c.getContext('2d');rect(a,0,0,38,41,'#263743');rect(a,3,3,32,35,'#394749');rect(a,3,31,32,7,'#313739');person(a,18,19,G[v.g].color,false,true,false);return c.toDataURL();}
+function spark(m,g){const hist=[...s.markets[m].history[g],E.mid(s,m,g)],lo=Math.min(...hist)*.92,hi=Math.max(...hist)*1.08;const points=hist.map((v,i)=>`${2+i*74/Math.max(1,hist.length-1)},${23-(v-lo)/(hi-lo)*20}`).join(' ');return `<svg class="spark" viewBox="0 0 78 26" role="img" aria-label="${esc(G[g].name)} recent indicative price trend"><path d="M1 24H77" stroke="#536057" fill="none"/><polyline points="${points}" fill="none" stroke="${hist.at(-1)>=hist[0]?'#e0bc76':'#91b4a0'}" stroke-width="2"/></svg>`;}
+function renderHud(){
+ const reserved=E.occupied(s)-E.onHand(s),pct=Math.min(100,s.cash/900*100);
+ $('hud').innerHTML=`<div class="metric"><span class="metric-label">Season</span><span class="metric-value">${s.day<=14?'DAY '+s.day+' <span class="muted small">/ 14</span>':'DAY '+s.day}</span><small>${s.day<=14?'One day, as many decisions as you like':'Free trading · season complete'}</small></div><div class="metric"><span class="metric-label">Cash in the till</span><span class="metric-value gold">${fmt(s.cash)} <span class="small">g</span></span><small>${s.charter?'Charter earned · keep trading':'Charter target: 900g cash'}</small><span class="progress"><i style="width:${pct}%"></i></span></div><div class="metric"><span class="metric-label">Warehouse space</span><span class="metric-value">${E.occupied(s)} <span class="muted small">/ ${s.capacity}</span></span><small>${E.onHand(s)} on hand${reserved?' + '+reserved+' reserved for arrivals':''}</small></div><div class="metric"><span class="metric-label">Today’s freight</span><span class="metric-value">${s.freightCapacity-s.freightUsed} <span class="muted small">/ ${s.freightCapacity}</span></span><small>Space remaining · resets tomorrow</small></div>`;
+ $('endday').textContent=`Close day ${s.day} →`;
+ $('save-warning').hidden=!saveError;$('save-warning').textContent=saveError;
+ if(s.day===1&&s.visitor.status==='open')$('hint').textContent='Nara needs to clear a cloth shipment. Try a counteroffer, then compare what the other towns will pay for the lot.';
+ else if(s.shipments.some(x=>x.kind==='sell'))$('hint').textContent='Your export buyers have committed to a fixed price. Freight is paid now; the sale proceeds arrive with delivery.';
+ else if(s.shipments.some(x=>x.kind==='buy'))$('hint').textContent='Purchased cargo is on its way. Its space is reserved, but you cannot sell it before it arrives.';
+ else if(s.day<=5)$('hint').textContent='Look beyond the biggest price gap. Freight, lot size, arrival time, and warehouse space determine the actual deal.';
+ else $('hint').textContent='The right move may be a small lot—or no deal. Buying more raises the next ask; selling more lowers the next bid.';
+ const current=s.events.filter(e=>s.day>=e.start&&s.day<=e.end).map(e=>e.name);
+ $('scene-caption').textContent=current.length?`DAY ${s.day} · ${current.join(' · ')} · Your trading house, Riverward`:`DAY ${s.day} · Your trading house, Riverward · Slow water & open ledgers`;
+}
+function renderMarket(){
+ const m=ui.market,g=ui.g,ms=s.markets[m],r=E.route(s,m),last=ms.last[g],incoming=E.reservedInbound(s,m,g);
+ $('market').innerHTML=`<div class="tabs" role="group" aria-label="Market">${M.map((d,i)=>`<button data-action="market" data-id="${i}" class="${i===m?'selected':''}" aria-pressed="${i===m}">${d.name}<small>${i===0?'Instant · your home':E.route(s,i).days+'-day freight · '+d.freight+'g/space + 2g'}</small></button>`).join('')}</div><div class="market-sub">${esc(M[m].blurb)} · Buyer budget: <span class="gold">${fmt(ms.budget)}g</span></div>
+ <table class="market-table"><thead><tr><th scope="col">Good</th><th scope="col">Stock</th><th scope="col">Buy</th><th scope="col">Sell</th><th scope="col">Yours</th><th scope="col">Trend</th></tr></thead><tbody>${G.map((d,i)=>`<tr class="${i===g?'active':''}"><td><button class="good-select" data-action="good" data-id="${i}" aria-label="Select ${d.name}">${icon(i)}<span>${d.name}<span class="substock">${d.bulk} space${d.bulk>1?'s':''}</span></span></button></td><td class="mono">${ms.stock[i]}<span class="substock">${E.reservedInbound(s,m,i)?'+'+E.reservedInbound(s,m,i)+' due':'on hand'}</span></td><td><button class="price-button" data-action="price" data-id="${i}" data-side="buy" aria-label="Buy ${d.name}">${E.rawTotal(s,m,i,'buy',1)}g</button></td><td><button class="price-button sell-price" data-action="price" data-id="${i}" data-side="sell" aria-label="Sell ${d.name}">${E.rawTotal(s,m,i,'sell',1)}g</button></td><td class="mono">${s.inventory[i]}</td><td>${spark(m,i)}</td></tr>`).join('')}</tbody></table>
+ <div class="trade-drawer"><div class="trade-title"><h3>${ui.side==='buy'?'Buy':'Sell'} ${G[g].name.toLowerCase()} ${ui.side==='buy'?'from':'to'} ${M[m].name}</h3><div class="toggle"><button data-action="side" data-side="buy" class="tiny ${ui.side==='buy'?'selected':''}">Buy</button><button data-action="side" data-side="sell" class="tiny ${ui.side==='sell'?'selected':''}">Sell</button></div></div><div class="trade-controls"><label for="quantity">Quantity</label><input id="quantity" class="field qty-input" type="number" min="1" max="1000" step="1" value="${ui.qty}">${[1,5,10].map(n=>`<button data-action="qty" data-n="${n}" class="${ui.qty===n?'selected':''}">${n}</button>`).join('')}<button data-action="max">Max</button></div><div id="quote-container"></div></div>
+ <details class="market-reasons"><summary>Why this price? · ${G[g].name}</summary><p>${esc(G[g].role)} <strong class="gold">${M[m].name} holds ${ms.stock[g]} units against ${M[m].target[g]} normal stock.</strong> ${incoming?incoming+' already-committed incoming units lower its next buying bid. ':''}Last close: ${last.produced} produced, ${last.consumed} consumed${last.workshop?', workshop '+(last.workshop>0?'+':'')+last.workshop:''}. The market will still buy up to ${ms.buying[g]} more units today, budget permitting. Indicative midpoint ${E.mid(s,m,g).toFixed(1)}g; a 9% dealer margin on each side and whole-coin rounding separate Buy from Sell.</p></details>`;
+ renderQuote();
+}
+function renderQuote(){
+ const {market:m,g,side,qty}=ui,q=E.quote(s,m,g,side,qty),validQty=Number.isInteger(qty)&&qty>0;
+ let text='Choose a positive whole quantity.',note=q.message||'',label=side==='buy'?'Buy lot':'Sell lot';
+ if(validQty&&Number.isFinite(q.total)) {
+  const avg=q.total/qty;
+  text=side==='buy'?`<strong class="gold">${fmt(q.total)}g</strong> paid now · ${avg.toFixed(1)}g per unit`:
+    `<strong class="good">${fmt(q.total)}g</strong> net sale · ${avg.toFixed(1)}g per unit`;
+  text+=`<br>${q.goods}g goods${m?' · '+q.fee+'g freight · '+q.slots+' freight space':' · no freight'}`;
+  if(q.ok) {
+   if(!m) note='Immediate settlement. The lot price includes every unit’s effect on stock.';
+   else if(side==='buy') note=`Goods arrive day ${q.arrival}. ${q.slots} warehouse spaces are reserved now.`;
+   else note=`Pay ${q.fee}g freight now. Receive ${q.goods}g on day ${q.arrival}; the buyer’s price is locked.`;
+   if(m&&q.arrival>14&&s.day<=14)note+=' This arrives after the 14-day charter assessment.';
+  }
+  if(side==='sell'&&s.inventory[g]>=qty) {
+   const cost=s.basis[g]*qty/s.inventory[g],margin=q.total-cost;
+   text+=`<br><span class="${margin>=0?'good':'bad'}">${margin>=0?'+':''}${margin.toFixed(0)}g margin</span> against your ${cost.toFixed(0)}g landed cost`;
+  }
+  label=m?(side==='buy'?'Order by barge':'Book river sale'):(side==='buy'?'Buy lot':'Sell lot');
+ }
+ $('quote-container').innerHTML=`<div class="quote"><div class="quote-detail">${text}</div><button class="primary" data-action="trade" ${q.ok?'':'disabled'}>${label} →</button></div><div class="quote-note ${q.ok?'':'bad'}">${esc(note)}</div>`;
+}
+function renderVisitor(){
+ const v=s.visitor;
+ if(ui.visitorId!==v.id){ui.visitorId=v.id;ui.offer=v.side==='sell'?Math.floor(v.ask*.9):Math.ceil(v.ask*1.12);}
+ $('visitor-patience').textContent=v.status==='open'?`${v.patience} counteroffer${v.patience===1?'':'s'} left`:v.status==='done'?'Deal struck':'Visitor departed';
+ const valid=E.visitorQuote(s,ui.offer),askValid=E.visitorQuote(s,v.ask);
+ $('visitor').innerHTML=`<div class="visitor-top"><img class="portrait-frame" alt="Pixel-art portrait of ${esc(v.name)}, a fictional merchant" src="${portrait(v)}"><div><h3>${esc(v.name)}</h3><p class="small muted">${esc(v.title)}</p><p class="small ${v.side==='sell'?'gold':'good'}">${v.side==='sell'?'Selling to you':'Buying from you'}</p></div></div><div class="visitor-goods">${icon(v.g)}<div><strong>${v.qty} ${G[v.g].name.toLowerCase()}</strong> <span class="muted small">· the entire lot</span><div class="small">${v.side==='sell'?'Asking':'Offering'} <strong class="gold">${v.ask}g</strong> <span class="muted">(${(v.ask/v.qty).toFixed(1)}g each)</span></div></div></div><div class="speech">${esc(v.hint)}<em>${esc(v.reply)}</em></div>${v.status==='open'?`<div class="haggle-controls"><label class="small muted" for="offer">Lot offer</label><input type="number" min="1" max="99999" step="1" class="field" id="offer" value="${ui.offer}" aria-label="Your total offer in coins"><button data-action="offer" id="offer-btn" class="primary" ${valid.ok?'':'disabled'}>Offer</button><button data-action="accept" class="quiet" ${askValid.ok?'':'disabled'}>Accept ${v.ask}g</button><button class="quiet" data-action="pass">Pass</button><span class="small muted" id="visitor-error">${valid.ok?'One lot. No dice roll; the merchant has a fixed reservation price.':esc(valid.message)}</span></div>`:`<div class="visitor-status ${v.status==='done'?'good':'muted'}">${v.status==='done'?'The lot changed hands for '+v.final+'g.':'No trade. A new visitor arrives tomorrow.'}</div>`}`;
+}
+function renderRequests(){
+ const rr=s.requests.filter(r=>r.status==='open');
+ $('requests').innerHTML=rr.length?rr.map(r=>`<div class="request">${icon(r.g)}<div class="details"><h3>${esc(r.who)}</h3><p>${r.qty} ${G[r.g].name.toLowerCase()} · <span class="gold">${r.pay}g total</span><br>Through day ${r.due} · ${s.inventory[r.g]}/${r.qty} on hand</p></div><button data-action="fulfill" data-id="${r.id}" ${s.inventory[r.g]>=r.qty?'':'disabled'}>Deliver →</button></div>`).join(''):'<div class="pad empty">No open requests. New requests appear every third day.</div>';
+}
+function renderCargo(){
+ $('inventory-value').textContent=`${fmt(E.cashOutValue(s))}g sellable here now`;
+ const goods=G.map((d,g)=>s.inventory[g]?`<div class="cargo-chip">${icon(g)}<span>${s.inventory[g]} ${d.name.toLowerCase()} <span class="muted">· ${(s.basis[g]/s.inventory[g]).toFixed(1)}g cost ea.</span></span></div>`:'').join('');
+ const ships=s.shipments.map(x=>`<div class="ship-row">${icon(x.g)}<div class="desc">${x.qty} ${G[x.g].name.toLowerCase()} ${x.kind==='buy'?'←':'→'} ${M[x.market].name}<small>${x.kind==='buy'?'Purchase paid · warehouse space reserved':'Buyer committed · '+x.pay+'g receivable'}</small></div><span class="arrival">DAY ${x.arrival}</span></div>`).join('');
+ $('cargo').innerHTML=`<div class="cargo-list">${goods||'<div class="empty">Empty shelves. Goods bought at your home market appear here immediately.</div>'}</div><div class="section-label">Along the river</div>${ships||'<div class="empty">No barges booked. Remote trades reserve river freight automatically.</div>'}<div class="upgrade-row"><button data-action="upgrade" data-which="warehouse" ${s.upgrades.warehouse||s.cash<160?'disabled':''}>${s.upgrades.warehouse?'Warehouse loft installed':'Warehouse loft · +20 space · 160g'}</button><button data-action="upgrade" data-which="berth" ${s.upgrades.berth||s.cash<150?'disabled':''}>${s.upgrades.berth?'Second mooring installed':'Second mooring · +12 freight/day · 150g'}</button></div>`;
+}
+function renderNews(){const events=s.events.filter(e=>e.announced<=s.day&&e.end>=s.day);$('news-list').innerHTML=events.length?events.map(e=>`<article class="notice ${s.day<e.start?'not-active':''}"><span class="when">${s.day>=e.start?'Happening now':'Confirmed ahead'} · days ${e.start}–${e.end}</span><h3>${esc(e.name)}</h3><p>${esc(e.text)}</p></article>`).join(''):'<div class="pad empty">No special events on the calendar. Ordinary production, demand, and trading continue.</div>';}
+function render(){
+ renderHud();renderMarket();renderVisitor();renderRequests();renderCargo();renderNews();
+ $('ledger-summary').textContent=`Trading ledger · ${Math.round(s.stats.realizedMargin)>=0?'+':''}${fmt(s.stats.realizedMargin)}g realized trading margin · ${s.stats.requests} requests delivered`;
+ $('log').innerHTML=s.log.map(x=>`<div class="log-entry ${esc(x.kind)}"><span>DAY ${x.day}</span>${esc(x.text)}</div>`).join('');
+}
+function showReport(){const r=s.seasonReport;$('report-body').innerHTML=`<div class="eyebrow">The first fourteen days</div><h2 id="report-heading">${r.charter?'Your charter is signed.':'A merchant in the making.'}</h2><p>${r.charter?'You reached 900 coins in cash during the season. The guild has granted your permanent trading charter.':'The charter asks for 900 coins in cash. This season fell short, but your business is still open.'}</p><p><strong class="gold">${fmt(r.cash)}g</strong> cash at close · <strong>${r.requests}</strong> requests completed.</p><p class="small muted">Realized trading margin: ${r.margin>=0?'+':''}${fmt(r.margin)}g. Goods still on hand cost ${fmt(r.inventoryCost)}g. Outstanding export receipts: ${fmt(r.receivables)}g. These are different accounting measures, not additional cash profits.</p><p>Keep trading with everything you own, or open a new ledger and try another approach.</p><div class="modal-actions"><button class="primary" id="continue-report">Keep trading →</button></div>`;$('report-dialog').showModal();$('continue-report').onclick=()=>$('report-dialog').close();}
+$('app').addEventListener('click',event=>{
+ const b=event.target.closest('button[data-action]');if(!b||b.disabled)return;
+ const a=b.dataset.action;
+ if(a==='market'){ui.market=Number(b.dataset.id);renderMarket();return;}
+ if(a==='good'){ui.g=Number(b.dataset.id);renderMarket();return;}
+ if(a==='price'){ui.g=Number(b.dataset.id);ui.side=b.dataset.side;renderMarket();return;}
+ if(a==='side'){ui.side=b.dataset.side;renderMarket();return;}
+ if(a==='qty'){ui.qty=Number(b.dataset.n);renderMarket();return;}
+ if(a==='max'){ui.qty=Math.max(1,E.maxQuantity(s,ui.market,ui.g,ui.side));renderMarket();return;}
+ if(a==='trade'){action(E.trade(s,ui.market,ui.g,ui.side,ui.qty));return;}
+ if(a==='offer'){action(E.negotiate(s,ui.offer));return;}
+ if(a==='accept'){action(E.negotiate(s,s.visitor.ask));return;}
+ if(a==='pass'){E.passVisitor(s);save();render();return;}
+ if(a==='fulfill'){action(E.fulfill(s,Number(b.dataset.id)));return;}
+ if(a==='upgrade'){action(E.upgrade(s,b.dataset.which));return;}
+ if(a==='endday'||a==='close-top'){const last=s.day;action(E.endDay(s));window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});if(last===14)showReport();return;}
+ if(a==='help'){$('help-dialog').showModal();return;}
+ if(a==='new'){$('seed').value=s.seed;$('new-dialog').showModal();return;}
+});
+$('app').addEventListener('input',event=>{
+ if(event.target.id==='quantity'){ui.qty=Number(event.target.value);renderQuote();}
+ if(event.target.id==='offer'){ui.offer=Number(event.target.value);const q=E.visitorQuote(s,ui.offer);$('offer-btn').disabled=!q.ok;$('visitor-error').textContent=q.ok?'One lot. No dice roll; the merchant has a fixed reservation price.':q.message;}
+});
+$('close-help').onclick=()=>{s.introSeen=true;save();$('help-dialog').close();};
+$('help-dialog').addEventListener('cancel',()=>{s.introSeen=true;save();});
+$('cancel-new').onclick=()=>$('new-dialog').close();
+$('confirm-new').onclick=()=>{s=E.createGame($('seed').value);s.introSeen=true;ui={market:0,g:4,side:'buy',qty:4,offer:null,visitorId:null};save();render();$('new-dialog').close();toast('A fresh ledger. Safe waters!');};
+// Small pixel crest: a balancing scale, not a borrowed sprite or font asset.
+const seal=$('seal').getContext('2d');rect(seal,0,0,24,24,'#2e3b3d');rect(seal,11,3,2,16,'#e6bd70');rect(seal,4,7,16,2,'#e6bd70');rect(seal,4,9,1,6,'#d5b16c');rect(seal,19,9,1,6,'#d5b16c');rect(seal,1,15,8,2,'#e6bd70');rect(seal,16,15,8,2,'#e6bd70');rect(seal,7,20,11,2,'#e6bd70');
+// Original low-resolution scene. Decorative animation never advances simulation time.
+const canvas=$('scene'),c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
+// A grounded riverfront: far-bank homes, waterborne cargo, and a fixed shop.
+// All drawing is decorative; it consumes no game RNG or simulation actions.
+function poly(points,col){c.fillStyle=col;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(Math.round(x),Math.round(y)):c.moveTo(Math.round(x),Math.round(y)));c.closePath();c.fill();}
+function crate(x,y,g,scale=1){
+ c.save();c.translate(Math.round(x),Math.round(y));c.scale(scale,scale);
+ rect(c,0,0,21,18,'#503e36');rect(c,1,1,19,15,'#936a47');rect(c,2,3,17,2,'#be9661');rect(c,3,1,2,15,'#654939');rect(c,16,1,2,15,'#654939');
+ if(g!==undefined){rect(c,7,7,7,7,'#d6b785');rect(c,9,8,3,5,G[g].color);}c.restore();
+}
+function house(x,base,w,h,wall,roof,lit){
+ rect(c,x,base-h,w,h,wall);rect(c,x+2,base-h+3,w-4,h-3,'#c2ad80');
+ for(let i=0;i<8;i++)rect(c,x-3+i*2,base-h-1-i*2,w+6-i*4,2,roof);
+ rect(c,x+5,base-h-14,4,9,'#665c4b');rect(c,x+4,base-h-15,6,2,'#aa9876');
+ rect(c,x+1,base-h,2,h,'#635342');rect(c,x+w-3,base-h,2,h,'#635342');rect(c,x+w/2,base-h,2,h,'#635342');rect(c,x,base-11,w,2,'#736048');
+ for(let xx=x+5;xx<x+w-5;xx+=11){rect(c,xx,base-h+6,5,7,'#465650');rect(c,xx+1,base-h+7,3,4,lit?'#efd28a':'#90a398');}
+ rect(c,x+w-12,base-10,6,10,'#574d3f');rect(c,x-1,base,w+2,3,'#776e58');
+}
+function tree(x,base,scale=1){
+ c.save();c.translate(Math.round(x),Math.round(base));c.scale(scale,scale);
+ rect(c,-2,-16,4,20,'#665a43');rect(c,-15,-29,29,11,'#435b47');rect(c,-19,-22,36,12,'#567153');rect(c,-13,-35,20,13,'#6e8559');rect(c,-10,-31,22,10,'#7b8e5e');rect(c,8,-18,7,11,'#567153');c.restore();
+}
+function barge(x,y,t){
+ const bob=Math.round(Math.sin(t/1250));x=Math.round(x);y=Math.round(y+bob);
+ // Waterline, broad flat hull, folded canopy, and freight stacked on deck.
+ rect(c,x+3,y+12,77,2,'#284e50');rect(c,x+10,y+14,57,1,'#86a89b');
+ poly([[x-4,y+1],[x+83,y+1],[x+75,y+11],[x+8,y+11]],'#3b3930');
+ rect(c,x,y+2,78,3,'#ad8050');rect(c,x+5,y+6,70,2,'#755839');rect(c,x+12,y+10,59,2,'#474337');
+ rect(c,x+9,y-15,17,16,'#9c855a');rect(c,x+7,y-17,22,3,'#455f54');rect(c,x+13,y-12,8,6,'#344f50');rect(c,x+14,y-11,3,4,'#b9c1a1');
+ crate(x+32,y-10,3,.62);crate(x+47,y-10,4,.62);crate(x+42,y-20,0,.56);
+ // Boatman and long steering oar; no mast or balloon.
+ rect(c,x+68,y-12,5,4,'#d3ad7f');rect(c,x+66,y-14,9,2,'#6a523c');rect(c,x+68,y-8,6,9,'#bb7d50');rect(c,x+69,y,2,3,'#313f3b');
+ poly([[x+75,y-8],[x+77,y-9],[x+87,y+9],[x+85,y+10]],'#ae9463');rect(c,x+82,y+8,5,3,'#c2a576');
+}
+function ferry(x,y,t){
+ x=Math.round(x);y=Math.round(y+Math.sin(t/900));
+ rect(c,x+3,y+6,33,1,'#99b8a1');poly([[x-3,y],[x+40,y],[x+34,y+6],[x+3,y+6]],'#574334');rect(c,x,y,37,2,'#c6a36b');
+ rect(c,x+6,y-12,2,12,'#ad8c59');rect(c,x+29,y-12,2,12,'#ad8c59');rect(c,x+4,y-14,29,3,'#b68754');rect(c,x+7,y-13,6,2,'#e2bd80');rect(c,x+20,y-13,6,2,'#e2bd80');
+ for(let i=0;i<3;i++){rect(c,x+11+i*6,y-8,3,3,'#d9b183');rect(c,x+10+i*6,y-5,5,5,['#667d67','#b87752','#758994'][i]);}
+}
+function draw(t){
+ const dusk=s.day%3===0,storm=E.active(s,'gale');
+ const water=storm?'#456868':dusk?'#52766c':'#548680';
+ rect(c,0,0,640,168,storm?'#778887':dusk?'#96908c':'#90b0a7');
+ rect(c,291,32,349,24,storm?'#93a29a':dusk?'#c4aa8e':'#b5c3a4');
+ rect(c,291,56,349,28,dusk?'#d4b994':'#cbd1af');
+ ellipse(c,518,25,11,11,storm?'#c3c1aa':'#f0d8a1');
+ // Hills stay attached to a continuous bank; no floating scenery.
+ poly([[291,64],[314,57],[328,57],[342,48],[358,46],[380,58],[410,59],[426,49],[449,52],[465,61],[495,56],[514,44],[530,48],[545,57],[574,53],[600,57],[626,47],[640,52],[640,79],[291,79]],storm?'#6d8172':'#8c9d75');
+ poly([[291,72],[321,67],[349,69],[380,59],[403,63],[422,70],[459,65],[486,70],[523,65],[559,60],[579,68],[603,65],[640,69],[640,86],[291,86]],'#718568');
+ rect(c,291,74,349,12,'#a99873');rect(c,291,77,349,2,'#ceba8b');
+ for(let i=0;i<19;i++)rect(c,298+i*19,80,1,6,'#857d65');
+ // River first, so piers, buildings, and bridge properly meet the water.
+ rect(c,291,86,349,62,water);rect(c,291,86,349,3,'#3e6863');
+ c.save();c.beginPath();c.rect(291,0,349,168);c.clip();
+ for(let row=0;row<7;row++)for(let col=0;col<9;col++){
+  const x=289+((col*46+row*17+t*(.003+row*.0007))%360),y=92+row*8;
+  rect(c,x,y,12+(col*7+row*3)%15,1,(row+col)%3===0?'#b4c5a6':storm?'#6f9690':'#80a99a');
+ }
+ for(let i=0;i<9;i++){rect(c,339+i*29,90+(i%2)*3,3,13,'#749a88');rect(c,339+i*29,107,3,4,water);}
+ house(313,77,28,27,'#93805a','#846044',dusk);
+ house(350,77,34,35,'#a29271','#a0684e',dusk);
+ house(391,77,25,25,'#958467','#6c7962',dusk);
+ tree(443,75,.72);tree(460,74,.54);
+ house(478,77,32,33,'#b09972','#8d634f',dusk);
+ house(517,78,26,22,'#8f876e','#6e7965',dusk);
+ // A small stone bridge crosses the mouth of the canal, with visible piers.
+ rect(c,557,70,83,5,'#c3b58b');rect(c,557,75,83,12,'#918d75');
+ for(const ax of [571,600,627]){
+  rect(c,ax-5,78,10,12,water);rect(c,ax-3,76,6,3,water);rect(c,ax-7,84,14,4,water);
+  rect(c,ax-7,87,14,2,'#416b65');
+ }
+ rect(c,555,68,85,2,'#e0cea0');rect(c,559,62,3,8,'#aa9975');rect(c,579,62,3,8,'#aa9975');rect(c,602,62,3,8,'#aa9975');rect(c,626,62,3,8,'#aa9975');rect(c,560,63,78,2,'#a99875');
+ // Mooring steps and greenery keep the far bank grounded.
+ rect(c,422,80,15,3,'#c6b384');rect(c,419,83,21,3,'#ae9f7a');rect(c,418,86,24,2,'#887f68');
+ for(let i=0;i<7;i++){rect(c,302+i*3,81-i%3*2,1,7+i%3*2,'#56745a');}
+ const boatX=376+Math.sin(t/16000)*32;
+ barge(boatX,112,t);ferry(508+Math.sin(t/10000+1)*32,130,t);
+ // Optional fair ribbons; storm rain is decorative, never a new cost.
+ if(E.active(s,'fair')){
+  for(let i=0;i<10;i++){rect(c,323+i*20,45+(i%3),14,1,'#716448');rect(c,327+i*20,46+(i%3),4,5,['#d4ac62','#b56d4e','#8ea67b'][i%3]);}
+ }
+ if(storm){for(let i=0;i<44;i++){const x=296+((i*29+t*.04)%339),y=(i*19+t*.075)%138;rect(c,x,y,1,4,'#b0bdb0');}}
+ c.restore();
+ // A solid stone quay, with a short wooden loading jetty at the river's edge.
+ rect(c,291,143,349,25,'#877861');rect(c,291,139,349,4,'#c3b086');rect(c,291,143,349,3,'#5b6051');
+ for(let y=149;y<168;y+=8){rect(c,291,y,349,1,'#afa081');for(let x=297+(y%3)*7;x<640;x+=29)rect(c,x,y,1,8,'#6c6956');}
+ rect(c,548,132,91,8,'#90724c');for(let x=550;x<640;x+=12)rect(c,x,132,1,8,'#544b39');rect(c,550,129,5,15,'#776146');rect(c,632,129,5,15,'#776146');
+ // Fixed shop interior: warm beams, goods, a ledger, and an actual counter.
+ rect(c,0,0,291,168,'#302f2c');rect(c,9,8,270,126,'#4f4839');
+ for(let y=14;y<132;y+=15){rect(c,10,y,270,1,'#605540');for(let x=20+(y%2)*12;x<275;x+=37)rect(c,x,y,1,14,'#433d32');}
+ rect(c,25,21,79,57,'#273e37');rect(c,29,25,71,49,'#a9bca0');rect(c,30,49,69,11,'#728970');rect(c,30,60,69,14,water);rect(c,33,65,21,1,'#bdc9aa');rect(c,72,69,20,1,'#9fba9e');rect(c,61,23,5,55,'#584736');rect(c,27,46,76,4,'#584736');rect(c,23,78,82,5,'#a08050');
+ rect(c,132,23,112,58,'#332e27');rect(c,127,42,122,5,'#aa8656');rect(c,127,77,122,5,'#aa8656');
+ for(let i=0;i<6;i++){goodArt(c,i,135+i*17,21,.7);goodArt(c,5-i,135+i*17,54,.75);}
+ rect(c,0,135,291,33,'#725b42');for(let y=138;y<168;y+=7)rect(c,0,y,291,1,'#9f7e51');for(let x=20;x<291;x+=41)rect(c,x,135,1,33,'#514638');
+ rect(c,0,0,304,10,'#352c25');rect(c,0,9,304,4,'#a37a47');rect(c,9,0,9,136,'#6b4c34');rect(c,275,0,13,147,'#604630');rect(c,276,0,3,146,'#b08a54');
+ // A striped canvas valance shelters the goods at the shop's open side.
+ rect(c,289,10,24,7,'#b7905f');rect(c,289,17,6,4,'#e2c28b');rect(c,301,17,6,4,'#e2c28b');
+ person(c,107,100,'#668b74',false,false,Math.floor(t/150)%33===0);
+ person(c,228,94,G[s.visitor.g].color,true,true,Math.floor(t/120)%31===0);
+ rect(c,31,121,223,24,'#4c3931');rect(c,28,115,228,8,'#c5a06a');rect(c,31,123,223,3,'#9b6b41');
+ for(let x=34;x<250;x+=35){rect(c,x,128,27,12,'#6b4c38');rect(c,x+3,131,21,1,'#89613f');}
+ rect(c,125,108,19,6,'#e8d8a9');rect(c,132,107,1,7,'#a78c60');rect(c,125,114,20,2,'#644b37');
+ rect(c,55,101,2,15,'#d9b96f');rect(c,46,103,21,2,'#b39557');rect(c,45,105,1,7,'#cdb269');rect(c,66,105,1,7,'#cdb269');rect(c,40,111,11,2,'#e2c682');rect(c,61,111,11,2,'#e2c682');rect(c,50,114,12,2,'#ab874f');
+ for(let i=0;i<Math.min(9,Math.floor(s.cash/60));i++)rect(c,162+(i%3)*6,112-Math.floor(i/3)*2,5,2,'#dfb75d');
+ rect(c,261,19,1,10,'#bd985a');rect(c,254,29,15,19,'#755b39');rect(c,257,31,9,13,'#f1cf80');rect(c,259,33,5,9,Math.sin(t/230)>.2?'#fff0b6':'#f7df99');rect(c,253,27,17,3,'#39372e');rect(c,253,47,17,3,'#39372e');
+ // On-hand stock remains a visual pile, never a manual loading task.
+ crate(298,128,0);crate(323,128,4);for(let i=0;i<Math.min(7,Math.ceil(E.occupied(s)/7));i++)crate(350+(i%4)*24,128-Math.floor(i/4)*19,i%6);
+ // Quayside hoist and barrels; all supports meet the stone or wooden jetty.
+ rect(c,624,93,6,51,'#65533d');rect(c,624,93,2,51,'#b3945e');rect(c,579,94,51,5,'#917447');poly([[619,98],[623,98],[625,123],[621,121]],'#725c3b');rect(c,583,98,1,27,'#b0a079');rect(c,579,122,10,2,'#4c4d3d');crate(574,124,2);
+ rect(c,603,127,13,18,'#644c35');rect(c,601,130,17,13,'#a07849');rect(c,602,132,15,2,'#48554a');rect(c,602,140,15,2,'#48554a');rect(c,604,126,11,2,'#c19d65');
+ rect(c,11,163,618,5,'#2e352c');
+}
+
+let frameAt=0;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(t){if(t-frameAt>50){draw(reduced?0:t);frameAt=t;}requestAnimationFrame(frame);}
+render();save();requestAnimationFrame(frame);if(!s.introSeen)$('help-dialog').showModal();
+// A read-only developer snapshot helps inspect/save-test the standalone build.
+Object.defineProperty(window,'riverwardDebug',{get:()=>({state:E.copy(s),selection:{...ui}})});
+})();
+</script></body></html>

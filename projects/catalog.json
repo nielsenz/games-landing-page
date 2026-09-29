@@ -1,0 +1,83 @@
+[
+  {
+    "slug": "night-relay",
+    "name": "Night Relay",
+    "genre": "Gunship escort",
+    "status": "playable",
+    "source": "Night-Relay-v0.2.html",
+    "sha256": "18b2c5a185336374ede35d30bc8f49ac0debcfa21baab62dae8dd08b6da0d4b5",
+    "route": "/night-relay/"
+  },
+  {
+    "slug": "boostball-16",
+    "name": "Boostball 16",
+    "genre": "Car soccer",
+    "status": "playable",
+    "source": "Games/Boostball_16_v0_2_Play.html",
+    "sha256": "a7426129baa4d51bd22604dbfb4d7d7b0a08bfdcf2f99c5eb14daa35ceb5b3a7",
+    "route": "/boostball-16/"
+  },
+  {
+    "slug": "roofline",
+    "name": "Roofline",
+    "genre": "Skateboarding",
+    "status": "playable",
+    "source": "Games/Roofline.html",
+    "sha256": "fcce744052426ed91a1b4c125e0cc699e79429d291cf797363eccacb3c067e2f",
+    "route": "/roofline/"
+  },
+  {
+    "slug": "pocket-behemoth",
+    "name": "Pocket Behemoth",
+    "genre": "Boss fight",
+    "status": "playable",
+    "source": "Games/Pocket-Behemoth.html",
+    "sha256": "e886941008d0cf7709d2b10d224136721b40c2b91216a3f83989a69b44c56fc4",
+    "route": "/pocket-behemoth/"
+  },
+  {
+    "slug": "crumb-command",
+    "name": "Crumb Command",
+    "genre": "Tiny-army RTS",
+    "status": "playable",
+    "source": "Crumb_Command.html",
+    "sha256": "fe1f7c2ccdca55efef91b765a5f51cc3cfaa9f15a7a13fcd9a888984dab2427f",
+    "route": "/crumb-command/"
+  },
+  {
+    "slug": "riverward-exchange",
+    "name": "Riverward Exchange",
+    "genre": "Merchant trading",
+    "status": "playable",
+    "source": "Riverward_Exchange.html",
+    "sha256": "7e070018ffc22e27807ac1ece2a391e7f87b04625a865a424a451d7bc626c363",
+    "route": "/riverward-exchange/"
+  },
+  {
+    "slug": "dreadworks",
+    "name": "Dreadworks",
+    "genre": "Trap defense",
+    "status": "playable",
+    "source": "index(1).html",
+    "sha256": "066727668e24c31224221a62d548f9c7eb1965a98aedaaae2a5682f89e8cc4da",
+    "route": "/dreadworks/"
+  },
+  {
+    "slug": "pinecone-pass",
+    "name": "Pinecone Pass",
+    "genre": "Cozy management",
+    "status": "playable",
+    "source": "pinecone-pass-prototype.html",
+    "sha256": "b05962408e8719d5067c82e510ebd6a5192e20b7a5cc46c94e53647e39c33463",
+    "route": "/pinecone-pass/"
+  },
+  {
+    "slug": "blackwater",
+    "name": "Blackwater",
+    "status": "missing_assets",
+    "missing": [
+      "assets/index-CU-4aIDH.js",
+      "assets/index-BiePoi3e.css"
+    ]
+  }
+]
