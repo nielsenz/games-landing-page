@@ -74,10 +74,10 @@
   {
     "slug": "blackwater",
     "name": "Blackwater",
-    "status": "missing_assets",
-    "missing": [
-      "assets/index-CU-4aIDH.js",
-      "assets/index-BiePoi3e.css"
-    ]
+    "genre": "Pirate sandbox",
+    "status": "playable",
+    "source": "../pirates-redo/dist/",
+    "sha256": "ec7c4bcf008cf32377da8985dfd7b840eb6d9b02df4955ceeeda0bafaeb2620c",
+    "route": "/blackwater/"
   }
 ]
