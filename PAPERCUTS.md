@@ -31,3 +31,23 @@ Requesting the TLS certificate immediately after attaching games.zacharynielsen.
 2026-09-29T05:08:28.404Z - gpt-6-astra - znielsen
 
 After Netlify created the games DNS record, dig resolved it but curl still reported Could not resolve host, consistent with a cached negative DNS result. Verify HTTPS against a resolved Netlify address while the local resolver refreshes.
+
+2026-09-29T05:15:10.199Z - gpt-6-astra - znielsen
+
+The custom domain resolves through authoritative, Google, Cloudflare, and default dig queries, while macOS system resolution still fails. dscacheutil -flushcache alone did not clear this negative lookup.
+
+2026-09-29T23:46:07.565Z - gpt-6 - znielsen
+
+Reviewing input and persistence across the arcade: ripgrep matched minified single-line CSS and truncated the useful JavaScript results. Limit matching line length or extract script sections for cross-game searches.
+
+2026-09-29T23:50:59.636Z - gpt-6 - znielsen
+
+Adding arcade asset checks: scanning raw HTML also matched src attributes inside JavaScript template strings (Riverward's generated icons). Strip inline scripts before checking static asset references.
+
+2026-09-29T23:50:59.675Z - gpt-6 - znielsen
+
+Adding cross-game simulation checks: Roofline uses mode time, not timed, and Night Relay exposes summary(), not snapshot(). Read each engine API before assuming shared test conventions.
+
+2026-09-29T23:51:10.745Z - gpt-6 - znielsen
+
+Correction to the prior test note: Roofline does accept timed. The smoke test assumed a 130-second completion window without using the game's configured scoreRunSeconds and overtime allowance.

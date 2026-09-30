@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#244d3d" />
   <meta name="description" content="Pinecone Pass — a cozy, low-click campground planning game prototype." />
-  <title>Pinecone Pass — 7-Day Prototype</title>
+  <title>Pinecone Pass — Campground Adventures</title>
   <style>
 :root {
   --ink: #173126;
@@ -1677,6 +1677,47 @@ h3 {
   }
 }
 
+/* Challenge board and the decisions that interrupt a day. */
+.star-count { background: var(--forest); color: var(--sun); padding: .55rem .85rem; border-radius: 100px; font-weight: 800; white-space: nowrap; }
+.challenge-section { margin: 1.3rem 0; }
+.challenge-heading, .forecast-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.challenge-heading span { color:var(--ink-soft); font-size:.875rem; }
+.challenge-board { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin-top:.6rem; }
+.challenge-card { text-align:left; display:grid; gap:.4rem; padding:1rem 1.1rem; background:var(--cream); border:2px solid var(--paper-deep); border-radius:var(--radius-md); cursor:pointer; transition:border-color .15s, transform .15s; }
+.challenge-card:hover { transform:translateY(-2px); border-color:var(--forest-2); }
+.challenge-card.selected { background:var(--forest); color:var(--cream); border-color:var(--forest); box-shadow:0 4px 0 var(--sun); }
+.challenge-card strong { font-size:1.05rem; }
+.challenge-card span, .challenge-card small { font-size:.875rem; }
+.challenge-card small { font-weight:700; color:var(--brown); }
+.challenge-card.selected small { color:var(--sun); }
+.forecast { width:100%; padding:1rem; background:var(--cream); border:1px solid var(--paper-deep); border-radius:var(--radius-md); }
+.forecast-heading { font-size:.875rem; }
+.on-track { color:#28683f; font-weight:700; }
+.at-risk { color:#934323; font-weight:700; }
+.forecast-guests { display:flex; flex-wrap:wrap; gap:.65rem 1.2rem; margin:.8rem 0; }
+.forecast-guests div { display:flex; gap:.65rem; font-size:.875rem; }
+.forecast p { margin:0 0 .4rem; font-size:.875rem; }
+.forecast small { font-size:.8rem; color:var(--ink-soft); }
+.open-camp-wrap .forecast { grid-column:1 / -1; margin-bottom:.7rem; }
+.reward-recap { padding:1.1rem 1.25rem; margin:1rem 0; background:var(--forest); color:var(--cream); border-radius:var(--radius-md); border-bottom:4px solid var(--sun); }
+.reward-recap strong { color:var(--sun); font-size:1.15rem; }
+.reward-recap p { margin:.5rem 0 0; }
+.postcard-reasons { font-size:.875rem; color:var(--ink-soft); border-top:1px dashed var(--paper-deep); padding-top:.75rem; }
+.incident-modal { width:min(590px,calc(100% - 24px)); max-height:90dvh; overflow:auto; padding:clamp(1.2rem,4vw,2rem); color:var(--ink); background:var(--cream); border:2px solid var(--forest); border-radius:24px; box-shadow:var(--shadow); }
+.incident-modal::backdrop { background:rgba(15,35,27,.64); backdrop-filter:blur(4px); }
+.incident-modal h2 { font-size:2rem; }
+.incident-choices { display:grid; gap:.7rem; }
+.incident-option { display:grid; gap:.35rem; text-align:left; padding:1rem; background:var(--paper); border:2px solid var(--paper-deep); border-radius:12px; cursor:pointer; }
+.incident-option:not(:disabled):hover { border-color:var(--forest); background:#e1ead8; }
+.incident-option span, .incident-option small { font-size:.875rem; }
+.incident-option:disabled { opacity:.55; cursor:not-allowed; }
+.incident-footnote { margin:1rem 0 0; color:var(--ink-soft); font-size:.875rem; }
+@media(max-width:700px) { .challenge-board { grid-template-columns:1fr; } .challenge-card { gap:.2rem; padding:.8rem 1rem; } .challenge-heading { gap:.2rem; } .topbar-actions { flex-wrap:wrap; } .forecast-guests { flex-direction:column; } }
+@media(prefers-reduced-motion:reduce) { .challenge-card { transition:none; } }
+
+.choice-card small, .panel-help, .guest-copy p, .site-select-label, .tag, .plan-summary { font-size:.875rem; }
+.challenge-card:disabled { cursor:default; transform:none; }
+
 </style>
 </head>
 <body>
@@ -1685,12 +1726,13 @@ h3 {
       <div class="brand-lockup">
         <div class="brand-mark" aria-hidden="true">▲</div>
         <div>
-          <p class="eyebrow">A seven-day cozy management prototype</p>
+          <p class="eyebrow">Seven days. Your kind of campground.</p>
           <h1>Pinecone Pass</h1>
         </div>
       </div>
 
       <div class="topbar-actions">
+        <span class="star-count" id="starCount">★ 0 / 21</span>
         <button class="text-button" id="howToButton" type="button">How to play</button>
         <button class="text-button danger-text" id="resetButton" type="button">New week</button>
       </div>
@@ -1743,6 +1785,7 @@ h3 {
         </div>
       </section>
 
+      <section class="challenge-section" aria-labelledby="challengeHeading"><div class="challenge-heading"><h2 id="challengeHeading">Make today count</h2><span>Pick one challenge · build a streak for bigger bonuses</span></div><div id="challengeBoard" class="challenge-board"></div></section>
       <div class="game-grid">
         <section class="panel planning-panel" aria-labelledby="arrivalsHeading">
           <div class="panel-heading">
@@ -1883,6 +1926,7 @@ h3 {
           </div>
 
           <div class="open-camp-wrap">
+            <div id="forecast" class="forecast" aria-live="polite"></div>
             <div class="plan-summary" id="planSummary">A balanced first-day plan, with room for one personal call.</div>
             <button class="primary-button" id="openCampButton" type="button">
               <span>Open camp</span>
@@ -1902,6 +1946,7 @@ h3 {
       <p class="eyebrow" id="resultsEyebrow">Day complete</p>
       <h2 id="resultsTitle">A good first day</h2>
       <p class="modal-lede" id="resultsLede"></p>
+      <div id="rewardRecap" class="reward-recap"></div>
       <div class="delta-row" id="deltaRow"></div>
       <div class="postcard-grid" id="postcardGrid"></div>
       <div class="upgrade-picker hidden" id="upgradePicker">
@@ -1926,7 +1971,7 @@ h3 {
         <article>
           <span>1</span>
           <h3>Review the suggestion</h3>
-          <p>Your crew begins each morning with a reasonable plan. You never need to click through busywork.</p>
+          <p>Pick a daily challenge, then adjust the crew’s starting plan. The live forecast shows who will be happy and what needs work.</p>
         </article>
         <article>
           <span>2</span>
@@ -1936,12 +1981,12 @@ h3 {
         <article>
           <span>3</span>
           <h3>Watch consequences</h3>
-          <p>The campground runs itself for the day. Small stories reveal what worked, what clashed, and who may return.</p>
+          <p>A surprise pauses the day for your decision. Your store, crew, and upgrades can unlock a special response. Skipping animation never skips this choice.</p>
         </article>
         <article>
           <span>4</span>
           <h3>Shape the week</h3>
-          <p>Balance guest joy, town trust, nature health, and camp funds before Sunday’s council vote.</p>
+          <p>Earn up to three stars each day: average 7/10, delight one party at 8.3/10, and complete your chosen challenge. Consecutive challenges pay bigger bonuses.</p>
         </article>
       </div>
       <div class="design-note">
@@ -1950,12 +1995,13 @@ h3 {
     </div>
   </section>
 
+  <dialog class="incident-modal" id="incidentModal" aria-labelledby="incidentTitle" aria-describedby="incidentText"><p class="eyebrow">A little trouble in paradise</p><h2 id="incidentTitle"></h2><p id="incidentText"></p><div id="incidentChoices" class="incident-choices"></div><p class="incident-footnote">Take your time. Camp is waiting for your call.</p></dialog>
   <script>
 (() => {
   "use strict";
 
   const SAVE_KEY = "pinecone-pass-prototype-v1";
-  const DAY_LENGTH_MS = 2100;
+  const DAY_LENGTH_MS = 1500;
 
   const SITES = [
     {
@@ -2800,6 +2846,9 @@ h3 {
     history: [],
     finished: false,
     decisionsChanged: 0,
+    stars: 0,
+    streak: 0,
+    recap: null,
   };
 
   let state = loadState();
@@ -2810,6 +2859,7 @@ h3 {
   let selectedUpgradeId = null;
   let skipRequested = false;
   let wakeSimulation = null;
+  let resolveIncident = null;
 
   const dom = {};
 
@@ -2831,10 +2881,16 @@ h3 {
     }
 
     renderDay(state.dayIndex);
+    if (state.recap) {
+      pendingResult = state.recap;
+      renderResults(pendingResult);
+      openResultsModal();
+    }
   }
 
   function cacheDom() {
     const ids = [
+      "challengeBoard", "forecast", "incidentModal", "incidentChoices", "incidentTitle", "incidentText", "rewardRecap", "starCount",
       "dayCounter",
       "dayTitle",
       "weatherPill",
@@ -2892,7 +2948,7 @@ h3 {
     dom.continueButton.addEventListener("click", continueFromResults);
     dom.howToButton.addEventListener("click", () => openModal(dom.howToModal));
     dom.howToClose.addEventListener("click", () => closeModal(dom.howToModal));
-    dom.resetButton.addEventListener("click", resetGame);
+    dom.resetButton.addEventListener("click", () => resetGame());
     dom.modalBackdrop.addEventListener("click", () => {
       if (!dom.howToModal.classList.contains("hidden")) {
         closeModal(dom.howToModal);
@@ -2942,6 +2998,7 @@ h3 {
     clearTokens();
     clearMapHighlights();
     updateRecommendedLabels();
+    renderChallenges();
     updatePlanSummary();
     setPlanningDisabled(false);
   }
@@ -3058,7 +3115,7 @@ h3 {
   }
 
   function updatePlanSummary() {
-    const day = DAYS[state.dayIndex];
+    const day = DAYS[Math.min(state.dayIndex, DAYS.length - 1)];
     const event = EVENTS[plan.event];
     const store = STORE_OPTIONS.find((item) => item.id === plan.store);
     const staff = STAFF_OPTIONS.find((item) => item.id === plan.staff);
@@ -3072,11 +3129,13 @@ h3 {
 
     if (changes === 0) {
       dom.planSummary.textContent = `The crew suggests ${store.name.toLowerCase()}, ${staff.name.toLowerCase()}, and ${event.name.toLowerCase()}. You can open immediately.`;
+      updateForecast();
       return;
     }
 
     const emphasis = summarizePlanEmphasis(day, plan);
     dom.planSummary.textContent = `You changed ${changes} part${changes === 1 ? "" : "s"} of the suggestion. This plan now leans toward ${emphasis}.`;
+    updateForecast();
   }
 
   function buildRecommendation(day) {
@@ -3096,7 +3155,7 @@ h3 {
       staff = lowest.choice;
     }
 
-    return { assignments, store, staff, event };
+    return { assignments, store, staff, event, challenge: "welcome" };
   }
 
   function findBestAssignments(day) {
@@ -3164,42 +3223,47 @@ h3 {
   }
 
   async function runDay() {
-    if (simulating) return;
+    if (simulating || pendingResult || state.finished) return;
 
     simulating = true;
     skipRequested = false;
-    pendingResult = evaluateDay(DAYS[state.dayIndex], plan);
+    pendingResult = evaluateDay(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], plan);
     setPlanningDisabled(true);
+    dom.resetButton.disabled = true;
     dom.openCampButton.disabled = true;
-    dom.openCampButton.innerHTML = `<span>Camp is open</span><small>Your crew has it from here</small>`;
+    dom.openCampButton.innerHTML = `<span>Camp is open</span><small>A little adventure awaits</small>`;
     dom.skipButton.classList.remove("hidden");
-    createTokens(DAYS[state.dayIndex]);
+    createTokens(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]);
 
     const phases = [
       {
         name: "Morning check-in",
         story: pendingResult.stories[0],
-        action: () => moveTokensToSites(DAYS[state.dayIndex]),
+        action: () => moveTokensToSites(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]),
       },
       {
         name: "Afternoon wandering",
         story: pendingResult.stories[1],
-        action: () => moveTokensToAfternoon(DAYS[state.dayIndex]),
+        action: () => moveTokensToAfternoon(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]),
       },
       {
         name: "Evening together",
         story: pendingResult.stories[2],
-        action: () => moveTokensToEvent(DAYS[state.dayIndex], EVENTS[plan.event]),
+        action: () => moveTokensToEvent(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], EVENTS[plan.event]),
       },
     ];
 
-    for (const phase of phases) {
-      if (skipRequested) break;
+    for (const [index, phase] of phases.entries()) {
+      if (index === 1) {
+        await presentIncident();
+        phases[2].story = pendingResult.incident.story;
+      }
+      if (skipRequested) continue;
       dom.phaseLabel.textContent = phase.name;
       dom.dayLog.innerHTML = `<span class="log-dot"></span><p>${escapeHtml(phase.story)}</p>`;
       showStory(phase.story);
       phase.action();
-      await sleep(DAY_LENGTH_MS);
+      await sleep(window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : DAY_LENGTH_MS);
     }
 
     finishSimulation();
@@ -3230,7 +3294,11 @@ h3 {
     dom.storyBubble.classList.add("hidden");
     dom.phaseLabel.textContent = "Evening recap";
     clearMapHighlights();
+    awardChallenge(pendingResult);
     applyDayResult(pendingResult);
+    state.recap = clone(pendingResult);
+    saveState();
+    dom.resetButton.disabled = false;
     renderResults(pendingResult);
     openResultsModal();
     simulating = false;
@@ -3521,6 +3589,9 @@ h3 {
     state.history.push({
       dayNumber: result.day.number,
       title: result.day.title,
+      stars: result.reward.stars,
+      challenge: result.reward.name,
+      incident: result.incident.story,
       averageScore: result.averageScore,
       event: result.event.name,
       deltas: clone(result.deltas),
@@ -3533,6 +3604,7 @@ h3 {
   }
 
   function renderResults(result) {
+    dom.rewardRecap.innerHTML = `<strong>${"★".repeat(result.reward?.stars || 0)} ${escapeHtml(result.reward?.message || "Day complete")}</strong><p>${escapeHtml(result.incident?.story || "")} ${result.reward?.bonus ? `Challenge bonus: +$${result.reward.bonus}.` : ""}</p>`;
     const average = result.averageScore;
     let title = "A few rough edges";
     if (average >= 8.4) title = "A postcard-perfect day";
@@ -3596,6 +3668,7 @@ h3 {
           <h3>${escapeHtml(party.shortName)}</h3>
         </div>
         <p>“${escapeHtml(note)}”</p>
+        <p class="postcard-reasons">${partyResult.reasons.slice(0, 3).map(escapeHtml).join(" · ")}</p>
         <span class="satisfaction">${satisfaction} · ${score.toFixed(1)}/10</span>
       </article>
     `;
@@ -3684,6 +3757,7 @@ h3 {
       }
     }
 
+    state.recap = null;
     if (pendingResult.day.number === DAYS.length) {
       state.finished = true;
       state.dayIndex = DAYS.length;
@@ -3701,6 +3775,9 @@ h3 {
 
   function renderFinalCouncil() {
     const ending = chooseEnding();
+    let best = state.stars;
+    try { best = Math.max(best, Number(localStorage.getItem("pinecone-best-stars")) || 0); localStorage.setItem("pinecone-best-stars", String(best)); } catch {}
+    dom.rewardRecap.innerHTML = `<strong>★ ${state.stars} / 21 stars · ${state.stars >= 18 ? "Legendary host" : state.stars >= 13 ? "Camp favorite" : "Ranger in training"}</strong><p>Best on this device: ${best} stars. Earn one for a happy camp, one for a delighted guest, and one for your daily challenge.</p>`;
     const allPartyScores = state.history.flatMap((day) => day.partyResults.map((party) => party.score));
     const averageScore = allPartyScores.length
       ? allPartyScores.reduce((sum, score) => sum + score, 0) / allPartyScores.length
@@ -3732,7 +3809,7 @@ h3 {
             <div class="week-stat"><strong>${averageScore.toFixed(1)}</strong><small>Avg. guest stay</small></div>
             <div class="week-stat"><strong>${delighted}</strong><small>Delighted parties</small></div>
             <div class="week-stat"><strong>${bestDay ? `Day ${bestDay.dayNumber}` : "—"}</strong><small>Best day</small></div>
-            <div class="week-stat"><strong>126</strong><small>Chores delegated</small></div>
+            <div class="week-stat"><strong>${state.history.filter(day => day.stars === 3).length}</strong><small>Three-star days</small></div>
           </div>
         </article>
       </div>
@@ -3807,6 +3884,7 @@ h3 {
     dom.joyValue.textContent = state.joy;
     dom.trustValue.textContent = state.trust;
     dom.natureValue.textContent = state.nature;
+    dom.starCount.textContent = `★ ${state.stars} / 21`;
     dom.cashValue.textContent = `$${state.cash}`;
   }
 
@@ -3906,7 +3984,7 @@ h3 {
     dom.guestList.querySelectorAll("select").forEach((select) => {
       select.disabled = disabled;
     });
-    [dom.storeChoices, dom.staffChoices, dom.eventChoices].forEach((container) => {
+    [dom.challengeBoard, dom.storeChoices, dom.staffChoices, dom.eventChoices].forEach((container) => {
       container.querySelectorAll("button").forEach((button) => {
         button.disabled = disabled;
       });
@@ -3927,6 +4005,108 @@ h3 {
       .slice(0, 2)
       .map(([tag]) => prettyTag(tag).toLowerCase());
     return top.join(" and ") || "a balanced day";
+  }
+
+
+  const CHALLENGES = [
+    { id: "welcome", icon: "☺", name: "Happy campers", goal: "Every party leaves with at least 7/10.", test: r => r.partyResults.every(p => p.score >= 7) },
+    { id: "nature", icon: "♧", name: "Leave it better", goal: "Gain at least 3 nature; nobody leaves below 6/10.", test: r => r.deltas.nature >= 3 && r.partyResults.every(p => p.score >= 6) },
+    { id: "town", icon: "⌂", name: "Good neighbors", goal: "Gain at least 4 town trust; nobody leaves below 6/10.", test: r => r.deltas.trust >= 4 && r.partyResults.every(p => p.score >= 6) },
+  ];
+
+  const INCIDENTS = [
+    { title: "The great marshmallow heist", text: "A raccoon has made off with the welcome snacks. Three children have offered to negotiate.", prep: p => p.store === "family", prepText: "Family picnic shelf: spare snacks ready", options: [
+      ["Buy a replacement feast", "The kids appoint you honorary snack captain.", {cash:-35, joy:2}, .6],
+      ["Make a wildlife detective game", "The missing snacks become a lesson in keeping wildlife wild.", {nature:2, joy:1}, .25],
+      ["Bring out the spare picnic", "Your extra supplies save the picnic. The raccoon remains uninvited.", {joy:3}, .8, true] ] },
+    { title: "A lake inside the tent", text: "The scouts’ rainfly has surrendered. Their leader is trying to call this a water feature.", prep: p => p.store === "storm", prepText: "Storm shelf: dry gear in reserve", options: [
+      ["Rent dry tents from town", "The scouts sleep dry. The local outfitter remembers the order.", {cash:-40, trust:2}, .7],
+      ["Turn the lodge into a bunkhouse", "A noisy indoor sleepover saves the night, but the trails go untended.", {nature:-2, joy:1}, .4],
+      ["Deploy the storm supplies", "Your ponchos and tarps become the most admired roof in camp.", {joy:3, trust:1}, .8, true] ] },
+    { title: "Pie emergency. A real one.", text: "The town bake sale has lost its venue. Six pies and their increasingly anxious bakers arrive at your gate.", prep: p => p.staff === "town", prepText: "Town errands: your crew knows the bakers", options: [
+      ["Host the whole bake sale", "The pies sell out. The cleanup lasts rather longer.", {trust:4, nature:-2, cash:-20}, .3],
+      ["Buy pies for tonight’s guests", "Everyone gets a slice, and the bakers still make their donation.", {cash:-35, trust:2, joy:2}, .5],
+      ["Call in the town volunteers", "Your crew’s local friendships turn a crisis into a proper party.", {trust:4, cash:15}, .5, true] ] },
+    { title: "A very small trail closure", text: "A fox family has moved in beside the shortcut. Guests are already gathering for a closer look.", prep: p => p.staff === "trail" || hasUpgrade("boardwalk"), prepText: "Trail crew or boardwalk: a safe detour", options: [
+      ["Close the shortcut", "The foxes keep their peace. A few campers grumble about the long way home.", {nature:4, joy:-2}, -.3],
+      ["Hire a wildlife guide", "The guide gives everyone a good view from a respectful distance.", {nature:2, cash:-40}, .6],
+      ["Open a careful detour", "Your prepared route keeps both curious guests and the fox family happy.", {nature:4, trust:1}, .4, true] ] },
+    { title: "One more van?", text: "A festival band arrives without a reservation. They offer to pay well. Their amplifier is taller than the driver.", prep: p => p.staff === "welcome" || hasUpgrade("pavilion"), prepText: "Welcome crew or pavilion: room to host", options: [
+      ["Squeeze them in", "The band pays generously. Their encore reaches the other side of the lake.", {cash:65, trust:-3, nature:-2}, -.4],
+      ["Find them a room in town", "The innkeeper gets a booking. Camp keeps its quiet corners.", {trust:4, cash:-15}, .2],
+      ["Host an acoustic set", "Your spare gathering space turns strangers into the evening’s favorite memory.", {cash:35, trust:1, joy:2}, .7, true] ] },
+    { title: "The humming generator", text: "The oldest generator has developed a noise like a spoon in a blender. A sunset gathering is about to begin.", prep: p => hasUpgrade("solar") || p.staff === "trail", prepText: "Solar hookups or trail crew: a quiet backup", options: [
+      ["Pay for an emergency repair", "The mechanic fixes the rattle before the first guest sits down.", {cash:-45, trust:1}, .4],
+      ["Go unplugged", "Lanterns replace the lights. Power-hungry campers are less enchanted.", {nature:3, joy:-1}, -.25],
+      ["Switch to the quiet backup", "Your earlier preparation pays off in a beautifully uneventful sunset.", {nature:3, joy:2}, .6, true] ] },
+    { title: "The council takes a wrong turn", text: "The council has arrived at the service gate, beside the compost. One member is taking enthusiastic notes.", prep: p => p.staff === "town" || hasUpgrade("localShelf"), prepText: "Town crew or local shelf: a familiar welcome", options: [
+      ["Show them the whole operation", "The honest tour wins respect, even if it uses up the afternoon’s trail work.", {trust:4, nature:-2}, .2],
+      ["Lay on a lakeside lunch", "A generous lunch buys goodwill and a long look at the view.", {cash:-50, trust:2, joy:2}, .5],
+      ["Let your local partners lead", "The council hears what Pinecone Pass means to the people who live here.", {trust:4, joy:2}, .6, true] ] },
+  ];
+
+  function renderChallenges() {
+    dom.challengeBoard.innerHTML = CHALLENGES.map(c => `<button type="button" class="challenge-card ${plan.challenge === c.id ? "selected" : ""}" data-challenge="${c.id}" aria-pressed="${plan.challenge === c.id}"><strong>${c.icon} ${c.name}</strong><span>${c.goal}</span><small>★ + $${30 + Math.min(state.streak, 3) * 10} if completed</small></button>`).join("");
+    dom.challengeBoard.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
+      if (simulating) return;
+      plan.challenge = button.dataset.challenge;
+      renderChallenges(); updateForecast();
+    }));
+  }
+
+  function effectText(deltas) {
+    return Object.entries(deltas).map(([key, value]) => `${value > 0 ? "+" : "−"}${key === "cash" ? "$" : ""}${Math.abs(value)} ${key === "cash" ? "funds" : key === "trust" ? "town" : key}`).join(" · ");
+  }
+
+  function updateForecast() {
+    const result = evaluateDay(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], plan);
+    const challenge = CHALLENGES.find(c => c.id === plan.challenge);
+    dom.forecast.innerHTML = `<div class="forecast-heading"><strong>Your plan, before surprises</strong><span class="${challenge.test(result) ? "on-track" : "at-risk"}">${challenge.test(result) ? "✓ Challenge on track" : "↗ Challenge needs work"}</span></div><div class="forecast-guests">${result.partyResults.map(p => `<div><span>${p.party.emoji} ${escapeHtml(p.party.shortName)}</span><strong>${p.score >= 8.3 ? "★" : p.score >= 7 ? "☺" : "△"} ${p.score.toFixed(1)}/10</strong></div>`).join("")}</div><p>${escapeHtml(effectText(result.deltas))}${result.conflict ? " · ⚠ Lively and quiet neighbors clash." : ""}</p><small>Expect a mid-day decision. Good preparation can unlock a better option.</small>`;
+    result.partyResults.forEach(p => {
+      const card = dom.guestList.querySelector(`[data-party-id="${p.party.id}"]`);
+      if (card) card.title = p.reasons.join(". ");
+    });
+  }
+
+  function presentIncident() {
+    const incident = INCIDENTS[state.dayIndex];
+    dom.skipButton.classList.add("hidden");
+    dom.phaseLabel.textContent = "Your call";
+    dom.incidentTitle.textContent = incident.title;
+    dom.incidentText.textContent = incident.text;
+    const prepared = incident.prep(plan);
+    dom.incidentChoices.innerHTML = incident.options.map((o, i) => `<button type="button" class="incident-option" data-option="${i}" ${o[4] && !prepared ? "disabled" : ""}><strong>${o[4] ? (prepared ? "✦ " : "🔒 ") : ""}${escapeHtml(o[0])}</strong><span>${escapeHtml(effectText(o[2]))} · ${o[3] > 0 ? "+" : ""}${o[3]} each guest</span>${o[4] ? `<small>${escapeHtml(incident.prepText)}</small>` : ""}</button>`).join("");
+    dom.incidentModal.showModal();
+    dom.incidentModal.oncancel = e => e.preventDefault();
+    return new Promise(resolve => {
+      resolveIncident = resolve;
+      dom.incidentChoices.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
+        if (!resolveIncident) return;
+        const option = incident.options[Number(button.dataset.option)];
+        applyIncident(pendingResult, option);
+        dom.incidentModal.close();
+        dom.skipButton.classList.remove("hidden");
+        const done = resolveIncident; resolveIncident = null; done();
+      }));
+    });
+  }
+
+  function applyIncident(result, option) {
+    Object.entries(option[2]).forEach(([key, value]) => { result.deltas[key] += value; });
+    result.partyResults.forEach(p => { p.score = roundTo(clamp(p.score + option[3], 1.5, 10), 1); p.reasons.push(option[1]); });
+    result.averageScore = roundTo(result.partyResults.reduce((sum, p) => sum + p.score, 0) / result.partyResults.length, 1);
+    result.incident = { choice: option[0], story: option[1] };
+  }
+
+  function awardChallenge(result) {
+    const challenge = CHALLENGES.find(c => c.id === result.plan.challenge) || CHALLENGES[0];
+    const won = challenge.test(result);
+    const bonus = won ? 30 + Math.min(state.streak, 3) * 10 : 0;
+    const stars = Number(result.averageScore >= 7) + Number(result.partyResults.some(p => p.score >= 8.3)) + Number(won);
+    result.reward = { stars, bonus, name: challenge.name, message: won ? `${challenge.name} complete!${state.streak ? ` ${state.streak + 1}-day streak.` : ""}` : `${challenge.name}: missed this time. Tomorrow is a new chance.` };
+    result.deltas.cash += bonus;
+    state.stars += stars;
+    state.streak = won ? state.streak + 1 : 0;
   }
 
   function scoreSiteFit(party, site, weatherId) {
@@ -3991,6 +4171,7 @@ h3 {
   }
 
   function resetGame(skipConfirmation = false) {
+    if (simulating) return;
     if (!skipConfirmation) {
       const confirmed = window.confirm("Start a fresh seven-day week? Your current campground will be reset.");
       if (!confirmed) return;

@@ -18,7 +18,7 @@ The arcade is a separate Netlify project from the existing zacharynielsen.com we
 - `public/<game>/index.html`: game wrapper with All games and full-screen controls.
 - `public/<game>/play.html`: playable build (Blackwater also uses its adjacent `assets/` directory).
 - `projects/<game>/`: available project documents.
-- `projects/catalog.json`: build inventory, routes, and original game hashes.
+- `projects/catalog.json`: build inventory, routes, and current served HTML hashes.
 
 Nine playable games: Night Relay v0.2, Boostball 16 v0.2, Roofline, Pocket Behemoth, Crumb Command, Riverward Exchange, Dreadworks, Pinecone Pass, and Blackwater.
 
@@ -26,6 +26,14 @@ Blackwater is the game developed in the sibling `../pirates-redo/` repository. I
 
 No installation or build step is required. For local preview, run `python3 -m http.server 8000 --directory public`, then open http://localhost:8000/.
 
+## Updating sibling games
+
+Build Pinecone Pass with `node build.cjs` in its source directory and Blackwater with `npm run check` in `../pirates-redo`. Dreadworks is already standalone HTML. Then run `node scripts/sync-games.cjs` here to copy all three into the arcade and refresh every catalog HTML hash. This does not deploy. The sibling directories must be present; the script checks its inputs before copying.
+
+The other six games are maintained directly in `public/<game>/play.html`. Run the sync script after editing them too, so their catalog hashes stay current. Blackwater's old hashed assets are retained; its entry point references the current build.
+
 ## Checks
 
-Verified local gallery and wrapper links and the original game file hashes. A full gameplay test has not been performed.
+Run `node --test tests/arcade.test.cjs`. It checks every catalog entry's scripts, static local links/assets, and HTML hash, plus simulation regressions for Night Relay, Boostball, Roofline, Pocket Behemoth, Crumb Command, and Riverward Exchange. Source projects have their own suites for the remaining games.
+
+See `REVIEW.md` for the September 2026 findings, changes, and test limits. These checks do not replace browser playtesting.

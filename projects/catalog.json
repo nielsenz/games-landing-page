@@ -41,7 +41,7 @@
     "genre": "Tiny-army RTS",
     "status": "playable",
     "source": "Crumb_Command.html",
-    "sha256": "fe1f7c2ccdca55efef91b765a5f51cc3cfaa9f15a7a13fcd9a888984dab2427f",
+    "sha256": "da5e751b6b9d3ed2f1de6b7d12a3fba22c77708243f9a6006fe7b8faf614e41a",
     "route": "/crumb-command/"
   },
   {
@@ -50,7 +50,7 @@
     "genre": "Merchant trading",
     "status": "playable",
     "source": "Riverward_Exchange.html",
-    "sha256": "7e070018ffc22e27807ac1ece2a391e7f87b04625a865a424a451d7bc626c363",
+    "sha256": "6d1623d1b1d1f722d5edbb4aa4d52397bd2df3d8c3cbe895f05c8967a9468633",
     "route": "/riverward-exchange/"
   },
   {
@@ -58,8 +58,8 @@
     "name": "Dreadworks",
     "genre": "Trap defense",
     "status": "playable",
-    "source": "index(1).html",
-    "sha256": "066727668e24c31224221a62d548f9c7eb1965a98aedaaae2a5682f89e8cc4da",
+    "source": "../hostile-architect/index.html",
+    "sha256": "68b5c8168e264515f80eddbe2d891678bbd45d2381499014565a9d8eded2fc7a",
     "route": "/dreadworks/"
   },
   {
@@ -67,8 +67,8 @@
     "name": "Pinecone Pass",
     "genre": "Cozy management",
     "status": "playable",
-    "source": "pinecone-pass-prototype.html",
-    "sha256": "b05962408e8719d5067c82e510ebd6a5192e20b7a5cc46c94e53647e39c33463",
+    "source": "../pinecone-pass/pinecone-pass-prototype/pinecone-pass-prototype.html",
+    "sha256": "f48e9e28bc4414eb536eef5108746ef1e89ce114d9ee4e6ac5a90bb1adf419dc",
     "route": "/pinecone-pass/"
   },
   {
@@ -76,7 +76,7 @@
     "name": "Blackwater",
     "genre": "Pirate sandbox",
     "status": "playable",
-    "source": "../pirates-redo/dist/",
+    "source": "../pirates-redo/dist/index.html",
     "sha256": "ec7c4bcf008cf32377da8985dfd7b840eb6d9b02df4955ceeeda0bafaeb2620c",
     "route": "/blackwater/"
   }

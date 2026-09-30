@@ -390,7 +390,7 @@
     if(!Array.isArray(s.inventory)||s.inventory.length!==6||!s.inventory.every(units)||
        !Array.isArray(s.basis)||s.basis.length!==6||!s.basis.every(nonnegative))return false;
     if(!Array.isArray(s.markets)||s.markets.length!==3)return false;
-    for(const m of s.markets)if(!Array.isArray(m.stock)||m.stock.length!==6||!m.stock.every(units)||
+    for(const m of s.markets)if(!m||!Array.isArray(m.stock)||m.stock.length!==6||!m.stock.every(units)||
       !units(m.budget)||!Array.isArray(m.buying)||m.buying.length!==6||!m.buying.every(units)||
       !Array.isArray(m.history)||m.history.length!==6||!m.history.every(a=>Array.isArray(a)&&a.every(nonnegative))||
       !Array.isArray(m.last)||m.last.length!==6||!m.last.every(x=>x&&units(x.produced)&&units(x.consumed)&&Number.isInteger(x.workshop)))return false;

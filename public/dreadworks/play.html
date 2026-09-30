@@ -8,7 +8,7 @@
   :root {
     color-scheme: dark;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: #130f24;
+    background: #10131f;
   }
   * { box-sizing: border-box; }
   body {
@@ -17,8 +17,8 @@
     display: grid;
     place-items: center;
     background:
-      radial-gradient(circle at 50% 25%, #29204a 0 18%, transparent 42%),
-      #130f24;
+      radial-gradient(ellipse at 50% 5%, #33344e 0, transparent 65%),
+      #10131f;
     color: #f4e9ce;
   }
   .shell {
@@ -39,9 +39,9 @@
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    border: 4px solid #6c547c;
+    border: 4px solid #817084;
     outline: 4px solid #231b38;
-    box-shadow: 0 16px 50px rgba(0,0,0,.45);
+    box-shadow: 0 0 0 1px #b5a090, 0 24px 70px rgba(0,0,0,.6);
     background: #19152c;
     overflow: hidden;
   }
@@ -54,6 +54,13 @@
     cursor: crosshair;
     touch-action: none;
   }
+  .levels { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+  .levels[hidden] { display: none; }
+  .levels button { font: inherit; font-size: 13px; color: #f4e9ce; background: #231b38; border: 2px solid #6c547c; padding: 8px 12px; cursor: pointer; }
+  .levels button:disabled { opacity: .5; cursor: default; }
+  .levels button[aria-pressed="true"] { border-color: #ffcf70; color: #ffcf70; }
+  .levels button:focus-visible { outline: 2px solid #79d8db; outline-offset: 3px; }
+  .level-note { font-size: 12px; color: #cfc0df; margin: 0 0 12px; }
   .hint {
     margin-top: 10px;
     line-height: 1.45;
@@ -73,13 +80,28 @@
 <body>
 <div class="shell">
   <div class="topline">
-    <div><strong>DREADWORKS</strong> / prototype 0.1</div>
+    <div><strong>DREADWORKS</strong> / THE HOSTILE ARCHITECT</div>
     <div>Build the level. Release the heroes. Regret the gaps.</div>
   </div>
-  <div class="frame"><canvas id="game" width="384" height="216"></canvas></div>
+  <nav class="levels" aria-label="Start a new level">
+    <button id="level-0" type="button" aria-pressed="true">1 · Broken Road</button>
+    <button id="level-1" type="button" aria-pressed="false">2 · Iron Foundry</button>
+    <button id="pause-game" type="button" disabled>Pause [P]</button>
+    <span class="level-note">Survive 12 waves to win. Choose a level to start a fresh run.</span>
+  </nav>
+  <p id="level-description" class="level-note" aria-live="polite"></p>
+  <div class="frame"><canvas id="game" width="384" height="216" tabindex="0" aria-label="Dreadworks battlefield. Select a shop card, then click a tile to place it."></canvas></div>
+  <div id="victory-actions" class="levels" aria-label="Victory choices" hidden>
+    <button id="continue-endless" type="button">Continue endless [E]</button>
+    <button id="next-level" type="button">Next level [N]</button>
+  </div>
   <div class="hint">
     Click a shop card, then a tile to place it. Right-click a placed trap to sell it in build phase.
-    <kbd>1</kbd>–<kbd>5</kbd> select cards, <kbd>Space</kbd> releases a wave, <kbd>P</kbd> pauses, <kbd>R</kbd> restarts after defeat.
+    <kbd>1</kbd>–<kbd>5</kbd> select cards, <kbd>Space</kbd> releases a wave, <kbd>P</kbd> pauses, <kbd>R</kbd> restarts after defeat or victory.
+    <br>Start with 24 gold: try three complementary pieces. Spikes reset in 3s; saws in 0.8s; crushers recover for 3.2s after impact. Springs near gaps can catch survivors.
+    <br>Blocks delay heroes, but stranded heroes break through after 1.5s. Kills pay bounties; wave-clear bonuses start at 5 gold.
+    <br>Cannons reload in 2.2s. From wave 9, reinforced balloons take two hits. Layer your air coverage.
+    <br>From wave 4, armored knights take only ¼ damage from spikes. Use saws, cannons, or crushers to finish them.
   </div>
 </div>
 <script>
@@ -101,6 +123,8 @@
   const WORLD_BOTTOM = 176;
   const GRAVITY = 180;
   const CASTLE_X = 354;
+  const VICTORY_WAVE = 12;
+  const CANNON_RELOAD = 2.2;
 
   const C = {
     sky0: '#17142c',
@@ -128,24 +152,27 @@
   };
 
   const TRAP_DEFS = {
-    block:    { name: 'BLOCK',    cost: 4,  support: false, desc: 'route' },
-    spikes:   { name: 'SPIKES',   cost: 6,  support: true,  desc: 'hurt' },
-    spring:   { name: 'SPRING',   cost: 7,  support: true,  desc: 'launch' },
+    block:    { name: 'BLOCK',    cost: 4,  support: false, desc: '1.5s wall' },
+    spikes:   { name: 'SPIKES',   cost: 8,  support: true,  desc: '3s reset' },
+    spring:   { name: 'SPRING',   cost: 6,  support: true,  desc: 'launch' },
     conveyor: { name: 'REVERSE',  cost: 6,  support: true,  desc: 'push' },
-    saw:      { name: 'SAW',      cost: 10, support: true,  desc: 'shred' },
-    cannon:   { name: 'CANNON',   cost: 16, support: true,  desc: 'ranged' },
-    crusher:  { name: 'CRUSHER',  cost: 14, support: false, desc: 'slam' }
+    saw:      { name: 'SAW',      cost: 10, support: true,  desc: '.8s reset' },
+    cannon:   { name: 'CANNON',   cost: 16, support: true,  desc: '2.2s load' },
+    crusher:  { name: 'CRUSHER',  cost: 14, support: false, desc: '3.2s reset' }
   };
 
   const HERO_DEFS = {
     recruit:  { hp: 1, speed: 27, jumpSkill: .72, jumpPower: 70, bounty: 1, tint: C.cream },
     rogue:    { hp: 1, speed: 38, jumpSkill: .82, jumpPower: 72, bounty: 1, tint: C.cyan },
-    knight:   { hp: 3, speed: 20, jumpSkill: .58, jumpPower: 64, bounty: 2, tint: C.blue },
+    knight:   { hp: 3, speed: 20, jumpSkill: .58, jumpPower: 64, bounty: 2, tint: C.blue, spikeArmor: .25 },
     acrobat:  { hp: 1, speed: 29, jumpSkill: .97, jumpPower: 92, bounty: 2, tint: C.green },
     balloon:  { hp: 1, speed: 23, jumpSkill: 1, jumpPower: 0, bounty: 2, tint: C.purple, flying: true }
   };
 
-  const baseSolids = [
+  const LEVELS = [{
+    name: 'Broken Road',
+    description: 'Three gaps break up the road. Layer traps across the islands.',
+    solids: [
     { x: 0,   y: 160, w: 96, h: 16, kind: 'ground' },
     { x: 112, y: 160, w: 96, h: 16, kind: 'ground' },
     { x: 224, y: 160, w: 96, h: 16, kind: 'ground' },
@@ -153,7 +180,21 @@
     { x: 48,  y: 112, w: 48, h: 8,  kind: 'platform' },
     { x: 160, y: 96,  w: 48, h: 8,  kind: 'platform' },
     { x: 256, y: 128, w: 48, h: 8,  kind: 'platform' }
-  ];
+    ]
+  }, {
+    name: 'Iron Foundry',
+    description: 'A long entrance feeds two furnace gaps. Use the overhead gantries for crushers and crossfire.',
+    solids: [
+      { x: 0, y: 160, w: 144, h: 16, kind: 'ground' },
+      { x: 160, y: 160, w: 64, h: 16, kind: 'ground' },
+      { x: 240, y: 160, w: 144, h: 16, kind: 'ground' },
+      { x: 32, y: 112, w: 48, h: 8, kind: 'platform' },
+      { x: 112, y: 96, w: 64, h: 8, kind: 'platform' },
+      { x: 208, y: 112, w: 48, h: 8, kind: 'platform' },
+      { x: 288, y: 96, w: 48, h: 8, kind: 'platform' }
+    ]
+  }];
+  let baseSolids = LEVELS[0].solids;
 
   // ---------------------------------------------------------------------------
   // Utilities
@@ -178,14 +219,36 @@
     ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
   }
 
+  // A tiny bitmap alphabet keeps labels crisp at the native 384px resolution.
+  const PIXEL_FONT = {
+    A:'010101111101101', B:'110101110101110', C:'011100100100011', D:'110101101101110',
+    E:'111100110100111', F:'111100110100100', G:'011100101101011', H:'101101111101101',
+    I:'111010010010111', J:'001001001101010', K:'101101110101101', L:'100100100100111',
+    M:'101111111101101', N:'101111111111101', O:'010101101101010', P:'110101110100100',
+    Q:'010101101111011', R:'110101110101101', S:'011100010001110', T:'111010010010010',
+    U:'101101101101111', V:'101101101101010', W:'101101111111101', X:'101101010101101',
+    Y:'101101010010010', Z:'111001010100111',
+    0:'111101101101111',1:'010110010010111',2:'110001010100111',3:'110001010001110',
+    4:'101101111001001',5:'111100110001110',6:'011100111101111',7:'111001010010010',
+    8:'111101111101111',9:'111101111001110',
+    ' ':'000000000000000','-':'000000111000000','+':'000010111010000',
+    '/':'001001010100100','.':'000000000000010',':':'000010000010000',
+    '[':'110100100100110',']':'011001001001011','!':'010010010000010',
+    '?':'110001010000010','‹':'001010100010001','•':'000000010000000'
+  };
   function pxText(text, x, y, color = C.cream, size = 8, align = 'left') {
-    ctx.font = `bold ${size}px ui-monospace, monospace`;
-    ctx.textAlign = align;
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = C.black;
-    ctx.fillText(text, Math.round(x + 1), Math.round(y + 1));
-    ctx.fillStyle = color;
-    ctx.fillText(text, Math.round(x), Math.round(y));
+    const chars=String(text).toUpperCase(), scale=size>=10?2:1;
+    const width=(chars.length*4-1)*scale;
+    let left=Math.round(x-(align==='center'?width/2:align==='right'?width:0));
+    const top=Math.round(y);
+    for(const shadow of color === C.black ? [false] : [true,false]) {
+      const offset=shadow?1:0;
+      for(let i=0;i<chars.length;i++) {
+        const glyph=PIXEL_FONT[chars[i]]||PIXEL_FONT['?'];
+        for(let bit=0;bit<15;bit++) if(glyph[bit]==='1')
+          rect(left+i*4*scale+(bit%3)*scale+offset,top+Math.floor(bit/3)*scale+offset,scale,scale,shadow?C.black:color);
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -221,12 +284,15 @@
   let lastT = performance.now();
   let pointer = { x: 0, y: 0, inside: false };
 
-  function freshState() {
+  function freshState(level) {
     return {
-      mode: 'build', // build | wave | gameover
+      level,
+      mode: 'build', // build | wave | victory | gameover
+      endless: false,
+      simAccumulator: 0,
       paused: false,
       wave: 1,
-      gold: 30,
+      gold: 24,
       castleHp: 10,
       maxCastleHp: 10,
       traps: [],
@@ -250,25 +316,48 @@
     };
   }
 
-  function resetGame() {
-    state = freshState();
+  function resetGame(level = state ? state.level : 0) {
+    if (!Number.isInteger(level) || !LEVELS[level]) return;
+    baseSolids = LEVELS[level].solids;
+    state = freshState(level);
+    state.banner = LEVELS[level].name.toUpperCase();
     rollShop();
+    document.getElementById('victory-actions').hidden = true;
+    document.getElementById('level-description').textContent = LEVELS[level].description;
+    LEVELS.forEach((_, i) => document.getElementById(`level-${i}`).setAttribute('aria-pressed', String(i === level)));
+  }
+
+  function continueEndless() {
+    if (state.mode !== 'victory') return;
+    state.endless = true;
+    state.mode = 'build';
+    state.banner = 'ENDLESS MODE'; state.bannerT = 1.8;
+    document.getElementById('victory-actions').hidden = true;
+  }
+
+  function nextLevel() {
+    if (state.mode !== 'victory') return;
+    resetGame((state.level + 1) % LEVELS.length);
   }
 
   function rollShop() {
     const advanced = shuffle(['spring', 'conveyor', 'saw', 'cannon', 'crusher']);
-    const offers = ['block', 'spikes'];
+    const offers = ['block', 'spikes', 'saw'];
+    if (state.wave <= 3) offers.push('spring');
     if (state.wave >= 6) {
       offers.push('cannon');
       for (const id of advanced) if (!offers.includes(id) && offers.length < 5) offers.push(id);
     } else {
-      for (const id of advanced) if (offers.length < 5) offers.push(id);
+      for (const id of advanced) if (!offers.includes(id) && offers.length < 5) offers.push(id);
     }
     state.shop = offers.slice(0, 5);
     state.selected = state.shop[0];
   }
 
   resetGame();
+  document.getElementById('continue-endless').addEventListener('click', continueEndless);
+  document.getElementById('next-level').addEventListener('click', nextLevel);
+  LEVELS.forEach((_, i) => document.getElementById(`level-${i}`).addEventListener('click', () => resetGame(i)));
 
   // ---------------------------------------------------------------------------
   // Geometry helpers
@@ -365,7 +454,7 @@
     if (state.mode !== 'build') return;
     state.mode = 'wave';
     state.paused = false;
-    state.spawnLeft = Math.min(12 + state.wave * 4, 76);
+    state.spawnLeft = Math.min(10 + state.wave * 3, 76);
     state.waveSpawned = 0;
     state.spawnTimer = .15;
     state.banner = `WAVE ${state.wave}`;
@@ -388,12 +477,14 @@
     const type = heroTypeForWave();
     const d = HERO_DEFS[type];
     const flying = !!d.flying;
+    const airHp = flying && state.wave >= 9 ? 2 : d.hp;
     const hpScale = state.wave >= 12 ? 1 + Math.floor((state.wave - 10) / 6) : 1;
     const h = {
       id: state.nextId++,
       type,
-      x: -10 - rand(0, 5),
-      y: flying ? rand(64, 118) : 150,
+      // Spawn on the entrance floor; off-map spawns fall before reaching it.
+      x: 0,
+      y: flying ? rand(64, 118) : 160 - (type === 'knight' ? 11 : 10),
       w: type === 'knight' ? 9 : 7,
       h: type === 'knight' ? 11 : 10,
       vx: d.speed,
@@ -401,12 +492,14 @@
       speed: d.speed * (1 + Math.min(state.wave * .006, .12)),
       jumpSkill: d.jumpSkill,
       jumpPower: d.jumpPower,
-      hp: d.hp * hpScale,
-      maxHp: d.hp * hpScale,
+      hp: airHp * hpScale,
+      maxHp: airHp * hpScale,
       bounty: d.bounty,
       grounded: !flying,
       groundY: 160,
       threatSeen: false,
+      checkedTraps: new Set(),
+      evading: false,
       hitTimers: Object.create(null),
       dead: false,
       flying,
@@ -421,7 +514,9 @@
     const look = clamp(7 + h.speed * .12, 8, 13);
     const footY = h.y + h.h;
     const probeX = h.x + h.w + look;
-    const sameLevelSupport = supportAt(probeX, footY, 2);
+    // Jump at the lip of a pit so the short arc is spent crossing the gap.
+    // Walls still need the longer lookahead below.
+    const sameLevelSupport = supportAt(h.x + h.w / 2 + 1, footY, 2);
 
     const obstacle = solids().some(s => {
       if (s.y >= footY - 1) return false;
@@ -435,6 +530,16 @@
 
   function damageHero(h, amount, source, knockX = 0, knockY = 0) {
     if (h.dead) return;
+    const spikeArmor = HERO_DEFS[h.type].spikeArmor;
+    if (source === 'spikes' && spikeArmor) {
+      amount *= spikeArmor;
+      // Heavy boots also resist the spike bounce, but not other trap impulses.
+      knockX = 0;
+      knockY = 0;
+      if (!h.hitTimers.armorFlash) addFloater('ARMORED', h.x, h.y - 7, C.blue);
+      h.hitTimers.armorFlash = .7;
+      h.hitTimers.spikeGuard = .7;
+    }
     h.hp -= amount;
     if (knockX) h.vx += knockX;
     if (knockY) h.vy = knockY;
@@ -449,7 +554,33 @@
     }
   }
 
+  function tryEvadeTrap(h) {
+    if (!h.grounded || state.wave === 1) return false;
+    const footY = h.y + h.h;
+    const trap = state.traps
+      .filter(t => ['saw', 'spikes', 'spring', 'conveyor'].includes(t.type)
+        && !h.checkedTraps.has(t.id)
+        && Math.abs(t.y + TILE - footY) <= 2
+        && t.x >= h.x + h.w - 1 && t.x <= h.x + h.w + 9)
+      .sort((a, b) => a.x - b.x)[0];
+    if (!trap) return false;
+    // One decision per trap: an inattentive hero cannot reroll every frame.
+    h.checkedTraps.add(trap.id);
+    const specialty = h.type === 'acrobat' ? .20 : h.type === 'rogue' ? .12 : h.type === 'knight' ? -.08 : 0;
+    const awareness = clamp(.25 + (state.wave - 2) * .14 + specialty, .15, .92);
+    if (Math.random() >= awareness) return false;
+    // A deliberate running jump clears a single floor trap. Combinations,
+    // low ceilings, and traps near pits can still catch an alert hero.
+    h.vy = -Math.max(h.jumpPower, 90);
+    h.vx = Math.max(h.vx, 42);
+    h.evading = true;
+    h.grounded = false;
+    beep(280, .018, 'square', .006, 60);
+    return true;
+  }
+
   function updateHero(h, dt) {
+    if (h.dead) return;
     h.anim += dt * 10;
     h.bob += dt * 4;
 
@@ -462,6 +593,8 @@
       h.x += h.speed * dt;
       h.y += Math.sin(h.bob) * 2.4 * dt;
     } else {
+      if (h.grounded) h.evading = false;
+      tryEvadeTrap(h);
       const threat = threatAhead(h);
       if (threat && !h.threatSeen && h.grounded) {
         h.threatSeen = true;
@@ -476,9 +609,11 @@
       }
 
       // Let conveyor / trap impulses alter vx, but pull toward native movement.
-      h.vx += (h.speed - h.vx) * Math.min(1, dt * 4.5);
+      const moveSpeed = h.evading ? Math.max(h.speed, 42) : h.speed;
+      h.vx += (moveSpeed - h.vx) * Math.min(1, dt * 4.5);
 
       // Horizontal movement + simple block collision.
+      let blockedBy = null;
       const oldX = h.x;
       h.x += h.vx * dt;
       const hr = { x: h.x, y: h.y, w: h.w, h: h.h };
@@ -486,6 +621,7 @@
         if (s.kind === 'ground' || s.kind === 'platform') continue;
         if (overlaps(hr, s)) {
           if (h.vx > 0 && oldX + h.w <= s.x + 2) {
+            blockedBy = s.ref;
             h.x = s.x - h.w;
             h.vx *= .15;
           } else if (h.vx < 0 && oldX >= s.x + s.w - 2) {
@@ -493,6 +629,23 @@
             h.vx = 0;
           }
         }
+      }
+
+      // A missed jump must not imprison a hero forever. A wall buys time,
+      // then a stranded hero breaks through; multiple heroes do not speed it up.
+      if (blockedBy && h.grounded) {
+        h.blockedT = (h.blockedId === blockedBy.id ? h.blockedT : 0) + dt;
+        h.blockedId = blockedBy.id;
+        if (h.blockedT >= 1.5) {
+          state.traps = state.traps.filter(t => t !== blockedBy);
+          spawnParticles(blockedBy.x + 8, blockedBy.y + 8, C.stone2, 8, 28);
+          addFloater('BREACH', blockedBy.x + 8, blockedBy.y, C.cream);
+          h.threatSeen = false;
+          h.blockedT = 0;
+        }
+      } else {
+        h.blockedT = 0;
+        h.blockedId = null;
       }
 
       const oldY = h.y;
@@ -536,6 +689,7 @@
       state.gold += h.bounty;
       addFloater(`+${h.bounty}`, clamp(h.x, 4, W - 12), 163, C.gold);
       beep(85, .06, 'square', .014, -30);
+      return;
     }
 
     if (h.x + h.w >= CASTLE_X) {
@@ -571,14 +725,16 @@
         const key = `${t.id}`;
         if (t.type === 'spikes') {
           const zone = { x: t.x + 1, y: t.y + 7, w: 14, h: 9 };
-          if (overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+          if (t.cooldown <= 0 && overlaps(h, zone) && !h.flying && !h.hitTimers[key] && !h.hitTimers.spikeGuard) {
+            t.cooldown = 3;
             h.hitTimers[key] = .42;
             damageHero(h, 1, 'spikes', 2, -25);
             beep(145, .025, 'square', .009, 80);
           }
         } else if (t.type === 'saw') {
           const zone = { x: t.x + 2, y: t.y + 3, w: 12, h: 13 };
-          if (overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+          if (t.cooldown <= 0 && overlaps(h, zone) && !h.flying && !h.hitTimers[key]) {
+            t.cooldown = .8;
             h.hitTimers[key] = .22;
             damageHero(h, 2, 'saw', -8, -18);
             beep(115, .018, 'square', .008, 35);
@@ -609,15 +765,15 @@
     let best = 130;
     for (const h of state.heroes) {
       if (h.dead) continue;
-      const dx = h.x - t.x;
+      const dx = (t.x - 2) - (h.x + h.w / 2);
       const dy = Math.abs((h.y + h.h / 2) - (t.y + 6));
-      if (dx > 4 && dx < best && dy < 62) {
+      if (dx > 0 && dx < best && dy < 62) {
         target = h; best = dx;
       }
     }
     if (!target) return;
-    t.cooldown = 1.15;
-    const ox = t.x + 15, oy = t.y + 7;
+    t.cooldown = CANNON_RELOAD;
+    const ox = t.x - 2, oy = t.y + 7;
     const tx = target.x + target.w / 2, ty = target.y + target.h / 2;
     const len = Math.hypot(tx - ox, ty - oy) || 1;
     const spd = 125;
@@ -644,7 +800,7 @@
       if (t.offset >= 52) {
         t.offset = 52;
         t.crushState = 2;
-        t.cooldown = 1.6;
+        t.cooldown = 3.2;
         state.shake = Math.max(state.shake, 2.2);
         spawnParticles(t.x + 8, t.y + t.offset + 14, C.stone2, 8, 36);
         beep(62, .08, 'square', .035, -18);
@@ -718,7 +874,15 @@
   // Main update
   // ---------------------------------------------------------------------------
   function update(dt) {
-    dt = Math.min(dt, .033);
+    // Trap timing and spring trajectories use the same physics step on every display.
+    state.simAccumulator += Math.min(dt, .1);
+    while (state.simAccumulator >= 1 / 60) {
+      state.simAccumulator -= 1 / 60;
+      stepUpdate(1 / 60);
+    }
+  }
+
+  function stepUpdate(dt) {
     updateFx(dt);
 
     if (state.mode !== 'wave' || state.paused) return;
@@ -738,12 +902,16 @@
     state.heroes = state.heroes.filter(h => !h.dead);
 
     if (state.mode === 'wave' && state.spawnLeft === 0 && state.heroes.length === 0) {
-      const clearBonus = 10 + state.wave * 2;
+      const clearBonus = 4 + Math.min(state.wave, 8);
       state.gold += clearBonus;
       addFloater(`WAVE CLEAR +${clearBonus}g`, W / 2, 62, C.gold);
       state.banner = 'WAVE CLEAR'; state.bannerT = 1.1;
       state.wave++;
-      state.mode = 'build';
+      state.mode = state.wave === VICTORY_WAVE + 1 && !state.endless ? 'victory' : 'build';
+      if (state.mode === 'victory') {
+        document.getElementById('victory-actions').hidden = false;
+        document.getElementById('next-level').textContent = state.level + 1 < LEVELS.length ? 'Next level [N]' : 'Back to level 1 [N]';
+      }
       state.paused = false;
       for (const t of state.traps) { t.cooldown = 0; t.crushState = 0; t.offset = 0; }
       rollShop();
@@ -755,55 +923,142 @@
   // ---------------------------------------------------------------------------
   // Rendering
   // ---------------------------------------------------------------------------
+  // Visual animation is independent of gameplay randomness and physics.
+  const visualTime = () => performance.now() / 1000;
+  function polygon(points, color) {
+    ctx.fillStyle = color; ctx.beginPath();
+    points.forEach(([x,y],i) => i ? ctx.lineTo(Math.round(x),Math.round(y)) : ctx.moveTo(Math.round(x),Math.round(y)));
+    ctx.closePath(); ctx.fill();
+  }
+  function flame(x, y, color = C.orange) {
+    const flicker = Math.floor(visualTime()*8+x)%3;
+    rect(x-2,y-3-flicker,5,7+flicker,color);
+    rect(x,y-2,2,6,C.gold); rect(x,y+1,1,3,C.white);
+  }
   function drawBackground() {
-    rect(0, 0, W, H, C.sky0);
-    rect(0, HUD_H, W, 38, C.sky1);
-    rect(0, HUD_H + 38, W, 74, C.sky2);
-
-    // Moon
-    rect(300, 38, 22, 22, C.moon);
-    rect(296, 42, 30, 14, C.moon);
-    rect(303, 35, 14, 28, C.moon);
-    rect(298, 39, 4, 4, C.sky1);
-    rect(315, 49, 3, 3, '#d3ba83');
-
-    // Distant mountains
-    ctx.fillStyle = '#342d50';
-    ctx.beginPath();
-    ctx.moveTo(0, 131); ctx.lineTo(40, 90); ctx.lineTo(72, 120); ctx.lineTo(112, 76);
-    ctx.lineTo(156, 127); ctx.lineTo(206, 84); ctx.lineTo(246, 125); ctx.lineTo(302, 88);
-    ctx.lineTo(350, 128); ctx.lineTo(384, 104); ctx.lineTo(384, 176); ctx.lineTo(0, 176); ctx.closePath(); ctx.fill();
-
-    // tiny stars
-    const stars = [[17,42],[34,65],[86,40],[132,55],[149,34],[206,48],[236,70],[273,43],[345,63],[366,36]];
-    for (const [x,y] of stars) rect(x,y,1,1,C.cream);
+    const t = visualTime();
+    if (state.level === 1) {
+      rect(0,0,W,H,'#171721');
+      for (let y=HUD_H;y<166;y+=14) rect(0,y,W,14,['#25202b','#2b232e','#322630','#392a31','#412f33','#483235','#503635','#563935','#593b36','#603e36'][Math.floor((y-HUD_H)/14)]);
+      // Distant factory roofs, smokestacks, and drifting pixel smoke.
+      for (let i=0;i<7;i++) {
+        const x=i*62-12, top=93+(i*17)%29;
+        rect(x,top,52,70,'#28242e');
+        polygon([[x,top],[x+22,top-14],[x+22,top],[x+46,top-14],[x+46,top]],'#302730');
+        rect(x+12,top-44,10,44,'#27232d'); rect(x+10,top-44,14,4,'#594047');
+        for(let j=0;j<3;j++) {
+          const drift=(t*5+j*12+i*3)%36;
+          rect(x+8+drift/4,top-48-drift,12+j*3,5,'#45343e');
+        }
+        for(let wx=x+5;wx<x+48;wx+=12) rect(wx,top+12,4,7,'#84503c');
+      }
+      // Near iron framework remains subdued behind traps and enemies.
+      for(const x of [8,184,328]) {
+        rect(x,54,5,107,'#332a33'); rect(x+1,54,1,107,'#67504c');
+        rect(x-5,68,16,3,'#46353b');
+        for(let y=76;y<155;y+=20) rect(x+1,y,2,2,'#947057');
+      }
+      rect(0,166,W,10,'#a34430'); rect(0,168,W,2,'#ee8d49');
+      for(let x=0;x<W;x+=13) {
+        const shift=Math.sin(t*2+x)*3;
+        rect(x+shift,171,8,1,'#ffc76b'); rect(x-shift,175,5,1,'#eb7540');
+      }
+      for(let i=0;i<13;i++) {
+        const x=(i*43+Math.sin(t+i)*4)%W,y=166-(t*9+i*11)%68;
+        rect(x,y,1,2,y>132?'#db8950':'#805044');
+      }
+      return;
+    }
+    const sky=['#15192c','#1c2037','#242940','#30334d','#3d3b57','#4b4360','#574a64'];
+    for(let y=HUD_H;y<176;y+=22) rect(0,y,W,22,sky[Math.min(6,Math.floor((y-HUD_H)/22))]);
+    for(let i=0;i<35;i++) {
+      const x=(i*73+17)%W,y=31+(i*31)%61;
+      rect(x,y,1,1,Math.sin(t*.7+i)>.5?'#d6c5b1':'#746d8c');
+    }
+    // Stepped halo and cratered moon.
+    rect(290,32,41,36,'#454154'); rect(286,39,49,22,'#454154');
+    rect(297,34,25,32,'#cabd9e'); rect(292,40,35,20,'#e6d5ac'); rect(296,37,27,26,'#e6d5ac');
+    rect(303,39,14,20,'#f1dfb7'); rect(298,45,5,4,'#bdaf97'); rect(314,55,6,3,'#cabd9e');
+    for(let i=0;i<4;i++) {
+      const x=((i*113+t*1.4)%470)-65,y=52+i%2*20;
+      rect(x,y,48,3,'#51465e'); rect(x+9,y-3,22,3,'#51465e');
+    }
+    polygon([[0,126],[35,86],[67,114],[113,74],[157,123],[209,83],[248,119],[304,86],[354,126],[384,99],[384,176],[0,176]],'#36344c');
+    polygon([[80,111],[113,74],[132,101],[116,93],[109,98],[104,94]],'#62556b');
+    polygon([[177,114],[209,83],[228,103],[211,98],[205,101]],'#5c5267');
+    // Ruined aqueduct gives the road a place in the world.
+    rect(0,128,W,6,'#2b2c40');
+    for(let x=-8;x<W;x+=40) {
+      rect(x,132,8,44,'#292b3c'); rect(x-3,132,14,5,'#292b3c');
+      rect(x+8,134,5,8,'#292b3c'); rect(x+27,134,5,8,'#292b3c');
+    }
+    for(let i=0;i<14;i++) {
+      const x=i*31-5,y=131+(i*13)%17;
+      rect(x,y,2,29,'#1b2331');
+      polygon([[x-7,y+14],[x+1,y-5],[x+9,y+14]],'#232b3a');
+      polygon([[x-9,y+23],[x+1,y+3],[x+11,y+23]],'#232b3a');
+    }
+    rect(0,173,W,3,'#111a26');
   }
 
   function drawTerrain() {
+    const iron=state.level===1;
     for (const s of baseSolids) {
       if (s.kind === 'ground') {
-        rect(s.x, s.y, s.w, s.h, C.dirt);
-        rect(s.x, s.y, s.w, 3, C.grass);
-        for (let x = s.x + 4; x < s.x + s.w; x += 11) rect(x, s.y + 7 + ((x/11|0)%2)*3, 3, 2, C.dirt2);
-        rect(s.x, s.y + s.h - 2, s.w, 2, '#3b2426');
+        rect(s.x,s.y,s.w,s.h,iron?'#302c35':'#3f2e35');
+        for(let x=s.x;x<s.x+s.w;x+=16) {
+          rect(x+1,s.y+5,14,5,iron?'#49414a':'#66434a');
+          rect(x+2,s.y+6,11,1,iron?'#61515a':'#86565a');
+          rect(x+5,s.y+11,10,4,iron?'#3b353e':'#503640');
+          if(iron) {rect(x+2,s.y+7,1,1,C.stone2);rect(x+13,s.y+7,1,1,C.stone2);}
+          else {rect(x+3,s.y+3,3,3,'#657b53');rect(x+11,s.y+2,2,3,'#455f48');}
+        }
+        rect(s.x,s.y,s.w,2,iron?'#b18c65':'#a3b979');
+        rect(s.x,s.y+2,s.w,1,iron?'#66535a':'#637b50');
+        rect(s.x,s.y+15,s.w,1,C.black);
+        rect(s.x,s.y+3,1,12,iron?'#796069':'#8b5c5d');
+        if(iron) for(let x=s.x+2;x<s.x+s.w;x+=8) rect(x,s.y+3,4,2,'#be955c');
       } else {
-        rect(s.x, s.y, s.w, s.h, C.stone1);
-        rect(s.x, s.y, s.w, 2, C.stone2);
-        for (let x = s.x + 4; x < s.x + s.w - 2; x += 12) rect(x, s.y + 4, 5, 2, C.stone0);
+        rect(s.x,s.y,s.w,s.h,iron?'#343340':'#3c394e');
+        rect(s.x,s.y,s.w,2,iron?'#a08b78':'#9c91a7');
+        rect(s.x,s.y+2,s.w,1,iron?'#655b61':'#625b77');
+        for(let x=s.x+3;x<s.x+s.w-2;x+=12) {
+          rect(x,s.y+4,7,2,'#242535'); rect(x,s.y+3,1,1,C.stone2);
+        }
+        rect(s.x,s.y+s.h-1,s.w,1,C.black);
+        for(const x of [s.x+3,s.x+s.w-5]) {
+          rect(x,s.y+s.h,2,4,iron?'#4d414b':'#51455b');
+          if(!iron) rect(x+1,s.y+s.h+2,1,4,'#53664c');
+        }
       }
     }
   }
 
   function drawCastle() {
-    const flash = state.castleFlash > 0 && Math.floor(state.castleFlash * 20) % 2 === 0;
-    const stone = flash ? C.red : C.stone1;
-    rect(350, 120, 34, 40, C.stone0);
-    rect(354, 108, 26, 52, stone);
-    rect(352, 106, 8, 8, stone); rect(364, 104, 8, 10, stone); rect(376, 106, 6, 8, stone);
-    rect(362, 142, 12, 18, C.black);
-    rect(364, 132, 4, 6, C.gold);
-    rect(374, 118, 2, 10, C.red);
-    rect(376, 118, 8, 5, C.red);
+    const flash=state.castleFlash>0&&Math.floor(state.castleFlash*20)%2===0;
+    const stone=flash?C.red:'#575269';
+    rect(348,117,36,43,'#232332'); rect(353,108,28,52,stone);
+    for(let y=116;y<160;y+=7) for(let x=354+(y%2)*4;x<380;x+=9) {
+      rect(x,y,7,1,flash?C.orange:'#746b80'); rect(x+7,y+1,1,5,'#3b384c');
+    }
+    for(const x of [350,376]) {
+      rect(x,108,8,52,stone); rect(x,108,2,51,'#81758a'); rect(x+7,110,1,50,'#302e42');
+      rect(x-1,105,10,5,'#99909d');
+      for(let bx=x-1;bx<x+9;bx+=4)rect(bx,101,2,5,'#99909d');
+    }
+    rect(359,139,14,21,'#242230'); rect(361,136,10,3,'#242230');
+    rect(361,141,10,19,'#443c43');
+    for(let x=362;x<372;x+=3)rect(x,141,1,19,'#9b7f67');
+    rect(361,147,10,2,'#282635');
+    rect(363,119,7,11,'#222535');rect(365,120,3,8,C.cyan);rect(366,121,1,5,C.white);
+    rect(357,133,3,3,'#332b37');rect(373,133,3,3,'#332b37');
+    flame(358,130);flame(374,130);
+    rect(378,86,1,16,'#b2a2a3');
+    const flutter=Math.sin(visualTime()*4)>0?1:0;
+    rect(367,87+flutter,11,7,'#9f455e');rect(369,88+flutter,8,2,'#dc6d79');rect(368,94+flutter,3,2,'#702f4c');
+    // Visible cracks as core integrity falls.
+    if(state.castleHp<7) {rect(354,122,1,6,C.black);rect(355,127,2,1,C.black);rect(356,128,1,5,C.black);}
+    if(state.castleHp<4) {rect(380,135,2,2,C.black);rect(379,137,1,6,C.black);}
   }
 
   function drawTrap(t) {
@@ -812,79 +1067,134 @@
       case 'block':
         rect(x, y, 16, 16, C.dirt2); rect(x, y, 16, 3, C.dirt3);
         rect(x+2,y+5,6,3,C.dirt); rect(x+10,y+5,4,3,C.dirt);
-        rect(x+5,y+11,8,3,C.dirt); break;
+        rect(x+5,y+11,8,3,C.dirt); rect(x,y,1,16,'#d89c65'); rect(x+15,y+2,1,14,C.black);
+        rect(x+2,y+4,5,1,'#c18a5d'); rect(x+6,y+10,7,1,'#a26a50'); break;
       case 'spikes':
         rect(x, y+12, 16, 4, C.stone0);
+        if (t.cooldown > 0) {
+          rect(x+1,y+11,14,2,C.stone1);
+          rect(x+1,y+14,Math.ceil(14 * (1 - t.cooldown / 3)),1,C.gold);
+          break;
+        }
         ctx.fillStyle = C.cream;
-        for (let i=0;i<4;i++) { ctx.beginPath(); ctx.moveTo(x+i*4,y+12); ctx.lineTo(x+i*4+2,y+4); ctx.lineTo(x+i*4+4,y+12); ctx.fill(); }
+        for (let i=0;i<4;i++) { ctx.beginPath(); ctx.moveTo(x+i*4,y+12); ctx.lineTo(x+i*4+2,y+4); ctx.lineTo(x+i*4+4,y+12); ctx.fill(); rect(x+i*4+2,y+8,1,4,C.stone2); }
+        rect(x+1,y+13,14,1,C.stone2);rect(x+2,y+14,1,1,C.gold);rect(x+13,y+14,1,1,C.gold);
         break;
       case 'spring':
         rect(x+1,y+12,14,4,C.stone0); rect(x+3,y+2,10,3,C.cyan);
-        rect(x+5,y+5,6,2,C.stone2); rect(x+4,y+7,8,2,C.stone1); rect(x+5,y+9,6,3,C.stone2); break;
+        rect(x+3,y+2,10,1,C.white); rect(x+2,y+5,12,1,'#277c91');
+        rect(x+5,y+5,6,2,C.stone2); rect(x+4,y+7,8,2,C.stone1); rect(x+5,y+9,6,3,C.stone2);
+        rect(x+6,y+5,1,7,C.cream);rect(x+2,y+13,12,1,C.stone2);break;
       case 'conveyor':
         rect(x,y+9,16,7,C.stone0); rect(x,y+9,16,2,C.stone2);
         rect(x+2,y+12,3,2,C.orange); rect(x+7,y+12,3,2,C.orange); rect(x+12,y+12,2,2,C.orange);
+        for(let i=0;i<3;i++){const bx=x+((i*5+Math.floor(visualTime()*-12)%5+5)%15);rect(bx,y+10,2,1,C.gold);}
+        rect(x+1,y+13,2,2,C.stone2);rect(x+13,y+13,2,2,C.stone2);
         pxText('‹',x+5,y+2,C.gold,8); break;
       case 'saw': {
         rect(x,y+12,16,4,C.stone0);
         const cx=x+8, cy=y+8;
-        ctx.fillStyle=C.cream;
+        ctx.fillStyle=t.cooldown > 0 ? C.stone2 : C.cream;
         ctx.beginPath();
-        const rot = performance.now()/80;
+        const rot = performance.now()/(t.cooldown > 0 ? 240 : 80);
         for (let i=0;i<12;i++) {
           const a = rot + i*Math.PI/6;
           const r = i%2===0 ? 7 : 5;
           const px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r;
           if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
         }
-        ctx.closePath(); ctx.fill(); rect(cx-2,cy-2,4,4,C.red); break;
+        ctx.closePath(); ctx.fill();
+        rect(cx-4,cy-2,8,4,C.stone1);rect(cx-2,cy-4,4,8,C.stone1);
+        rect(cx-2,cy-2,4,4,C.red);rect(cx-1,cy-1,2,2,C.gold);
+        rect(x+1,y+13,2,2,C.stone2);rect(x+13,y+13,2,2,C.stone2);
+        if (t.cooldown > 0) rect(x+1,y+14,Math.ceil(14*(1-t.cooldown/.8)),1,C.gold);
+        break;
       }
       case 'cannon':
-        rect(x+2,y+9,12,7,C.stone0); rect(x+4,y+5,9,5,C.stone1); rect(x+11,y+6,7,3,C.cream);
+        rect(x+2,y+9,12,7,C.stone0); rect(x+3,y+5,9,5,C.stone1); rect(x-2,y+6,7,3,C.cream);
         rect(x+3,y+14,4,2,C.gold); rect(x+10,y+14,4,2,C.gold);
-        if(t.cooldown>1.02) rect(x+17,y+6,3,3,C.orange); break;
+        rect(x-2,y+5,8,1,C.white);rect(x-3,y+6,2,4,C.black);rect(x+5,y+5,2,6,C.gold);
+        rect(x+3,y+12,4,4,C.black);rect(x+4,y+13,2,2,C.stone2);
+        rect(x+10,y+12,4,4,C.black);rect(x+11,y+13,2,2,C.stone2);
+        if(t.cooldown>CANNON_RELOAD-.13) {rect(x-7,y+5,4,5,C.orange);rect(x-5,y+6,3,2,C.white);} break;
       case 'crusher': {
         const off = t.offset || 0;
         rect(x+6,y,4,Math.max(6,off+5),C.stone1);
-        rect(x+2,y+off,12,14,C.stone0); rect(x+1,y+off+10,14,4,C.stone2);
+        for(let cy=y+2;cy<y+off;cy+=4)rect(x+7,cy,2,1,C.cream);
+        rect(x,y,16,3,C.stone2);
+        rect(x+2,y+off,12,14,C.stone0);
+        rect(x+3,y+off+1,10,8,C.stone1);rect(x+4,y+off+2,8,1,C.stone2);
+        rect(x+4,y+off+5,2,2,C.red);rect(x+10,y+off+5,2,2,C.red);
+        rect(x+1,y+off+10,14,4,C.stone2);
+        for(let i=0;i<3;i++)rect(x+2+i*4,y+off+10,2,2,C.gold);
         rect(x+3,y+off+12,2,4,C.cream); rect(x+7,y+off+12,2,4,C.cream); rect(x+11,y+off+12,2,4,C.cream);
+        if(t.cooldown>0) {
+          rect(x+1,y+1,14,1,C.stone0);
+          rect(x+1,y+1,Math.ceil(14*(1-t.cooldown/3.2)),1,C.gold);
+        }
         break;
       }
     }
   }
 
   function drawHero(h) {
-    const d = HERO_DEFS[h.type];
-    const x = Math.round(h.x), y = Math.round(h.y + (h.flying ? Math.sin(h.bob)*1.5 : 0));
-
-    if (h.type === 'balloon') {
-      rect(x+1,y-8,6,7,d.tint); rect(x+2,y-10,4,2,C.cream); rect(x+3,y-1,1,5,C.cream);
-      rect(x+1,y+3,6,6,C.stone0); rect(x+2,y+4,1,1,C.cream); rect(x+5,y+4,1,1,C.cream); return;
+    const d=HERO_DEFS[h.type], x=Math.round(h.x), y=Math.round(h.y+(h.flying?Math.sin(h.bob)*1.5:0));
+    const step=h.grounded && Math.sin(h.anim)>0?1:0;
+    if(h.grounded) rect(x-1,y+h.h, h.w+2,1,'#171923');
+    if(h.type==='balloon') {
+      rect(x,y-10,8,10,'#553e74');rect(x-1,y-7,10,5,'#553e74');
+      rect(x+1,y-10,5,9,'#b98bd0');rect(x+2,y-9,2,4,'#efd3db');rect(x+5,y-8,2,7,'#8f629f');
+      rect(x+2,y,1,4,C.cream);rect(x+5,y,1,4,C.cream);
+      rect(x,y+3,8,7,C.black);rect(x+1,y+4,6,5,'#997253');rect(x+1,y+5,6,1,C.gold);
+      rect(x+2,y+1,4,3,'#dfad8b');rect(x+5,y+2,1,1,C.black);
+      if(h.maxHp>1) {
+        rect(x,y-4,8,2,C.stone2);rect(x+1,y-4,1,1,C.white);rect(x+6,y-4,1,1,C.white);
+        rect(x,y-14,8,2,C.black);rect(x,y-14,Math.ceil(8*h.hp/h.maxHp),1,C.red);
+      }
+      return;
     }
-
-    // body
-    rect(x+1,y+3,h.w-2,h.h-5,d.tint);
-    rect(x+1,y,h.w-2,4,'#d8a77f');
-    // blank little face
-    rect(x+2,y+2,1,1,C.black); rect(x+h.w-3,y+2,1,1,C.black);
-    // hair / helmet
-    if (h.type === 'knight') {
-      rect(x,y-1,h.w,4,C.stone2); rect(x+h.w-2,y+2,2,5,C.stone1);
+    // Outlined bodies and separate silhouettes for every class.
+    rect(x,y+3,h.w,h.h-4,C.black);
+    if(h.type==='rogue') {
+      polygon([[x+2,y+3],[x-3,y+8+step],[x+3,y+7]],'#397d8b');
+      rect(x,y-1,6,5,'#285367');rect(x+1,y,5,2,'#60b0b4');
+    }
+    if(h.type==='acrobat') {
+      rect(x-2,y+3,5,2,'#78974f');rect(x-3,y+4+step,3,1,C.green);
+    }
+    rect(x+1,y+4,h.w-2,h.h-6,d.tint);
+    rect(x+1,y+5,2,h.h-7,h.type==='knight'?'#335877':'#847563');
+    rect(x+1,y, h.w-2,4,'#dda988');rect(x+2,y, h.w-3,1,'#f2c8a3');
+    rect(x+h.w-3,y+1,1,1,C.black);
+    rect(x+1,y+7,h.w-2,1,'#5a3e42');rect(x+3,y+7,1,1,C.gold);
+    rect(x+1-step,y+h.h-2,2,2,'#564451');rect(x+h.w-3+step,y+h.h-2,2,2,'#564451');
+    rect(x-step,y+h.h,3,1,C.black);rect(x+h.w-3+step,y+h.h,3,1,C.black);
+    if(h.type==='knight') {
+      rect(x,y-1,h.w,3,'#8698ac');rect(x+1,y-2,h.w-2,1,'#c0c6c6');
+      rect(x+2,y+1,h.w-2,1,C.black);rect(x+1,y+2,2,2,'#657b96');
+      rect(x+2,y-4,4,2,'#b45261');rect(x+1,y-3,3,2,'#833f57');
+      rect(x+h.w-1,y+4,3,5,'#b8b2a6');rect(x+h.w,y+5,2,3,'#496f9a');
+      rect(x+2,y+4,3,1,'#b5c6ce');
+      const boot=h.hitTimers.armorFlash?C.cyan:'#8e9aab';
+      rect(x,y+h.h-1,4,2,boot);rect(x+h.w-4,y+h.h-1+step,4,2,boot);
+    } else if(h.type==='rogue') {
+      rect(x,y-1,6,2,'#39788b');rect(x+1,y+2,5,1,'#244553');
+      rect(x+h.w,y+5-step,2,1,C.white);
+    } else if(h.type==='acrobat') {
+      rect(x,y-1,6,2,'#446f48');rect(x+4,y-3,1,3,C.gold);
+      rect(x+h.w-1,y+4,2,2,'#dfad8b');
     } else {
-      rect(x+1,y-1,h.w-2,2,C.black);
+      rect(x+1,y-1,h.w-2,2,'#614044');rect(x,y,2,2,'#614044');
+      rect(x+h.w-1,y+4,1,4,'#a38975');rect(x+h.w,y+3,1,3,C.cream);
     }
-    // legs
-    const step = Math.sin(h.anim) > 0 ? 1 : 0;
-    rect(x+1,y+h.h-2,2,3,C.black); rect(x+h.w-3,y+h.h-2+step,2,3,C.black);
-
-    if (h.hp < h.maxHp || h.type === 'knight') {
-      rect(x, y-4, h.w, 2, C.black);
-      rect(x, y-4, Math.ceil(h.w * h.hp / h.maxHp), 1, C.red);
+    if(h.hp<h.maxHp||h.type==='knight') {
+      rect(x,y-7,h.w,2,C.black);rect(x,y-7,Math.ceil(h.w*h.hp/h.maxHp),1,C.red);
     }
   }
 
   function drawProjectiles() {
     for (const p of state.projectiles) {
+      rect(p.x-p.vx*.025,p.y-p.vy*.025,2,2,'#b96347');
       rect(p.x-1,p.y-1,3,3,C.gold); rect(p.x,p.y,1,1,C.white);
     }
   }
@@ -899,6 +1209,8 @@
     const x = snap(pointer.x), y = snap(pointer.y);
     const ok = placementValid(state.selected, x, y) && state.gold >= TRAP_DEFS[state.selected].cost;
     ctx.globalAlpha = .45;
+    drawTrap({type: state.selected,x,y,cooldown:0});
+    ctx.globalAlpha = .18;
     rect(x,y,16,16,ok?C.green:C.red);
     ctx.globalAlpha = 1;
     ctx.strokeStyle = ok ? C.green : C.red;
@@ -908,15 +1220,18 @@
   function drawHud() {
     rect(0,0,W,HUD_H,'#100d1d');
     rect(0,HUD_H-2,W,2,C.stone1);
-    pxText(`WAVE ${state.wave}`,7,6,C.cream,8);
+    pxText(state.endless ? `WAVE ${state.wave}` : `WAVE ${Math.min(state.wave,VICTORY_WAVE)}/${VICTORY_WAVE}`,7,6,C.cream,8);
     pxText(`GOLD ${state.gold}`,70,6,C.gold,8);
     pxText(`CORE ${state.castleHp}/${state.maxCastleHp}`,137,6,state.castleHp<=3?C.red:C.cyan,8);
     pxText(`KILLS ${state.kills}`,218,6,C.cream,8);
+    pxText(LEVELS[state.level].name,7,16,'#93869e',5);
+    for(let i=0;i<state.maxCastleHp;i++) rect(137+i*6,16,4,2,i<state.castleHp?C.cyan:C.stone0);
+    pxText(state.mode==='victory'?'VICTORY':state.mode==='build'?'PREPARE':'DEFEND',218,16,C.gold,5);
 
     const bx=306,by=4,bw=72,bh=18;
     rect(bx,by,bw,bh,state.mode==='build'?C.red:C.stone0);
     rect(bx+2,by+2,bw-4,bh-4,state.mode==='build'?C.orange:C.stone1);
-    pxText(state.mode==='build'?'RELEASE [SPACE]':state.paused?'PAUSED [P]':'WAVE RUNNING',bx+bw/2,by+5,C.black,6,'center');
+    pxText(state.mode==='victory'?'VICTORY':state.mode==='build'?'RELEASE [SPACE]':state.paused?'PAUSED [P]':'WAVE RUNNING',bx+bw/2,by+5,C.black,6,'center');
   }
 
   function drawShop() {
@@ -928,13 +1243,28 @@
       const selected=id===state.selected;
       rect(x,y,cardW,28,selected?C.gold:C.stone0);
       rect(x+2,y+2,cardW-4,24,selected?'#503b31':C.stone1);
-      pxText(`${i+1} ${d.name}`,x+4,y+4,selected?C.gold:C.cream,6);
-      pxText(`${d.cost}g`,x+4,y+14,state.gold>=d.cost?C.cyan:C.red,6);
-      pxText(d.desc,x+cardW-4,y+14,C.cream,5,'right');
+      rect(x+3,y+3,19,22,'#211e30');
+      drawTrap({type:id,x:x+5,y:y+5,cooldown:0});
+      pxText(d.name,x+25,y+4,selected?C.gold:C.cream,6);
+      pxText(`${i+1}`,x+4,y+4,C.gold,5);
+      pxText(`${d.cost}g`,x+25,y+14,state.gold>=d.cost?C.cyan:C.red,6);
+      pxText(d.desc,x+25,y+20,'#c7b6c8',5);
+
     });
   }
 
   function drawOverlay() {
+    if (state.mode === 'victory') {
+      rect(42,48,300,108,'rgba(9,7,16,.95)');
+      ctx.strokeStyle=C.gold;ctx.strokeRect(43.5,49.5,297,105);
+      pxText('THE CASTLE STANDS',W/2,62,C.gold,14,'center');
+      pxText(`${LEVELS[state.level].name} COMPLETE`,W/2,83,C.cream,8,'center');
+      pxText(`12 WAVES CLEARED - ${state.castleHp} CORE REMAINS`,W/2,96,C.cyan,8,'center');
+      pxText('E - CONTINUE ENDLESS',W/2,114,C.cream,8,'center');
+      pxText(state.level+1<LEVELS.length?'N - NEXT LEVEL':'N - BACK TO LEVEL 1',W/2,127,C.gold,8,'center');
+      pxText('R - REPLAY THIS LEVEL',W/2,140,C.stone2,8,'center');
+      return;
+    }
     if (state.mode === 'gameover') {
       rect(54,55,276,93,'rgba(9,7,16,.92)');
       ctx.strokeStyle=C.red; ctx.strokeRect(55.5,56.5,273,90);
@@ -961,7 +1291,7 @@
 
   function render() {
     ctx.save();
-    if (state.shake > 0) ctx.translate(Math.round(rand(-state.shake,state.shake)), Math.round(rand(-state.shake,state.shake)));
+    if (state.shake > 0) ctx.translate(Math.round(Math.sin(visualTime()*83)*state.shake), Math.round(Math.cos(visualTime()*97)*state.shake));
     drawBackground();
     drawTerrain();
     drawCastle();
@@ -1004,6 +1334,8 @@
       return;
     }
 
+    if (state.paused) { setPaused(false); return; }
+
     // release button
     if (p.x >= 306 && p.x <= 378 && p.y >= 4 && p.y <= 22) {
       startWave(); return;
@@ -1030,11 +1362,15 @@
   canvas.addEventListener('contextmenu', ev => ev.preventDefault());
 
   window.addEventListener('keydown', ev => {
+    if (ev.target && ['BUTTON','INPUT','SELECT','TEXTAREA'].includes(ev.target.tagName)) return;
+    if (ev.repeat || ev.ctrlKey || ev.metaKey || ev.altKey) return;
     ensureAudio();
-    if (['Space','Digit1','Digit2','Digit3','Digit4','Digit5','KeyP','KeyR'].includes(ev.code)) ev.preventDefault();
+    if (['Space','Digit1','Digit2','Digit3','Digit4','Digit5','KeyP','KeyR','KeyE','KeyN'].includes(ev.code)) ev.preventDefault();
     if (ev.code === 'Space') startWave();
-    if (ev.code === 'KeyP' && state.mode === 'wave') state.paused = !state.paused;
-    if (ev.code === 'KeyR' && state.mode === 'gameover') resetGame();
+    if (ev.code === 'KeyP') setPaused(!state.paused);
+    if (ev.code === 'KeyE') continueEndless();
+    if (ev.code === 'KeyN') nextLevel();
+    if (ev.code === 'KeyR' && ['gameover','victory'].includes(state.mode)) resetGame();
     if (ev.code.startsWith('Digit')) {
       const i = Number(ev.code.slice(5)) - 1;
       if (i >= 0 && i < state.shop.length) state.selected = state.shop[i];
@@ -1044,7 +1380,20 @@
   // ---------------------------------------------------------------------------
   // Loop
   // ---------------------------------------------------------------------------
+  function setPaused(paused) {
+    if (state.mode === 'wave') state.paused = paused;
+    state.simAccumulator = 0;
+    lastT = performance.now();
+  }
+  document.getElementById('pause-game').addEventListener('click', () => setPaused(!state.paused));
+  window.addEventListener('blur', () => setPaused(true));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+
   function loop(t) {
+    const pauseButton = document.getElementById('pause-game');
+    pauseButton.disabled = state.mode !== 'wave';
+    const pauseLabel = state.paused ? 'Resume [P]' : 'Pause [P]';
+    if (pauseButton.textContent !== pauseLabel) pauseButton.textContent = pauseLabel;
     const dt=(t-lastT)/1000; lastT=t;
     update(dt);
     render();

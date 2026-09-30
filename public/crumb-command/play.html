@@ -801,6 +801,7 @@
   canvas.addEventListener('pointermove', e => { pointer = worldPoint(e); if (drag && drag.id === e.pointerId) { drag.endX = pointer.x; drag.endY = pointer.y; } });
   canvas.addEventListener('pointerleave', () => { if (!drag) pointer = { x: -100, y: -100 }; });
   canvas.addEventListener('pointercancel', () => { drag = null; });
+  canvas.addEventListener('lostpointercapture', () => { drag = null; });
   canvas.addEventListener('pointerup', e => {
     if (!drag || drag.id !== e.pointerId) return;
     const d = drag; drag = null;
@@ -846,14 +847,17 @@
     else if (['q', 'w', 'e'].includes(key)) recruit({ q: 'scout', w: 'beetle', e: 'spitter' }[key]);
     else if (key === 'f') rush(); else if (key === 'a') setMode('command'); else if (key === 'r') setMode('rally'); else if (key === 'd') retreat();
   });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && game.status === 'playing') {
-      pause(true, 'Your match paused when you switched tabs. Resume when you are ready.');
-      // Closing an already-open help dialog must not override a visibility pause.
+  function suspendMatch() {
+    drag = null;
+    if (game.status === 'playing') {
+      pause(true, 'Your match paused when focus left the game. Resume when you are ready.');
+      // Closing help must not override an automatic pause.
       if (!$('helpDialog').hidden) helpWasPaused = true;
     }
     lastFrame = performance.now(); accumulator = 0;
-  });
+  }
+  window.addEventListener('blur', suspendMatch);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) suspendMatch(); });
   $('startBtn').addEventListener('click', startMatch);
   $('againBtn').addEventListener('click', () => { $('endOverlay').hidden = true; $('intro').hidden = false; $('startBtn').focus(); });
   $('pauseBtn').addEventListener('click', () => pause()); $('resumeBtn').addEventListener('click', () => pause(false));
