@@ -1,39 +1,44 @@
 # Zach Nielsen Games
 
-Standalone static arcade for https://games.zacharynielsen.com/.
+Static arcade at https://games.zacharynielsen.com/ with ten playable games: Night Relay, Boostball 16, Roofline, Pocket Behemoth, Crumb Command, Riverward Exchange, Dreadworks, Pinecone Pass, Blackwater, and Idle Farm.
 
-## Netlify setup
+## Develop and check
 
-Production: https://games.zacharynielsen.com/
+```sh
+npm ci
+npm run sync
+npm test
+python3 -m http.server 8000 --directory public
+```
 
-Netlify project: `zach-nielsen-games` (`089cb42d-8d90-4914-8237-fa020683b347`). The site uses branch `main`, an empty build command, and publish directory `public`, as set in `netlify.toml`. The custom subdomain uses Netlify DNS.
+Open http://localhost:8000/. Node 22 or newer runs the checks; GitHub and Netlify use Node 24. Games run without an npm install in the browser. `jsdom` is a development-only dependency for testing controls and saved state.
 
-To link another checkout, run `netlify link --id 089cb42d-8d90-4914-8237-fa020683b347`. For a direct production deployment, run `netlify deploy --prod --dir public`.
+`npm test` covers static links/assets, script syntax, catalog hashes, the six standalone game simulations, Dreadworks campaigns and controls, Idle Farm persistence, and onboarding DOM flows. Canvas and WebGL are mocked or excluded in automated tests; rendering and gameplay feel need browser checks.
 
-The arcade is a separate Netlify project from the existing zacharynielsen.com website.
+## Source ownership
 
-## Contents
+| Game | Maintained source | Served build |
+| --- | --- | --- |
+| Dreadworks | `projects/dreadworks/index.html`, adjacent tests and balance tools | `public/dreadworks/play.html` |
+| Idle Farm | `projects/idle-farm/`, including tests and `vendor/` | `public/idle-farm/play.html` and `vendor/` |
+| Blackwater | Sibling `../pirates-redo/` repository | `public/blackwater/play.html` and `assets/` |
+| Pinecone Pass | Sibling `../pinecone-pass/pinecone-pass-prototype/` repository | `public/pinecone-pass/play.html` |
+| Other six games | `public/<game>/play.html` | Same file |
 
-- `public/index.html`: responsive square game grid.
-- `public/<game>/index.html`: game wrapper with All games and full-screen controls.
-- `public/<game>/play.html`: playable build (Blackwater also uses its adjacent `assets/` directory).
-- `projects/<game>/`: available project documents.
-- `projects/catalog.json`: build inventory, routes, and current served HTML hashes.
+The sibling `hostile-architect/` and `farm-idle/` folders are historical copies. Make new changes to the versioned sources here. `projects/<game>/` also contains design documents; `projects/catalog.json` records routes and the current served HTML hashes.
 
-Nine playable games: Night Relay v0.2, Boostball 16 v0.2, Roofline, Pocket Behemoth, Crumb Command, Riverward Exchange, Dreadworks, Pinecone Pass, and Blackwater.
+Run `npm run sync` after editing games. It copies maintained Dreadworks and Idle Farm sources into `public/` and updates catalog hashes. It needs no sibling directories.
 
-Blackwater is the game developed in the sibling `../pirates-redo/` repository. Its complete production build is included at `public/blackwater/`, with the arcade wrapper at `index.html` and the game entry at `play.html`. To update it, run `npm run build` in `../pirates-redo`, copy `dist/index.html` to `public/blackwater/play.html`, and copy the complete `dist/assets/` directory to `public/blackwater/assets/`. Update its HTML SHA-256 in `projects/catalog.json` after replacing the build. The HTML in `projects/blackwater/` is the original supplied reference, not the served game. No Thronefall build was available.
+To import external updates, first run `npm run check` in Blackwater and `node build.cjs` in Pinecone Pass, then run `npm run sync -- --from-siblings` here. Blackwater's old hashed assets are retained; its entry point references the current build. `projects/blackwater/index.html` is an original reference, not the served game.
 
-No installation or build step is required. For local preview, run `python3 -m http.server 8000 --directory public`, then open http://localhost:8000/.
+## Deployment
 
-## Updating sibling games
+Netlify project: `zach-nielsen-games` (`089cb42d-8d90-4914-8237-fa020683b347`). It follows GitHub `main`, runs `npm test`, and publishes `public/`. A failing check stops the new build from being published. This is a separate project from zacharynielsen.com.
 
-Build Pinecone Pass with `node build.cjs` in its source directory and Blackwater with `npm run check` in `../pirates-redo`. Dreadworks is already standalone HTML. Then run `node scripts/sync-games.cjs` here to copy all three into the arcade and refresh every catalog HTML hash. This does not deploy. The sibling directories must be present; the script checks its inputs before copying.
+GitHub Actions also runs the suite for each push and pull request. Its workflow uses pinned official checkout/setup-node actions. Tests use no deployment credentials.
 
-The other six games are maintained directly in `public/<game>/play.html`. Run the sync script after editing them too, so their catalog hashes stay current. Blackwater's old hashed assets are retained; its entry point references the current build.
+After a successful deployment, run `npm run check:live`. It checks every game wrapper and play file against the local checkout, including linked Blackwater bundles and Idle Farm's renderer. HTML comparisons normalize Netlify's equivalent pretty-URL anchor rewrites; asset comparisons are byte-for-byte. An alternate origin can be passed as `npm run check:live -- https://example.netlify.app`.
 
-## Checks
+## Review notes
 
-Run `node --test tests/arcade.test.cjs`. It checks every catalog entry's scripts, static local links/assets, and HTML hash, plus simulation regressions for Night Relay, Boostball, Roofline, Pocket Behemoth, Crumb Command, and Riverward Exchange. Source projects have their own suites for the remaining games.
-
-See `REVIEW.md` for the September 2026 findings, changes, and test limits. These checks do not replace browser playtesting.
+`REVIEW.md` records the initial review. `FOLLOWUP.md` records the source migration, onboarding changes, verification, and remaining phone playtest. No Thronefall build was available.

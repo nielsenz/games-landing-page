@@ -51,3 +51,19 @@ Adding cross-game simulation checks: Roofline uses mode time, not timed, and Nig
 2026-09-29T23:51:10.745Z - gpt-6 - znielsen
 
 Correction to the prior test note: Roofline does accept timed. The smoke test assumed a 130-second completion window without using the game's configured scoreRunSeconds and overtime allowance.
+
+2026-09-30T03:34:32.324Z - gpt-6 - znielsen
+
+Live Pocket Behemoth check: Escape exits iframe fullscreen but also reaches the game's pause toggle, resuming a paused hunt during the transition. Pause on fullscreen changes so leaving fullscreen cannot restart combat.
+
+2026-09-30T03:35:04.777Z - gpt-6 - znielsen
+
+Trying Safari phone-layout checks: Command-Option-R reloads the page instead of entering Responsive Design Mode. Use the Develop menu's explicit Enter Responsive Design Mode item.
+
+2026-09-30T03:35:24.157Z - gpt-6 - znielsen
+
+Selecting Safari's Responsive Design Mode failed with 'native pipe startup failed' from computer-use automation. Refreshing app state before attempting any further UI actions.
+
+2026-09-30T03:40:19.798Z - gpt-6 - znielsen
+
+The live-file checker found Netlify rewrites HTML anchor hrefs from play.html to absolute extensionless paths, so a correct deployed wrapper has a different byte hash. Compare HTML after normalizing only equivalent same-origin anchor URLs; keep asset hashes exact.

@@ -32,7 +32,7 @@
     "genre": "Boss fight",
     "status": "playable",
     "source": "Games/Pocket-Behemoth.html",
-    "sha256": "e886941008d0cf7709d2b10d224136721b40c2b91216a3f83989a69b44c56fc4",
+    "sha256": "401321fba31b92f13edd51bd11af67e5f20c8ee967fe9ec77310303d080826e0",
     "route": "/pocket-behemoth/"
   },
   {
@@ -41,7 +41,7 @@
     "genre": "Tiny-army RTS",
     "status": "playable",
     "source": "Crumb_Command.html",
-    "sha256": "da5e751b6b9d3ed2f1de6b7d12a3fba22c77708243f9a6006fe7b8faf614e41a",
+    "sha256": "0bb96e9ea1fcc095ba08df920c9f2299aa68f0c585f311f26e21d224dacc7f03",
     "route": "/crumb-command/"
   },
   {
@@ -58,8 +58,8 @@
     "name": "Dreadworks",
     "genre": "Trap defense",
     "status": "playable",
-    "source": "../hostile-architect/index.html",
-    "sha256": "68b5c8168e264515f80eddbe2d891678bbd45d2381499014565a9d8eded2fc7a",
+    "source": "projects/dreadworks/index.html",
+    "sha256": "a3df80f69327f47d351315f2ab0c9cd7da5d64d5b2c6ea71f783699f505cd5ce",
     "route": "/dreadworks/"
   },
   {
@@ -79,5 +79,14 @@
     "source": "../pirates-redo/dist/index.html",
     "sha256": "ec7c4bcf008cf32377da8985dfd7b840eb6d9b02df4955ceeeda0bafaeb2620c",
     "route": "/blackwater/"
+  },
+  {
+    "slug": "idle-farm",
+    "name": "Idle Farm",
+    "genre": "Incremental farming",
+    "status": "playable",
+    "source": "projects/idle-farm/index.html",
+    "sha256": "2d90556fc8a71b71a0a9439769c2a713a297d5b77b7f076def10e55930c59564",
+    "route": "/idle-farm/"
   }
 ]

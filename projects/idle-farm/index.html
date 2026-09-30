@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Idle Farm (2D)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #1a1a2e;
+      color: #eee;
+      overflow-x: hidden;
+    }
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      gap: 12px;
+    }
+    #farmCanvas {
+      border-radius: 12px;
+      border: 2px solid #333;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      background: #2d5a27;
+      cursor: grab;
+      max-width: 100%;
+    }
+    #farmCanvas:active { cursor: grabbing; }
+    .ui-panel {
+      width: 100%;
+      max-width: 960px;
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.4rem; color: #e94560; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .card { border:1px solid #0f3460; border-radius:10px; padding:14px; margin:10px 0; background: #1a1a2e; }
+    button {
+      padding:8px 14px; border-radius:10px; border:1px solid #e94560;
+      cursor:pointer; background: #16213e; color: #eee;
+      font-weight: 600; transition: all 0.15s;
+    }
+    button:hover:not(:disabled) { background: #e94560; color: #fff; }
+    button:disabled { opacity:0.4; cursor:not-allowed; border-color:#555; }
+    .stat { font-weight:700; color: #e94560; }
+    .muted { color:#888; font-size:0.85rem; }
+    .primary { background:#0f3460; border-color:#e94560; }
+    .primary:hover:not(:disabled) { background:#e94560; }
+    .wide { min-width: min(280px, 100%); max-width: 100%; white-space: normal; }
+    #firstFieldProgress { width: min(100%, 240px); margin-right: 12px; accent-color: #a9d889; }
+    button { min-height: 44px; }
+    button:focus-visible { outline: 2px solid #a9d889; outline-offset: 3px; }
+    @media (max-width: 480px) { .ui-panel { padding: 10px; } .card { padding: 10px; } }
+    .best-buy { animation: pulse 1.5s infinite; border-color: #00d9ff !important; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,217,255,0.4); }
+      50% { box-shadow: 0 0 8px 2px rgba(0,217,255,0.2); }
+    }
+    .toast {
+      position: fixed; top: 20px; right: 20px;
+      background: #16213e; border: 1px solid #e94560;
+      border-radius: 10px; padding: 14px 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 1000; opacity: 0; transform: translateY(-20px);
+      transition: all 0.3s ease;
+      max-width: 320px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-title { font-weight: 700; color: #e94560; margin-bottom: 4px; }
+    select {
+      padding: 6px 10px; border-radius: 8px;
+      border: 1px solid #0f3460; background: #1a1a2e; color: #eee;
+    }
+    .checkbox-wrap { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .checkbox-wrap input { accent-color: #e94560; }
+    #tooltip {
+      position: absolute; pointer-events: none;
+      background: rgba(22,33,62,0.95); border: 1px solid #e94560;
+      border-radius: 8px; padding: 8px 12px; font-size: 0.85rem;
+      z-index: 500; display: none; max-width: 240px;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="farmCanvas"></canvas>
+
+    <div class="ui-panel">
+      <h1>🌾 Idle Farm</h1>
+      <div class="row" style="justify-content:space-between; flex-wrap:wrap;">
+        <div class="row">
+          <div>🌾 <span id="grain" class="stat">0</span></div>
+          <div>🪙 <span id="coins" class="stat">0</span></div>
+          <div>⚡ <span id="pps" class="stat">0</span>/s</div>
+        </div>
+        <div class="row">
+          <div>🏆 Tokens: <span id="tokens" class="stat">0</span></div>
+          <div>×<span id="prestigeMult" class="stat">1.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui-panel">
+      <section class="card" id="firstFieldGoal" aria-labelledby="firstFieldTitle" hidden>
+        <h3 id="firstFieldTitle">Your first field</h3>
+        <p id="firstFieldHint" role="status"></p>
+        <progress id="firstFieldProgress" max="15" value="0" aria-label="Grain and coins toward your first field"></progress>
+        <button id="firstFieldAction" type="button" hidden></button>
+      </section>
+      <div class="card">
+        <div class="row">
+          <button id="harvestBtn">🌾 Harvest +1</button>
+          <button id="sell10">Sell 10 grain → 10🪙</button>
+          <button id="sellAll">Sell All Grain</button>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="autoSell" />
+            <span>Auto-sell above: <input type="number" id="autoSellThreshold" value="100" style="width:60px; padding:4px; border-radius:6px; border:1px solid #0f3460; background:#1a1a2e; color:#eee;" /></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🚜 Producers</h3>
+        <div class="row">
+          <label for="buyMode">Buy:</label>
+          <select id="buyMode">
+            <option value="1">x1</option>
+            <option value="10">x10</option>
+            <option value="max">Max</option>
+          </select>
+          <span class="muted" id="bestBuyHint"></span>
+        </div>
+        <div id="producersList"></div>
+      </div>
+
+      <div class="card">
+        <h3>⚗️ Upgrades</h3>
+        <div class="row">
+          <button id="fertilizerBtn"></button>
+          <span class="muted" id="fertilizerInfo"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🔄 Prestige</h3>
+        <div class="row">
+          <button id="prestigeBtn">New Season (Prestige)</button>
+          <span class="muted" id="prestigeInfo"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💾 Data</h3>
+        <div class="row">
+          <button id="exportCopy">Export (Copy)</button>
+          <button id="exportDownload">Export (Download)</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" />
+          <button id="importFileBtn">Import (File)</button>
+          <button id="importPasteBtn">Import (Paste)</button>
+          <button id="resetBtn" style="border-color:#e94560; color:#e94560;">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <div class="toast-title" id="toastTitle"></div>
+    <div id="toastBody"></div>
+  </div>
+  <div id="tooltip"></div>
+
+  <script src="vendor/three-0.160.0.min.js"></script>
+  <script>
+    (function() {
+      if (typeof THREE === 'undefined') {
+        console.error('Three.js failed to load. Check your internet connection.');
+        document.body.insertAdjacentHTML('afterbegin', '<div style="color:#e94560;font-weight:bold;padding:10px;text-align:center;">Error: The farm renderer could not load. Keep the vendor folder beside index.html.</div>');
+        return;
+      }
+
+      // ─── Constants & Economy ───
+      const CONST = {
+        SAVE_KEY: "idle_farm_save_v2",
+        PRODUCERS: [
+          { id: "field",    name: "Field",    baseCost: 15,    growth: 1.15, pps: 0.5,  color: 0x4a8c3f, sprite: "field" },
+          { id: "farmhand", name: "Farmhand", baseCost: 100,   growth: 1.16, pps: 2,    color: 0xd4a76a, sprite: "house" },
+          { id: "barn",     name: "Barn",     baseCost: 1100,  growth: 1.15, pps: 15,   color: 0x8b4513, sprite: "barn" },
+          { id: "tractor",  name: "Tractor",  baseCost: 12000, growth: 1.14, pps: 100,  color: 0xe74c3c, sprite: "tractor" }
+        ],
+        FERT_BASE_COST: 500, FERT_GROWTH: 2.0, FERT_MULT_PER_LEVEL: 0.20,
+        PRESTIGE_DIVISOR: 1000, PRESTIGE_POWER: 0.5, PRESTIGE_MULT_PER_TOKEN: 0.10,
+        AUTOSAVE_MS: 10000, SIM_DT: 0.05, RENDER_MS: 50
+      };
+
+      const now = () => Date.now();
+      const defaultState = () => ({
+        grain: 0, coins: 0,
+        producers: Object.fromEntries(CONST.PRODUCERS.map(p => [p.id, 0])),
+        fertilizerLevel: 0, prestigeTokens: 0,
+        stats: { coinsEarned: 0, grainSold: 0, manualHarvests: 0 },
+        lastSavedTs: now(), settings: { autoSell: false, autoSellThreshold: 100 }
+      });
+
+      function showToast(title, body) {
+        const t = document.getElementById("toast");
+        if (!t) return;
+        document.getElementById("toastTitle").textContent = title;
+        document.getElementById("toastBody").textContent = body;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 4000);
+      }
+
+      function prestigeMultiplier(state) {
+        return 1 + (state.prestigeTokens || 0) * CONST.PRESTIGE_MULT_PER_TOKEN;
+      }
+      function productionPerSec(state) {
+        const base = CONST.PRODUCERS.reduce((sum, p) => sum + (state.producers[p.id] || 0) * p.pps, 0);
+        const mult = (1 + CONST.FERT_MULT_PER_LEVEL * state.fertilizerLevel) * prestigeMultiplier(state);
+        return base * mult;
+      }
+      function format(n) {
+        if (n >= 1e12) return (n/1e12).toFixed(2) + "T";
+        if (n >= 1e9)  return (n/1e9).toFixed(2) + "B";
+        if (n >= 1e6)  return (n/1e6).toFixed(2) + "M";
+        if (n >= 1e3)  return (n/1e3).toFixed(2) + "K";
+        return Math.floor(n);
+      }
+      function formatTime(sec) {
+        if (sec < 60) return Math.floor(sec) + "s";
+        if (sec < 3600) return Math.floor(sec/60) + "m";
+        if (sec < 86400) return Math.floor(sec/3600) + "h";
+        return Math.floor(sec/86400) + "d " + Math.floor((sec%86400)/3600) + "h";
+      }
+      function prodMeta(id) { return CONST.PRODUCERS.find(p => p.id === id); }
+      function costAt(id, level) {
+        const m = prodMeta(id); return Math.floor(m.baseCost * Math.pow(m.growth, level));
+      }
+      function fertilizerCost(level) {
+        return Math.floor(CONST.FERT_BASE_COST * Math.pow(CONST.FERT_GROWTH, level));
+      }
+      function totalCost(id, startLevel, count) {
+        let sum = 0;
+        for (let i = 0; i < count; i++) sum += costAt(id, startLevel + i);
+        return sum;
+      }
+      function maxAffordable(id, coins, startLevel) {
+        let k = 0, spent = 0;
+        while (true) {
+          const c = costAt(id, startLevel + k);
+          if (coins < spent + c) break;
+          spent += c; k++;
+          if (k > 100000) break;
+        }
+        return { k, cost: spent };
+      }
+
+      let S, pausedSince = null;
+      let storageWarningShown = false;
+      function normalizeSave(obj) {
+        if (!obj || typeof obj !== "object" || Array.isArray(obj)) throw new Error("Invalid save");
+        const next = defaultState();
+        function number(value, fallback, integer = false) {
+          if (value === undefined) return fallback;
+          if (!Number.isFinite(value) || value < 0 || value > 1e100 || (integer && !Number.isSafeInteger(value))) throw new Error("Invalid save number");
+          return value;
+        }
+        for (const key of ["grain", "coins"]) next[key] = number(obj[key], next[key]);
+        for (const key of ["fertilizerLevel", "prestigeTokens"]) next[key] = number(obj[key], next[key], true);
+        if (obj.producers !== undefined && (!obj.producers || typeof obj.producers !== "object" || Array.isArray(obj.producers))) throw new Error("Invalid producers");
+        for (const p of CONST.PRODUCERS) next.producers[p.id] = number(obj.producers?.[p.id] ?? (p.id === "field" ? obj.fields : undefined), 0, true);
+        for (const key of Object.keys(next.stats)) next.stats[key] = number(obj.stats?.[key], 0);
+        next.settings.autoSell = obj.settings?.autoSell === true;
+        next.settings.autoSellThreshold = Math.max(1, number(obj.settings?.autoSellThreshold, 100));
+        next.lastSavedTs = Math.min(now(), number(obj.lastSavedTs, now()));
+        if (!Number.isFinite(productionPerSec(next)) || productionPerSec(next) > 1e100) throw new Error("Invalid production");
+        return next;
+      }
+      function load() {
+        try {
+          const raw = localStorage.getItem(CONST.SAVE_KEY) ?? localStorage.getItem("idle_farm_save_v1");
+          if (!raw) return defaultState();
+          const obj = normalizeSave(JSON.parse(raw));
+          const deltaSec = Math.max(0, (now() - obj.lastSavedTs) / 1000);
+          const offlineGrain = productionPerSec(obj) * deltaSec;
+          obj.grain += offlineGrain;
+          obj.lastSavedTs = now();
+          if (deltaSec > 5) showToast("Welcome Back!", "You earned " + format(offlineGrain) + " grain while away (" + formatTime(deltaSec) + ").");
+          return obj;
+        } catch { return defaultState(); }
+      }
+      function save() {
+        const timestamp = now();
+        // Settle hidden production before moving the save timestamp forward.
+        if (pausedSince !== null) {
+          S.grain += productionPerSec(S) * Math.max(0, timestamp - pausedSince) / 1000;
+          pausedSince = timestamp;
+        }
+        S.lastSavedTs = timestamp;
+        try { localStorage.setItem(CONST.SAVE_KEY, JSON.stringify(S)); }
+        catch {
+          if (!storageWarningShown) showToast("Saving unavailable", "You can keep playing. Export your save before closing this tab.");
+          storageWarningShown = true;
+        }
+      }
+      function importSave(obj) {
+        const next = normalizeSave(obj);
+        next.lastSavedTs = now();
+        S = next;
+        if (pausedSince !== null) pausedSince = now();
+        save(); render(); updateFarmVisuals();
+        showToast("Imported", "Save loaded successfully!");
+      }
+
+      S = load();
+
+      // ─── Best Buy Calculator ───
+      function bestBuyEfficiency() {
+        let best = null, bestEff = 0;
+        CONST.PRODUCERS.forEach(p => {
+          const owned = S.producers[p.id] || 0;
+          const cost = costAt(p.id, owned);
+          if (S.coins >= cost) {
+            const eff = p.pps / cost;
+            if (eff > bestEff) { bestEff = eff; best = p.id; }
+          }
+        });
+        return best;
+      }
+
+      // ─── UI Elements ───
+      const elGrain = document.getElementById("grain");
+      const elCoins = document.getElementById("coins");
+      const elPps = document.getElementById("pps");
+      const elProducersList = document.getElementById("producersList");
+      const btnHarvest = document.getElementById("harvestBtn");
+      const selBuyMode = document.getElementById("buyMode");
+      const btnSell10 = document.getElementById("sell10");
+      const btnSellAll = document.getElementById("sellAll");
+      const btnFertilizer = document.getElementById("fertilizerBtn");
+      const elFertInfo = document.getElementById("fertilizerInfo");
+      const elTokens = document.getElementById("tokens");
+      const elPrestigeMult = document.getElementById("prestigeMult");
+      const btnPrestige = document.getElementById("prestigeBtn");
+      const elPrestigeInfo = document.getElementById("prestigeInfo");
+      const elBestBuyHint = document.getElementById("bestBuyHint");
+      const cbAutoSell = document.getElementById("autoSell");
+      const inpAutoSellThreshold = document.getElementById("autoSellThreshold");
+
+      cbAutoSell.checked = S.settings?.autoSell || false;
+      inpAutoSellThreshold.value = S.settings?.autoSellThreshold || 100;
+
+      // Build producer rows
+      const UI = { prods: {} };
+      function ensureProducerRows() {
+        if (Object.keys(UI.prods).length) return;
+        CONST.PRODUCERS.forEach(p => {
+          const row = document.createElement("div"); row.className = "row";
+          const label = document.createElement("div");
+          label.innerHTML = '<span style="color:#' + p.color.toString(16).padStart(6,'0') + '">■</span> ' + p.name + ': ';
+          const countEl = document.createElement("span"); countEl.id = "count_" + p.id; countEl.textContent = "0";
+          const btn = document.createElement("button"); btn.className = "primary wide"; btn.id = "btn_" + p.id;
+          const hint = document.createElement("div"); hint.className = "muted";
+
+          btn.addEventListener("click", function() {
+            const info = nextPurchaseInfo(p.id);
+            const canBuy = info.n >= 1 && S.coins >= info.cost;
+            if (!canBuy) {
+              hint.textContent = "Need " + Math.max(0, info.cost - S.coins) + " more coins.";
+              btn.style.transform = "scale(0.97)"; setTimeout(function() { btn.style.transform = ""; }, 120);
+              return;
+            }
+            const mode = selBuyMode.value;
+            let ok = false;
+            if (mode === "1") ok = buyProducer(p.id, 1);
+            else if (mode === "10") ok = buyProducer(p.id, 10);
+            else ok = buyProducerMax(p.id);
+            if (ok) { hint.textContent = ""; render(); updateFarmVisuals(); }
+          });
+
+          row.appendChild(label); row.appendChild(countEl); row.appendChild(btn);
+          elProducersList.appendChild(row); elProducersList.appendChild(hint);
+          UI.prods[p.id] = { row, countEl, btn, hint };
+        });
+      }
+
+      function nextPurchaseInfo(id) {
+        const p = prodMeta(id); const owned = S.producers[id] || 0;
+        const mode = selBuyMode ? selBuyMode.value : "1";
+        const mult = (1 + CONST.FERT_MULT_PER_LEVEL * S.fertilizerLevel) * prestigeMultiplier(S);
+        if (mode === "1") {
+          const cost = costAt(id, owned);
+          return { n: 1, cost, dpps: p.pps * mult };
+        }
+        if (mode === "10") {
+          const cost = totalCost(id, owned, 10);
+          return { n: 10, cost, dpps: 10 * p.pps * mult };
+        }
+        const res = maxAffordable(id, S.coins, owned);
+        return { n: res.k, cost: res.cost, dpps: res.k * p.pps * mult };
+      }
+
+      function firstFieldGoal(state) {
+        if (CONST.PRODUCERS.some(p => state.producers[p.id] > 0) || state.prestigeTokens > 0) return { phase: 'done', progress: 15 };
+        const progress = Math.min(15, Math.floor(state.grain) + Math.floor(state.coins));
+        if (state.coins >= 15) return { phase: 'buy', progress, text: 'You have 15 coins. Buy your first field to grow 0.5 grain every second.' };
+        if (progress >= 15) return { phase: 'sell', progress, text: 'Enough grain! Sell it for coins, then buy your first field.' };
+        return { phase: 'harvest', progress, text: `Harvest ${15-progress} more grain with Harvest +1. Your first field costs 15 coins; each grain sells for 1 coin.` };
+      }
+      function renderFirstFieldGoal() {
+        const goal = firstFieldGoal(S), panel = document.getElementById('firstFieldGoal');
+        panel.hidden = goal.phase === 'done';
+        if (panel.hidden) return;
+        const hint = document.getElementById('firstFieldHint');
+        if (hint.textContent !== goal.text) hint.textContent = goal.text;
+        document.getElementById('firstFieldProgress').value = goal.progress;
+        const button = document.getElementById('firstFieldAction');
+        button.hidden = goal.phase === 'harvest';
+        const label = goal.phase === 'buy' ? 'Buy first field · 15 coins' : 'Sell grain';
+        if (button.textContent !== label) button.textContent = label;
+      }
+      function render() {
+        renderFirstFieldGoal();
+        elGrain.textContent = format(S.grain);
+        elCoins.textContent = format(S.coins);
+        elPps.textContent = productionPerSec(S).toFixed(2);
+        ensureProducerRows();
+
+        const best = bestBuyEfficiency();
+        CONST.PRODUCERS.forEach(p => {
+          const owned = S.producers[p.id] || 0;
+          const els = UI.prods[p.id]; if (!els) return;
+          els.countEl.textContent = String(owned);
+          const info = nextPurchaseInfo(p.id);
+          const label = selBuyMode.value === "max" ? "Buy " + p.name + "s (Max x" + info.n + ")" : "Buy " + p.name + " x" + info.n;
+          const purchaseLabel = label + " (+" + info.dpps.toFixed(2) + "/s) — " + format(info.cost) + "🪙";
+          if (els.btn.textContent !== purchaseLabel) els.btn.textContent = purchaseLabel;
+          els.btn.classList.toggle("best-buy", best === p.id && info.n > 0);
+        });
+        elBestBuyHint.textContent = best ? "💡 Best value: " + prodMeta(best).name : "";
+
+        const fertCost = fertilizerCost(S.fertilizerLevel);
+        btnFertilizer.textContent = "Fertilizer +20% (Lv " + S.fertilizerLevel + ") — " + format(fertCost) + "🪙";
+        btnFertilizer.disabled = S.coins < fertCost;
+        elFertInfo.textContent = "Global production: " + (100 * (1 + CONST.FERT_MULT_PER_LEVEL * S.fertilizerLevel)).toFixed(0) + "%";
+
+        elTokens.textContent = String(S.prestigeTokens || 0);
+        elPrestigeMult.textContent = prestigeMultiplier(S).toFixed(2);
+        const gain = Math.max(0, prestigePotentialTokens() - (S.prestigeTokens || 0));
+        elPrestigeInfo.textContent = "Prestige now to gain +" + gain + " token(s). Lifetime coins: " + format(S.stats.coinsEarned || 0) + ".";
+        btnPrestige.disabled = gain <= 0;
+
+        btnSell10.disabled = S.grain < 10;
+        btnSellAll.disabled = S.grain < 1;
+      }
+
+      // Actions
+      function buyProducer(id, count) {
+        if (count <= 0) return false;
+        const owned = S.producers[id] || 0;
+        const cost = totalCost(id, owned, count);
+        if (S.coins < cost) return false;
+        S.coins -= cost;
+        S.producers[id] = owned + count;
+        save(); return true;
+      }
+      function buyProducerMax(id) {
+        const owned = S.producers[id] || 0;
+        const res = maxAffordable(id, S.coins, owned);
+        if (res.k < 1) return false;
+        S.coins -= res.cost;
+        S.producers[id] = owned + res.k;
+        save(); return true;
+      }
+      function sellGrain(amount) {
+        const sell = Math.floor(Math.min(amount, S.grain));
+        if (sell <= 0) return false;
+        S.grain -= sell; S.coins += sell;
+        S.stats.coinsEarned += sell; S.stats.grainSold += sell;
+        save(); spawnFloatingText("+" + format(sell) + "🪙", 0.5, 0.3); return true;
+      }
+      function sellAllGrain() {
+        const sell = Math.floor(S.grain);
+        if (sell <= 0) return false;
+        S.grain -= sell; S.coins += sell;
+        S.stats.coinsEarned += sell; S.stats.grainSold += sell;
+        save(); spawnFloatingText("+" + format(sell) + "🪙", 0.5, 0.3); return true;
+      }
+      function buyFertilizer() {
+        const c = fertilizerCost(S.fertilizerLevel);
+        if (S.coins < c) return false;
+        S.coins -= c; S.fertilizerLevel += 1;
+        save(); return true;
+      }
+
+      // Prestige
+      function prestigePotentialTokens() {
+        return Math.floor(Math.pow((S.stats.coinsEarned || 0) / CONST.PRESTIGE_DIVISOR, CONST.PRESTIGE_POWER));
+      }
+      function prestigeGain() {
+        return Math.max(0, prestigePotentialTokens() - (S.prestigeTokens || 0));
+      }
+      function doPrestige() {
+        const gain = prestigeGain();
+        if (gain <= 0) return false;
+        S.prestigeTokens += gain;
+        S.grain = 0; S.coins = 0; S.fertilizerLevel = 0;
+        S.producers = Object.fromEntries(CONST.PRODUCERS.map(p => [p.id, 0]));
+        save(); return true;
+      }
+
+      // ─── THREE.JS FARM VISUALS ───
+      const canvas = document.getElementById("farmCanvas");
+      const scene = new THREE.Scene();
+      const TILE = 48;
+      const GRID_W = 20, GRID_H = 14;
+
+      const camera = new THREE.OrthographicCamera(
+        -GRID_W * TILE / 2, GRID_W * TILE / 2,
+        GRID_H * TILE / 2, -GRID_H * TILE / 2,
+        1, 1000
+      );
+      camera.position.set(0, 0, 100);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+      renderer.setSize(GRID_W * TILE, GRID_H * TILE);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.domElement.style.width = "100%";
+      renderer.domElement.style.maxWidth = GRID_W * TILE + "px";
+
+      // Sprite generation
+      function makeSpriteTexture(drawFn, size) {
+        const cvs = document.createElement("canvas");
+        cvs.width = size; cvs.height = size;
+        const ctx = cvs.getContext("2d");
+        drawFn(ctx, size);
+        const tex = new THREE.CanvasTexture(cvs);
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.NearestFilter;
+        return tex;
+      }
+
+      const sprites = {};
+
+      sprites.grass = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#3d7a33"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#4a8c3f";
+        for (let i = 0; i < 8; i++) {
+          ctx.fillRect(Math.random()*s, Math.random()*s, 2+Math.random()*3, 2+Math.random()*3);
+        }
+        ctx.strokeStyle = "#2d5a27"; ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, s, s);
+      }, TILE);
+
+      sprites.dirt = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#8b6914"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#a0781a";
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(Math.random()*s, Math.random()*s, 3+Math.random()*4, 2+Math.random()*3);
+        }
+        ctx.strokeStyle = "#6b4e0a"; ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, s, s);
+      }, TILE);
+
+      sprites.water = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#2e86c1"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(4, 8, s-8, 4); ctx.fillRect(8, 20, s-12, 3); ctx.fillRect(2, 34, s-6, 4);
+      }, TILE);
+
+      sprites.field = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#5d3a1a"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#6b4226"; ctx.fillRect(2, 2, s-4, s-4);
+        for (let y = 8; y < s-4; y += 10) {
+          for (let x = 6; x < s-4; x += 10) {
+            ctx.fillStyle = "#2ecc71"; ctx.fillRect(x, y, 3, 6);
+            ctx.fillStyle = "#27ae60"; ctx.fillRect(x+1, y-3, 2, 4);
+          }
+        }
+      }, TILE);
+
+      sprites.house = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#3d7a33"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#d4a76a"; ctx.fillRect(12, 24, 40, 28);
+        ctx.fillStyle = "#8b4513"; ctx.fillRect(10, 20, 44, 8);
+        ctx.fillStyle = "#5d3a1a"; ctx.fillRect(26, 36, 12, 16);
+        ctx.fillStyle = "#87ceeb"; ctx.fillRect(16, 28, 8, 8); ctx.fillRect(32, 28, 8, 8);
+      }, TILE);
+
+      sprites.barn = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#3d7a33"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#8b0000"; ctx.fillRect(10, 18, 44, 34);
+        ctx.fillStyle = "#5c0000"; ctx.beginPath(); ctx.moveTo(8, 18); ctx.lineTo(32, 4); ctx.lineTo(56, 18); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.fillRect(24, 32, 16, 20);
+        ctx.fillStyle = "#333"; ctx.fillRect(30, 38, 4, 14);
+      }, TILE);
+
+      sprites.tractor = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#3d7a33"; ctx.fillRect(0, 0, s, s);
+        ctx.fillStyle = "#e74c3c"; ctx.fillRect(16, 20, 32, 18);
+        ctx.fillStyle = "#c0392b"; ctx.fillRect(36, 14, 14, 10);
+        ctx.fillStyle = "#333"; ctx.beginPath(); ctx.arc(20, 42, 8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(44, 42, 8, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#555"; ctx.beginPath(); ctx.arc(20, 42, 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(44, 42, 4, 0, Math.PI*2); ctx.fill();
+      }, TILE);
+
+      sprites.grain = makeSpriteTexture(function(ctx, s) {
+        ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.arc(s/2, s/2, 3, 0, Math.PI*2); ctx.fill();
+      }, 16);
+
+      // Build grid
+      const tileGroup = new THREE.Group();
+      scene.add(tileGroup);
+      const TILE_MAP = [
+        "WWWWWWWWWWWWWWWWWWWW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WGGGGGGGGGGGGGGGGGGW",
+        "WDDDDDDDDDDDDDDDDDDW",
+        "WWWWWWWWWWWWWWWWWWWW"
+      ];
+
+      TILE_MAP.forEach(function(row, y) {
+        row.split("").forEach(function(ch, x) {
+          const tex = ch === "W" ? sprites.water : ch === "D" ? sprites.dirt : sprites.grass;
+          const geo = new THREE.PlaneGeometry(TILE, TILE);
+          const mat = new THREE.MeshBasicMaterial({ map: tex });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set((x - GRID_W/2 + 0.5) * TILE, -(y - GRID_H/2 + 0.5) * TILE, 0);
+          tileGroup.add(mesh);
+        });
+      });
+
+      const buildingsGroup = new THREE.Group();
+      scene.add(buildingsGroup);
+      const particles = [];
+
+      function clearBuildings() {
+        while (buildingsGroup.children.length > 0) {
+          const c = buildingsGroup.children[0];
+          if (c.geometry) c.geometry.dispose();
+          if (c.material) c.material.dispose();
+          buildingsGroup.remove(c);
+        }
+      }
+
+      function getBuildingPositions(count, startX, startY, cols) {
+        const positions = [];
+        for (let i = 0; i < count; i++) {
+          const gx = startX + (i % cols);
+          const gy = startY + Math.floor(i / cols);
+          if (gy < GRID_H - 2) {
+            positions.push({ x: (gx - GRID_W/2 + 0.5) * TILE, y: -(gy - GRID_H/2 + 0.5) * TILE });
+          }
+        }
+        return positions;
+      }
+
+      function updateFarmVisuals() {
+        clearBuildings();
+        CONST.PRODUCERS.forEach(function(p, idx) {
+          const count = S.producers[p.id] || 0;
+          const tex = sprites[p.sprite];
+          if (!tex || count === 0) return;
+          const positions = getBuildingPositions(count, 1, 1 + idx * 3, 18);
+          positions.forEach(function(pos) {
+            const geo = new THREE.PlaneGeometry(TILE * 0.85, TILE * 0.85);
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(pos.x, pos.y, 1);
+            buildingsGroup.add(mesh);
+          });
+        });
+      }
+
+      function spawnFloatingText(text, normX, normY) {
+        const rect = canvas.getBoundingClientRect();
+        const el = document.createElement("div");
+        el.textContent = text;
+        el.style.position = "absolute";
+        el.style.left = (rect.left + normX * rect.width) + "px";
+        el.style.top = (rect.top + (1 - normY) * rect.height) + "px";
+        el.style.color = "#f1c40f"; el.style.fontWeight = "700";
+        el.style.fontSize = "18px"; el.style.pointerEvents = "none";
+        el.style.textShadow = "0 1px 3px rgba(0,0,0,0.8)";
+        el.style.transition = "all 1s ease-out";
+        el.style.zIndex = "100";
+        document.body.appendChild(el);
+        requestAnimationFrame(function() {
+          el.style.transform = "translateY(-40px)"; el.style.opacity = "0";
+        });
+        setTimeout(function() { el.remove(); }, 1000);
+      }
+
+      function spawnGrainParticles(count) {
+        const intensity = Math.min(count / 10, 1);
+        const n = Math.floor(2 + intensity * 5);
+        for (let i = 0; i < n; i++) {
+          const geo = new THREE.PlaneGeometry(6, 6);
+          const mat = new THREE.MeshBasicMaterial({ map: sprites.grain, transparent: true });
+          const mesh = new THREE.Mesh(geo, mat);
+          const startX = (Math.random() - 0.5) * GRID_W * TILE * 0.8;
+          const startY = (Math.random() - 0.5) * GRID_H * TILE * 0.6;
+          mesh.position.set(startX, startY, 5);
+          scene.add(mesh);
+          particles.push({
+            mesh: mesh, life: 1.0, vy: 0.3 + Math.random() * 0.5,
+            vx: (Math.random() - 0.5) * 0.4
+          });
+        }
+      }
+
+      // Camera pan
+      let isDragging = false, lastMX = 0, lastMY = 0;
+      canvas.addEventListener("mousedown", function(e) { isDragging = true; lastMX = e.clientX; lastMY = e.clientY; });
+      window.addEventListener("mouseup", function() { isDragging = false; });
+      window.addEventListener("mousemove", function(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - lastMX, dy = e.clientY - lastMY;
+        camera.position.x -= dx * 0.5; camera.position.y += dy * 0.5;
+        lastMX = e.clientX; lastMY = e.clientY;
+      });
+      canvas.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        const zoom = e.deltaY > 0 ? 1.1 : 0.9;
+        camera.zoom *= zoom;
+        camera.zoom = Math.max(0.5, Math.min(3, camera.zoom));
+        camera.updateProjectionMatrix();
+      });
+
+      // Tooltip
+      const tooltip = document.getElementById("tooltip");
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      canvas.addEventListener("mousemove", function(e) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObjects(buildingsGroup.children);
+        if (hits.length > 0) {
+          const tex = hits[0].object.material.map;
+          const p = CONST.PRODUCERS.find(function(pr) { return sprites[pr.sprite] === tex; });
+          if (p) {
+            const owned = S.producers[p.id] || 0;
+            const contrib = owned * p.pps * (1 + CONST.FERT_MULT_PER_LEVEL * S.fertilizerLevel) * prestigeMultiplier(S);
+            tooltip.style.display = "block";
+            tooltip.style.left = (e.clientX + 12) + "px";
+            tooltip.style.top = (e.clientY + 12) + "px";
+            tooltip.innerHTML = "<strong>" + p.name + "</strong><br/>Owned: " + owned + "<br/>Contribution: " + contrib.toFixed(2) + "/s";
+          }
+        } else {
+          tooltip.style.display = "none";
+        }
+      });
+
+      // ─── Game Loop ───
+      let rafId = null, lastTime = now(), acc = 0, lastRender = 0;
+      let particleTimer = 0;
+
+      function frame() {
+        const t = now();
+        const dt = Math.min(1000, t - lastTime) / 1000;
+        lastTime = t; acc += dt;
+        let changed = false;
+        while (acc >= CONST.SIM_DT) {
+          const pps = productionPerSec(S);
+          S.grain += pps * CONST.SIM_DT;
+          acc -= CONST.SIM_DT; changed = true;
+          particleTimer += CONST.SIM_DT;
+          if (particleTimer > 1 && pps > 0) {
+            spawnGrainParticles(pps);
+            particleTimer = 0;
+          }
+        }
+        if (S.settings && S.settings.autoSell && S.grain >= (S.settings.autoSellThreshold || 100)) {
+          sellAllGrain();
+        }
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const pt = particles[i];
+          pt.life -= dt; pt.mesh.position.y += pt.vy; pt.mesh.position.x += pt.vx;
+          pt.mesh.material.opacity = Math.max(0, pt.life);
+          if (pt.life <= 0) { scene.remove(pt.mesh); pt.mesh.geometry.dispose(); pt.mesh.material.dispose(); particles.splice(i, 1); }
+        }
+        if (!isDragging) {
+          camera.position.x += (0 - camera.position.x) * 0.02;
+          camera.position.y += (0 - camera.position.y) * 0.02;
+        }
+        renderer.render(scene, camera);
+        if (changed && t - lastRender >= CONST.RENDER_MS) {
+          render(); lastRender = t;
+        }
+        rafId = requestAnimationFrame(frame);
+      }
+      function startLoop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        lastTime = now(); lastRender = 0; acc = 0; rafId = requestAnimationFrame(frame);
+      }
+      function stopLoop() { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+
+      // ─── Events ───
+      document.getElementById('firstFieldAction').addEventListener('click', function() {
+        const phase = firstFieldGoal(S).phase;
+        if (phase === 'sell') sellAllGrain();
+        else if (phase === 'buy' && buyProducer('field', 1)) {
+          updateFarmVisuals(); showToast('First field planted', 'Your farm now grows 0.5 grain each second.');
+        }
+        render();
+      });
+      selBuyMode.addEventListener("change", render);
+      btnSell10.addEventListener("click", function() { if (sellGrain(10)) render(); });
+      btnSellAll.addEventListener("click", function() { if (sellAllGrain()) render(); });
+      btnFertilizer.addEventListener("click", function() { if (buyFertilizer()) render(); });
+      btnHarvest.addEventListener("click", function() {
+        S.grain += 1; S.stats.manualHarvests += 1;
+        save(); render();
+        spawnFloatingText("+1🌾", 0.5, 0.5);
+        spawnGrainParticles(1);
+      });
+      btnPrestige.addEventListener("click", function() {
+        const gain = prestigeGain();
+        if (gain <= 0) return;
+        if (!confirm("Prestige for " + gain + " token(s)? This resets producers, coins, grain, and upgrades.")) return;
+        if (doPrestige()) { render(); updateFarmVisuals(); showToast("New Season!", "Gained " + gain + " prestige token(s)."); }
+      });
+      cbAutoSell.addEventListener("change", function() {
+        S.settings.autoSell = cbAutoSell.checked; save();
+      });
+      inpAutoSellThreshold.addEventListener("change", function() {
+        S.settings.autoSellThreshold = Math.max(1, parseInt(inpAutoSellThreshold.value) || 100); save();
+      });
+
+      document.getElementById("exportCopy").addEventListener("click", async function() {
+        const data = JSON.stringify(S);
+        try { await navigator.clipboard.writeText(data); showToast("Exported", "Save copied to clipboard!"); }
+        catch { showToast("Error", "Could not copy to clipboard."); }
+      });
+      document.getElementById("exportDownload").addEventListener("click", function() {
+        const blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = "idle-farm-save-" + Date.now() + ".json";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      });
+      document.getElementById("importFileBtn").addEventListener("click", function() { document.getElementById("importFile").click(); });
+      document.getElementById("importFile").addEventListener("change", async function(e) {
+        const f = e.target.files && e.target.files[0]; if (!f) return;
+        try {
+          const text = await f.text(); const obj = JSON.parse(text);
+          importSave(obj);
+        } catch { showToast("Error", "Invalid save file."); }
+        e.target.value = "";
+      });
+      document.getElementById("importPasteBtn").addEventListener("click", async function() {
+        const text = prompt("Paste your save JSON:"); if (!text) return;
+        try {
+          const obj = JSON.parse(text);
+          importSave(obj);
+        } catch { showToast("Error", "Invalid save data."); }
+      });
+      document.getElementById("resetBtn").addEventListener("click", function() {
+        if (!confirm("Reset all progress? This cannot be undone.")) return;
+        S = defaultState(); if (pausedSince !== null) pausedSince = now(); save(); render(); updateFarmVisuals();
+      });
+
+      document.addEventListener("visibilitychange", function() {
+        if (document.hidden) { pausedSince = now(); save(); stopLoop(); }
+        else {
+          save();
+          pausedSince = null;
+          startLoop(); render();
+        }
+      });
+      window.addEventListener("beforeunload", save);
+      setInterval(save, CONST.AUTOSAVE_MS);
+
+      // Start
+      updateFarmVisuals();
+      render();
+      startLoop();
+    })();
+  </script>
+</body>
+</html>

@@ -1,2 +1,6 @@
 [build]
+  command = "npm test"
   publish = "public"
+
+[build.environment]
+  NODE_VERSION = "24"

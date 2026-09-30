@@ -1,0 +1,11 @@
+{
+  "name": "zach-nielsen-games",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/sync-games.cjs",
+    "test": "node --test tests/*.test.cjs projects/dreadworks/*.test.cjs projects/idle-farm/tests/*.test.cjs",
+    "check:live": "node scripts/check-live.cjs"
+  },
+  "devDependencies": { "jsdom": "26.1.0" },
+  "engines": { "node": ">=22" }
+}

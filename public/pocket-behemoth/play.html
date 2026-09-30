@@ -41,7 +41,7 @@ footer{display:flex;justify-content:space-between;gap:16px;margin-top:29px;paddi
 <main class="layout">
   <section aria-label="Pocket Behemoth game">
     <div class="game-shell">
-      <div class="toolbar"><div class="area-label"><i class="dot" aria-hidden="true"></i> MOSSBOUND CLEARING</div><div class="tools"><button id="restart" class="text-button" title="Restart hunt (R)">Restart</button><button id="pause" class="text-button" title="Pause / resume (P or Escape)" disabled>Pause</button></div></div>
+      <div class="toolbar"><div class="area-label"><i class="dot" aria-hidden="true"></i> MOSSBOUND CLEARING</div><div class="tools"><button id="restart" class="text-button" title="Restart hunt (R)">Restart</button><button id="pause" class="text-button" title="Pause / resume (P); Escape pauses" disabled>Pause</button></div></div>
       <div class="screen">
         <canvas id="game" width="640" height="400" tabindex="0" aria-label="Top-down monster fight. Move with WASD or arrows; hold J to cut, press K for a heavy strike, Space to dodge. P pauses. Touch controls are below the arena.">This game needs a browser with Canvas 2D and JavaScript.</canvas>
         <div id="fallback" hidden>Your browser could not create a Canvas 2D surface. Try opening this file in a current browser with JavaScript enabled.</div>
@@ -854,7 +854,8 @@ footer{display:flex;justify-content:space-between;gap:16px;margin-top:29px;paddi
     const interactive=/^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
     if(interactive&&['Space','Enter','ArrowLeft','ArrowRight'].includes(e.code))return;
     if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();
-    if(e.code==='KeyP'||e.code==='Escape'){if(!e.repeat)pause();return;}
+    if(e.code==='Escape'){if(!e.repeat&&game.scene==='playing')pause();return;}
+    if(e.code==='KeyP'){if(!e.repeat)pause();return;}
     if(e.code==='KeyM'&&!e.repeat){el('sound').click();return;}
     if(e.code==='KeyR'&&!e.repeat){start();return;}
     if(e.code==='Enter'&&!e.repeat&&game.scene!=='playing'){game.scene==='paused'?pause():start();return;}
