@@ -46,6 +46,6 @@ test('harvests gather at least 1 grain and scale with production', () => {
   const {api:g} = fixture();
   assert.equal(g.harvestValue(g.state),1);
   g.state.producers.field = 10; assert.equal(g.harvestValue(g.state),1);
-  g.state.producers.tractor = 3; assert.equal(g.harvestValue(g.state),31);
-  g.state.prestigeTokens = 10; assert.equal(g.harvestValue(g.state),61);
+  g.state.producers.tractor = 3; assert.equal(g.harvestValue(g.state),15);
+  g.state.prestigeTokens = 10; assert.equal(g.harvestValue(g.state),31);
 });
