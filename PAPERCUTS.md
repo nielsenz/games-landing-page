@@ -151,3 +151,19 @@ Catalog inspection searched root index.html, but this arcade's entry page is pub
 2026-10-07T03:05:41.744Z - claude-opus-5-5 - znielsen
 
 grep in this shell is aliased to ugrep, which rejects context regexes like '.{0,80}(a|b).{0,80}' with 'exceeds complexity limits'; use command grep or perl for context extraction from minified play.html files.
+
+2026-10-07T03:42:17.537Z - claude-opus-5-5 - znielsen
+
+gh run list --commit <sha> returned nothing right after a push (run not registered yet), so 'gh run watch $id' got an empty id and printed usage; list without --commit or retry after a few seconds.
+
+2026-10-07T05:04:52.406Z - claude-opus-5-5 - znielsen
+
+gh run list --commit 072e961 (short SHA) returns nothing even after the run exists; --commit needs the full SHA, so use $(git rev-parse HEAD).
+
+2026-10-07T05:20:42.313Z - claude-opus-5-5 - znielsen
+
+Wanted a real-browser visual check of Night Relay's new tank sprite: chrome-browser skill loaded but no mcp__claude-in-chrome tools existed in the session, so canvas rendering went unverified (fell back to jsdom-driven game loop for DOM/results only).
+
+2026-10-07T05:20:42.350Z - claude-opus-5-5 - znielsen
+
+tests/onboarding.test.cjs crumb() helper didn't stub ResizeObserver, so any page using it (Night Relay) threw on load in jsdom; added a ??= stub to the shared helper.

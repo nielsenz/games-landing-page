@@ -56,11 +56,40 @@ test('Crumb Command pauses its economy and resolves a full match',()=>{
 });
 test('Night Relay both missions complete without enemies and remain finite',()=>{
  const world=core('night-relay');const {Mission}=core('night-relay',1,world);
- for(const mission of ['home','floodgate']){
+ for(const mission of ['home','floodgate','mast']){
   const g=new Mission({mission,seed:123,spawns:false});g.start();
   for(let i=0;i<60*600&&g.status==='playing';i++)g.update(1/60);
   assert.equal(g.status,'won',mission);finiteTree(g.summary());
+  assert.ok(g.summary().debrief[1].length>0,`${mission} has a debrief line`);
  }
+});
+test('Night Relay squads spread out and rotate entry lanes',()=>{
+ const world=core('night-relay');const {Mission}=core('night-relay',1,world);
+ for(const mission of ['home','floodgate','mast']){
+  const g=new Mission({mission,seed:77});g.start();let waves=0,lanes=[];
+  for(let i=0;i<60*140&&g.status==='playing';i++){
+   g.courier.hp=100;const before=new Set(g.enemies.map(e=>e.id));g.update(1/60);
+   const fresh=g.enemies.filter(e=>!before.has(e.id));if(!fresh.length)continue;waves++;
+   // No Hammer (kill radius ~39px) can catch two fresh spawns at their midpoint.
+   for(const a of fresh)for(const b of fresh)if(a!==b)assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=64,`${mission} spawns too close`);
+   lanes.push(g.lastLanes.map(p=>`${p.x},${p.y}`).join('|'));
+   g.enemies=[]; // stand-in for a gunner clearing each wave, keeping the director below its cap
+  }
+  assert.ok(waves>10,mission);
+  const repeats=lanes.slice(1).filter((l,i)=>l===lanes[i]).length;
+  assert.ok(repeats<=lanes.length/4,`${mission} reuses the same lanes back to back`);
+ }
+});
+test('Night Relay tanks shrug off Needle and fall to Thunder',()=>{
+ const world=core('night-relay');const {Mission,ENEMIES}=core('night-relay',1,world);
+ const g=new Mission({mission:'mast',seed:5,spawns:false});g.start();
+ const spot={x:g.courier.x+260,y:g.courier.y};
+ const p=g.terrain.spawnPoint(spot.x,spot.y,ENEMIES.tank.radius,g.courier,200);
+ const tank=g.spawnEnemy('tank',p.x,p.y);tank.grace=99;
+ g.impact({faction:'friendly',weapon:0,x:tank.x,y:tank.y});
+ assert.ok(tank.hp>ENEMIES.tank.hp-5,'Needle barely scratches a tank');
+ g.impact({faction:'friendly',weapon:2,x:tank.x,y:tank.y});g.impact({faction:'friendly',weapon:1,x:tank.x,y:tank.y});g.impact({faction:'friendly',weapon:1,x:tank.x,y:tank.y});
+ assert.equal(g.enemies.length,0,'one Thunder plus two Hammers kill a tank');
 });
 test('Riverward survives a year of economy/save round trips and rejects malformed markets',()=>{
  const E=core('riverward-exchange');let s=E.createGame('ARCADE-REVIEW');

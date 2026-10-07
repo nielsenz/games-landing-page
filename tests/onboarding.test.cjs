@@ -14,6 +14,7 @@ function crumb(saved={},slug='crumb-command') {
    for(const [k,v] of Object.entries(saved))w.localStorage.setItem(k,v);
    w.matchMedia=()=>({matches:false,addEventListener(){}});
    w.requestAnimationFrame=()=>1;w.cancelAnimationFrame=()=>{};
+   w.ResizeObserver??=class{observe(){}disconnect(){}};
    const context=new Proxy({measureText:s=>({width:String(s).length*6}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}}),createPattern:()=>({})},{get:(o,k)=>k in o?o[k]:(()=>{})});
    w.HTMLCanvasElement.prototype.getContext=()=>context;
    w.HTMLCanvasElement.prototype.getBoundingClientRect=()=>({left:0,top:0,width:960,height:600});
@@ -110,4 +111,15 @@ test('Idle Farm first-field buttons complete the economy loop and preserve it on
   saved=f.w.localStorage.getItem('idle_farm_save_v2');assert.deepEqual(f.errors,[]);
  }finally{f.dom.window.close();}
  const reloaded=open(saved);try{assert.equal(reloaded.$('firstFieldGoal').hidden,true);assert.equal(reloaded.$('count_field').textContent,'1');}finally{reloaded.dom.window.close();}
+});
+test('Night Relay offers all three missions and starts Dead Air with the crew on the radio',()=>{
+ const {dom,w,$,errors}=crumb({'night-relay-v2':JSON.stringify({version:2,muted:true,best:{home:{standard:900,relaxed:0}}})},'night-relay');try{
+  $('pause');const mast=w.document.querySelector('[data-mission="mast"]');assert.ok(mast);
+  mast.click();assert.match($('brief-headline').textContent,/Last stop/);assert.equal($('mission-tag').textContent,'MISSION 03');
+  assert.match($('brief-fine').textContent,/About 5 minutes/);
+  $('start').click();
+  assert.equal(w.NightRelayDebug.snapshot().mission,'mast');assert.equal(w.NightRelayDebug.snapshot().status,'playing');
+  assert.match($('radio').textContent,/Transmitter is on the hill/);
+  assert.deepEqual(errors.map(e=>e.message),[]);
+ }finally{dom.window.close();}
 });

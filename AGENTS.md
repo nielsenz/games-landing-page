@@ -9,4 +9,5 @@
 - `npm ci && npm test` works from a fresh checkout. It checks the arcade, Dreadworks, Idle Farm saves, and DOM onboarding behavior. Canvas/WebGL rendering is not established by these tests.
 - GitHub runs the tests on pushes and pull requests. Netlify runs the same tests before publishing. Do not bypass the build with a direct unchecked production upload.
 - After deployment, run `npm run check:live` to compare published files with the checkout. Use browser playtesting separately for layout, input feel, and fullscreen.
-- Night Relay and Roofline's gameplay was accepted by the owner in September 2026; do not rebalance them without a new request.
+- Roofline's gameplay was accepted by the owner in September 2026; do not rebalance it without a new request.
+- Night Relay was rebalanced in October 2026 at the owner's request: spread multi-squad waves, a random seed per run, crew radio and debriefs, and mission 3 (Dead Air) with tanks. It awaits the owner's playtest. The GBC cartridge in `../gbc/night-relay` still uses the older two-mission balance.

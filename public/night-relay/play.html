@@ -12,7 +12,7 @@
 /* v0.2 mission selector + responsive touch cockpit. Controls stay outside the aim surface. */
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.45;cursor:default}button[aria-pressed=true]{border-color:var(--cyan)}
 .mission-picker{display:flex;align-items:center;gap:8px;margin:0 0 10px}.mission-picker button{font:10px monospace;letter-spacing:.5px;padding:10px 12px;min-height:44px}.mission-picker button span{color:var(--dim);margin-right:8px}.mission-picker button[aria-pressed=true]{background:#1b3431;color:var(--cyan)}.mission-picker b{font:8px monospace;color:var(--amber);margin-left:8px}.mission-picker-hint{margin-left:auto;font:8px monospace;color:var(--dim)}
-#brief-headline{white-space:pre-line}.screen-overlay{overflow:auto;overscroll-behavior:contain}.screen-overlay .mission-intel{font:10px/1.6 monospace;color:var(--amber);border-left:2px solid #a18c62;padding-left:10px;margin:10px 0 14px}.briefing-card{max-width:590px}.briefing-card .eyebrow{margin-bottom:10px}.briefing-card h2{margin-bottom:12px}.briefing-card p{margin-bottom:10px}.identify{margin:10px 0}.brief-controls{margin:10px 0 16px}.start-actions{flex-wrap:wrap}.screen-overlay .fine-print{margin-top:12px}
+#brief-headline{white-space:pre-line}.screen-overlay .debrief{font:12px/1.6 monospace;color:#d8e4d4;border-left:2px solid var(--cyan);padding-left:10px;margin:0 0 14px}.screen-overlay .debrief b{display:block;font:9px monospace;letter-spacing:1px;color:var(--cyan);margin-bottom:3px}.screen-overlay{overflow:auto;overscroll-behavior:contain}.screen-overlay .mission-intel{font:10px/1.6 monospace;color:var(--amber);border-left:2px solid #a18c62;padding-left:10px;margin:10px 0 14px}.briefing-card{max-width:590px}.briefing-card .eyebrow{margin-bottom:10px}.briefing-card h2{margin-bottom:12px}.briefing-card p{margin-bottom:10px}.identify{margin:10px 0}.brief-controls{margin:10px 0 16px}.start-actions{flex-wrap:wrap}.screen-overlay .fine-print{margin-top:12px}
 .touch-controls,.mobile-hud,.touch-hint,.mobile-radio{display:none}.mobile-note{display:none}#minimap{touch-action:none}
 .touch-mode .touch-controls{display:grid;grid-template-columns:1fr 110px;gap:10px;margin-top:10px;user-select:none;-webkit-user-select:none}.touch-tools{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.touch-controls button{min-height:54px;font:11px monospace;padding:8px 4px}.touch-controls small{display:block;font:9px monospace;color:var(--dim);margin-top:3px}.touch-controls button[aria-pressed=true]{background:#24453f;color:var(--cyan)}
 #touch-fire{background:#7ed6bb;color:#10251e;border:1px solid #b7f1da;font-weight:bold;font-size:17px;touch-action:none;-webkit-touch-callout:none}#touch-fire small{color:#1d4839;font-size:8px}#touch-fire.pressed{background:#e7f5c6;box-shadow:inset 0 0 0 3px #599d83}
@@ -48,7 +48,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   <div class="mission-line"><div><span class="tag" id="mission-tag">MISSION 01</span><strong id="mission-title">Bring them home.</strong><span class="subtle" id="mission-subtitle">Protect Rook-1 through the blackout.</span></div><span class="local-label" id="save-status">NO ACCOUNT · LOCAL ONLY</span></div>
   <main class="layout">
     <section class="main-feed" aria-label="Gunship targeting view">
-      <div class="mission-picker" role="group" aria-label="Choose mission"><button data-mission="home" aria-pressed="true"><span>01</span> BRING THEM HOME</button><button data-mission="floodgate" aria-pressed="false"><span>02</span> FLOODGATE <b>NEW</b></button><span class="mission-picker-hint">SELECT FROM BRIEFING</span></div>
+      <div class="mission-picker" role="group" aria-label="Choose mission"><button data-mission="home" aria-pressed="true"><span>01</span> BRING THEM HOME</button><button data-mission="floodgate" aria-pressed="false"><span>02</span> FLOODGATE</button><button data-mission="mast" aria-pressed="false"><span>03</span> DEAD AIR <b>NEW</b></button><span class="mission-picker-hint">SELECT FROM BRIEFING</span></div>
       <div class="mobile-hud" aria-label="Mission status"><strong id="mobile-hp">◇ 100%</strong><span id="mobile-objective">PROTECT ROOK-1</span><strong id="mobile-clock">05:00</strong></div>
       <div class="feed-top"><span><i class="live-dot"></i> LIVE FEED <span class="subtle">/ WHITE HOT</span></span><span id="camera-label">WIDE · AUTO TRACK</span></div>
       <div class="viewport" id="viewport">
@@ -61,13 +61,13 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
             <div class="eyebrow">GUNSHIP ONLINE / AWAITING YOUR SIGNAL</div>
             <h2 id="brief-headline">One road.<br>One way home.</h2>
             <p id="brief-description">Rook-1 has the relay. You have the sky. Clear a path, cover the stops, and get them to extraction.</p><p id="mission-intel" class="mission-intel"></p>
-            <div class="identify"><span><b class="friendly-diamond">◇</b> ROOK-1 — PROTECT</span><span><b class="hostile-mark">┼</b> WHITE MARKS — HOSTILE</span></div>
+            <div class="identify"><span><b class="friendly-diamond">◇</b> ROOK-1 — DELL &amp; HOLLIS</span><span><b class="hostile-mark">┼</b> WHITE MARKS — HOSTILE</span></div>
             <div class="brief-controls" id="brief-controls"><span><kbd>CLICK</kbd> Fire</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Weapons</span><span><kbd>SPACE</kbd> Hold escort</span></div>
             <div class="start-actions"><button id="start" class="primary">BEGIN ESCORT <span>↗</span></button><button id="training">RELAXED RUN</button></div>
             <p class="fine-print" id="brief-fine">About 4 minutes · Friendly fire is on</p>
           </div>
           <div class="pause-card" id="pause-card" hidden><div class="eyebrow">FEED SUSPENDED</div><h2>Holding orbit.</h2><p>The mission clock is paused.</p><button id="resume" class="primary">RESUME MISSION</button><button id="abort">RETURN TO BRIEFING</button></div>
-          <div class="results-card" id="results" hidden><div class="eyebrow" id="result-label">MISSION COMPLETE</div><h2 id="result-title">Rook-1 is home.</h2><p id="result-detail"></p><div class="result-stats" id="result-stats"></div><div class="start-actions"><button id="retry" class="primary">FLY AGAIN <kbd>R</kbd></button><button id="next-mission" hidden>NEXT MISSION ↗</button><button id="briefing-again">BRIEFING</button></div><p class="fine-print" id="result-best"></p></div>
+          <div class="results-card" id="results" hidden><div class="eyebrow" id="result-label">MISSION COMPLETE</div><h2 id="result-title">Rook-1 is home.</h2><p id="result-debrief" class="debrief"></p><p id="result-detail"></p><div class="result-stats" id="result-stats"></div><div class="start-actions"><button id="retry" class="primary">FLY AGAIN <kbd>R</kbd></button><button id="next-mission" hidden>NEXT MISSION ↗</button><button id="briefing-again">BRIEFING</button></div><p class="fine-print" id="result-best"></p></div>
         </div>
       </div>
       <div class="feed-bottom"><span id="sector-label">SECTOR 01 / OUTSKIRTS</span><span id="feed-status">AWAITING DEPLOYMENT</span></div>
@@ -118,25 +118,97 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       headline:'One road.\nOne way home.',brief:'Rook-1 has the relay. You have the sky. Clear a path, cover two stops, and get them to extraction.',
       intel:'Buildings stop movement and ground fire. The canal can only be crossed at the bridge. Roofs absorb your rounds.',
       seed:240926,terrainSeed:77391,speed:11,maxTime:300,extractTime:22,holdBudget:16,
-      intro:'ROOK-1: We have the relay. Keep the road clear.',
+      intro:'CONTROL: Rook-1 has the relay. Get them to the pad.',
       sectors:['OUTSKIRTS','RELAY DISTRICT','THE CROSSING','EXTRACTION'],
       ...routeData([[170,730],[425,730],[590,500],[830,500],[1000,665],[1230,665],[1475,420],[1640,420]],
         [{node:2,wait:14,name:'RELAY STATION',short:'RELAY'},{node:4,wait:18,name:'BRIDGE GATE',short:'GATE'}]),
       canals:[{x:1100,w:58,bridges:[{y:633,h:64}]}],
       gate:null,
-      entries:[[80,410],[310,385],[650,790],[860,775],[810,205],[440,150],[1050,925],[1260,940],[1260,310],[1550,770],[1710,155],[1420,130],[1720,690]]
+      entries:[[80,410],[310,385],[650,790],[860,775],[810,205],[440,150],[1050,925],[1260,940],[1260,310],[1550,770],[1710,155],[1420,130],[1720,690]],
+      buildings:{count:180,maxW:42},tone:{ground:'#233135',roof:'#465856'},
+      director:{cap:26,launcherAt:40,raiderAt:80,
+        waves:[{until:45,squads:1,size:[2,2],every:7},{until:110,squads:1,size:[3,3],every:6},{until:Infinity,squads:1,size:[4,4],every:5.2}],
+        exfil:{squads:1,size:[4,4],every:3.3}},
+      crew:{
+        intro:[['DELL','Dell on the wheel. Hollis is in the back with the box. Rolling.',2.5]],
+        stops:[
+          {arrive:[['HOLLIS','Patching into the relay station. {wait} seconds. Don\'t let anyone walk up on me.']],mid:[['HOLLIS','Handshake\'s slow. Every station in the city is down but this one.']],leave:[['DELL','He\'s back in. Moving.']]},
+          {arrive:[['HOLLIS','Bridge gate\'s on a manual lock. Give me {wait}.']],mid:[['DELL','Somebody chained this gate from our side. Wonder who.']],leave:[['DELL','Gate\'s up. Crossing.']]}],
+        quiet:[[['HOLLIS','Does anyone actually know what\'s on this thing?'],['DELL','Not our job.',2.5]],
+          [['HOLLIS','It\'s warm. Is it supposed to be warm?'],['DELL','Leave it alone, Hollis.',2]],
+          [['DELL','Every light in the city\'s out. Never seen the road this dark.']]],
+        extract:[['DELL','Pad\'s in sight. Bird needs {extract} seconds on the ground.']],
+        rotors:[['HOLLIS','I can hear the rotors.']],
+        debrief:{win:[null,'Hollis fell asleep on the box before the bird cleared the trees.'],
+          clean:['DELL','Not a scratch. I\'m going to tell people I drove well.'],
+          hurt:['DELL','She won\'t drive again. We did, though.'],
+          friendly:['HOLLIS','Can we get a different gunship next time? No offense.'],
+          killed:['CONTROL','Rook-1 is off the net. The relay is out there somewhere.'],
+          timeout:['CONTROL','The bird couldn\'t wait. Rook-1 is on foot.']}}
     }),
     Object.freeze({id:'floodgate',number:2,title:'Floodgate.',subtitle:'Two canals. One repair crew. No way around.',
       headline:'Open the gate.\nHold the line.',brief:'Rook-1 must restore a floodgate, cross the warehouse district, and survive a 28-second extraction. Keep the repair crew alive.',
       intel:'The first bridge is sealed until the 20-second gate repair finishes. Attackers can use the southern service bridge. Watch both banks.',
       seed:250926,terrainSeed:88127,speed:13.5,maxTime:360,extractTime:28,holdBudget:20,
-      intro:'ROOK-1: The floodgate is sealed. Get us to the controls; we can open it.',
+      intro:'CONTROL: The floodgate is sealed. Rook-1 opens it from the controls.',
       sectors:['LOWER CANAL','GATE CONTROL','WAREHOUSE DISTRICT','EAST BANK EXFIL'],
       ...routeData([[140,780],[400,780],[400,560],[690,560],[690,400],[960,400],[1080,240],[1220,240],[1220,660],[1530,660],[1660,500]],
         [{node:4,wait:20,name:'FLOODGATE CONTROLS',short:'GATE',opensGate:true},{node:7,wait:18,name:'RELAY UPLINK',short:'UPLINK'}]),
       canals:[{x:780,w:90,bridges:[{y:360,h:80},{y:800,h:80}]},{x:1320,w:80,bridges:[{y:620,h:80}]}],
       gate:{id:'floodgate',kind:'gate',x:784,y:360,w:10,h:80},
-      entries:[[80,435],[380,160],[645,130],[200,940],[620,850],[1030,850],[940,80],[1160,70],[1000,650],[1270,925],[1500,935],[1540,240],[1720,810],[1730,125]]
+      entries:[[80,435],[380,160],[645,130],[200,940],[620,850],[1030,850],[940,80],[1160,70],[1000,650],[1270,925],[1500,935],[1540,240],[1720,810],[1730,125]],
+      buildings:{count:230,maxW:62},tone:{ground:'#243136',roof:'#56605a'},
+      director:{cap:30,launcherAt:22,raiderAt:50,
+        waves:[{until:45,squads:2,size:[2,2],every:8},{until:120,squads:2,size:[2,3],every:7.5},{until:Infinity,squads:3,size:[2,3],every:6.5}],
+        exfil:{squads:2,size:[2,3],every:4.5}},
+      crew:{
+        intro:[['DELL','Same truck, new dents. Hollis says he can open the gate.',2.5],['HOLLIS','I said probably.',5]],
+        stops:[
+          {arrive:[['HOLLIS','These controls are older than me. {wait} seconds, maybe less.']],mid:[['HOLLIS','Come on, come on. Pressure\'s holding.']],leave:[['HOLLIS','Gate\'s open! That was not less.'],['DELL','Crossing.',2]]},
+          {arrive:[['HOLLIS','Plugging the relay into the uplink. {wait} seconds.']],mid:[['HOLLIS','Huh. It\'s sending, not just receiving.']],leave:[['DELL','Done? Good. Moving.']]}],
+        quiet:[[['HOLLIS','Control, what\'s actually on the relay?'],['CONTROL','Stay on task, Rook-1.',2.5]],
+          [['HOLLIS','If the gate floods, do we float?'],['DELL','No.',2]],
+          [['DELL','Water\'s over the second step. I don\'t want to be here when it comes over.']]],
+        extract:[['DELL','East bank. {extract} seconds and we\'re out of the water.']],
+        rotors:[['HOLLIS','Rotors. Finally.']],
+        debrief:{win:['HOLLIS','The uplink logged a reply from somewhere north. Control won\'t say where.'],
+          clean:['DELL','Clean run. Hollis wants it on record that he opened the gate.'],
+          hurt:['DELL','Came out the other side on three tires. I\'ll take it.'],
+          friendly:['HOLLIS','I counted the scorch marks on the roof. Some of them are yours.'],
+          killed:['CONTROL','Lost Rook-1 at the canal. The floodgate is still sealed.'],
+          timeout:['CONTROL','Water\'s over the bridge. Nobody crosses tonight.']}}
+    }),
+    Object.freeze({id:'mast',number:3,title:'Dead air.',subtitle:'Get the relay to the transmitter. They are sending armor.',
+      headline:'Last stop.\nPut it on the air.',brief:'The relay goes into the old transmitter on Mast Hill. Rook-1 restarts the substation on the way, then holds at the mast while Hollis brings the emergency channel up.',
+      intel:'Tanks barely notice Needle and take several Hammer hits. Thunder breaks them. The substation crew can load three more Thunder rounds. Two canals, one road bridge each.',
+      seed:260926,terrainSeed:93017,speed:12,maxTime:390,extractTime:30,holdBudget:20,
+      intro:'CONTROL: Last leg, Rook-1. Transmitter is on the hill.',
+      sectors:['NORTH YARDS','SUBSTATION','RIVER STREETS','MAST HILL'],
+      ...routeData([[120,190],[400,190],[400,480],[690,480],[690,800],[1060,800],[1060,500],[1370,500],[1370,260],[1690,260]],
+        [{node:4,wait:20,name:'SUBSTATION',short:'POWER',resupply:3},{node:7,wait:24,name:'MAST TRANSMITTER',short:'MAST'}]),
+      canals:[{x:860,w:80,bridges:[{y:180,h:70},{y:760,h:80}]},{x:1190,w:70,bridges:[{y:460,h:80}]}],
+      gate:null,
+      entries:[[60,420],[260,40],[620,90],[560,330],[300,700],[150,940],[560,950],[1000,940],[1000,330],[1110,110],[1500,900],[1560,640],[1300,880],[1740,560],[1600,60],[1760,880]],
+      buildings:{count:210,maxW:54},tone:{ground:'#22302f',roof:'#4d5a52'},
+      director:{cap:30,launcherAt:20,raiderAt:45,tankAt:70,tankEvery:50,maxTanks:2,
+        waves:[{until:40,squads:2,size:[2,3],every:7.5},{until:120,squads:3,size:[2,3],every:7.5},{until:Infinity,squads:3,size:[2,3],every:7}],
+        exfil:{squads:3,size:[2,3],every:5}},
+      crew:{
+        intro:[['DELL','Heard. Hollis, strap that thing down.',2.5],['HOLLIS','It\'s strapped. I\'m strapped. Everything\'s strapped.',5]],
+        stops:[
+          {arrive:[['HOLLIS','Substation. {wait} seconds to put power on the hill.']],mid:[['HOLLIS','Breaker one. Breaker two. Don\'t look at breaker three.']],leave:[['DELL','Lights on the hill. Go.']]},
+          {arrive:[['HOLLIS','Relay\'s in. Bringing the channel up. {wait} seconds.']],mid:[['HOLLIS','Carrier\'s up. It\'s looking for the repeaters.']],leave:[['HOLLIS','We\'re on the air. Somebody out there can hear us.'],['DELL','Then let\'s not die on it.',2.5]]}],
+        quiet:[[['DELL','My kid\'s out there with a hand-crank radio. Hope she\'s cranking.']],
+          [['HOLLIS','What do we even say when it\'s on?'],['DELL','Where the water is. Where the doctors are.',2.5]],
+          [['HOLLIS','Control\'s been real quiet since the uplink.'],['DELL','Control\'s always quiet.',2.5]]],
+        extract:[['DELL','Top of the hill. Bird needs {extract} seconds.']],
+        rotors:[['HOLLIS','Rotors! Okay. Okay.']],
+        debrief:{win:[null,'At 04:12 the emergency channel came back. The first thing the city heard was Hollis asking if the mic was on.'],
+          clean:['DELL','My kid called in on the open channel. She\'s fine. So are we.'],
+          hurt:['DELL','Truck\'s finished. Channel\'s up. Fair trade.'],
+          friendly:['HOLLIS','We made it. Most of the roof didn\'t.'],
+          killed:['CONTROL','Rook-1 is down short of the mast. The channel stays dark.'],
+          timeout:['CONTROL','It\'s light out and the channel is still dead.']}}
     })
   ]);
   const getMission=id=> MISSIONS.find(m=>m.id===id || m.number===id) || MISSIONS[0];
@@ -182,8 +254,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
           if(y<WORLD.height)this.water.push({kind:'water',x:c.x,y,w:c.w,h:WORLD.height-y});
         }
         const rng=rngFor(config.terrainSeed);
-        for(let i=0;i<(config.id==='floodgate'?230:180);i++) {
-          const b={id:`building-${i}`,kind:'building',x:35+Math.floor(rng()*1680),y:35+Math.floor(rng()*900),w:24+Math.floor(rng()*(config.id==='floodgate'?62:42)),h:24+Math.floor(rng()*42)};
+        for(let i=0;i<config.buildings.count;i++) {
+          const b={id:`building-${i}`,kind:'building',x:35+Math.floor(rng()*1680),y:35+Math.floor(rng()*900),w:24+Math.floor(rng()*config.buildings.maxW),h:24+Math.floor(rng()*42)};
           // Keep the full footprint off the authored route, bridge approach and ingress points.
           if(config.route.slice(1).some((p,j)=>segmentHit(config.route[j],p,b,42)!==null))continue;
           if(config.canals.some(c=>overlap(b,{x:c.x-28,y:0,w:c.w+56,h:1000})))continue;
@@ -278,24 +350,38 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   else root.NightRelay = factory(root.NightRelayWorld);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (T) {
   'use strict';
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
   const WORLD = T.WORLD, ROUTE = T.MISSIONS[0].route;
   const WEAPONS = Object.freeze([
     Object.freeze({ name: 'Needle', role: 'PRECISION', interval: 0.12, flight: 0.20,
-      radius: 14, damage: 38, friendly: 5, heat: 7, armor: 0.28 }),
+      radius: 14, damage: 38, friendly: 5, heat: 7 }),
     Object.freeze({ name: 'Hammer', role: 'AREA CONTROL', interval: 0.85, flight: 0.55,
-      radius: 36, damage: 115, friendly: 28, heat: 0, armor: 1 }),
+      radius: 36, damage: 115, friendly: 28, heat: 0 }),
     Object.freeze({ name: 'Thunder', role: 'HEAVY BLAST', interval: 3.8, flight: 1.0,
-      radius: 76, damage: 280, friendly: 82, heat: 0, armor: 1 })
+      radius: 76, damage: 280, friendly: 82, heat: 0 })
   ]);
+  // armor scales damage per weapon: [Needle, Hammer, Thunder].
   const ENEMIES = Object.freeze({
-    runner: Object.freeze({ hp: 34, speed: 18, range: 95, interval: 2.4, damage: 2, points: 75, radius: 5 }),
-    launcher: Object.freeze({ hp: 70, speed: 12, range: 225, interval: 6.5, damage: 9, points: 150, radius: 6 }),
-    raider: Object.freeze({ hp: 180, speed: 29, range: 145, interval: 3.4, damage: 5, points: 250, radius: 10 })
+    runner: Object.freeze({ hp: 34, speed: 18, range: 95, interval: 2.4, damage: 2, points: 75, radius: 5, armor: [1, 1, 1], shell: 0.65 }),
+    launcher: Object.freeze({ hp: 70, speed: 12, range: 225, interval: 6.5, damage: 9, points: 150, radius: 6, armor: [1, 1, 1], shell: 0.65 }),
+    raider: Object.freeze({ hp: 180, speed: 29, range: 145, interval: 3.4, damage: 5, points: 250, radius: 10, armor: [0.28, 1, 1], shell: 0.65 }),
+    tank: Object.freeze({ hp: 420, speed: 8, range: 200, interval: 5.2, damage: 12, points: 600, radius: 12, armor: [0.08, 0.6, 1], shell: 1.1 })
+  });
+  // Shared crew reactions. Mission-specific lines live with each mission's data.
+  const CREW = Object.freeze({
+    firstKill: [['DELL', 'Good. Keep doing that.']],
+    multiKill: [[['HOLLIS', 'Whoa. All of them?']], [['DELL', 'That\'ll do it.']], [['HOLLIS', 'Okay, that one I felt.']]],
+    friendly: [[['DELL', 'That was you. Pull it off us.']], [['HOLLIS', 'Something just hit the roof and it wasn\'t them!']], [['DELL', 'Overwatch. Check your fire.']]],
+    hull60: [['DELL', 'Taking hits. She\'ll hold.']],
+    hull35: [['DELL', 'Engine\'s coughing. Not much left in her.'], ['HOLLIS', 'Not much left in me either.', 2]],
+    hold: [['DELL', 'Holding here. Say when.']],
+    launcher: [['CONTROL', 'Long-range team. Watch for the charging ring.']],
+    raider: [['CONTROL', 'Armored raider. Use Hammer or Thunder.'], ['DELL', 'That truck\'s bigger than ours.', 2.5]],
+    tank: [['CONTROL', 'Heavy armor on the road. Needle won\'t touch it. Use Thunder.'], ['DELL', 'That\'s a tank. That\'s an actual tank.', 2.5]]
   });
   const RULES = Object.freeze({ speed: 11, maxTime: 300, holdBudget: 16, extractTime: 22,
     heatCool: 19, heatUnlock: 30, mediumMax: 8, mediumRecharge: 3.2,
-    heavyAmmo: 6, spawnGrace: 3, enemyCap: 26 });
+    heavyAmmo: 6, spawnGrace: 3 });
   const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const SEGMENTS = T.MISSIONS[0].segments, ROUTE_LENGTH = T.MISSIONS[0].length;
@@ -333,6 +419,9 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       this.cooldowns = [0, 0, 0]; this.heat = 0; this.overheated = false;
       this.mediumAmmo = RULES.mediumMax; this.heavyAmmo = RULES.heavyAmmo;
       this.nextWave = 6; this.wave = 0; this.score = 0; this.reason = '';
+      this.director = this.config.director; this.lastLanes = []; this.nextTank = this.director.tankAt ?? Infinity;
+      this.chatter = []; this.lastRadio = -100; this.lastQuiet = 0; this.quietIndex = 0;
+      this.multiIndex = 0; this.lastMulti = -100; this.friendlyIndex = 0; this.lastFriendlyRadio = -100;
       this.stats = { kills: 0, shots: [0, 0, 0], hits: 0, friendlyDamage: 0,
         enemyDamage: 0, killPoints: 0, escortBonus: 0, penalty: 0 };
       this.radioFlags = new Set();
@@ -342,11 +431,20 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       if (this.events.length > 160) this.events.shift();
     }
     drainEvents() { return this.events.splice(0); }
-    radio(text, urgent = false) { this.emit('radio', { text, urgent }); }
+    radio(text, urgent = false) { this.lastRadio = this.time; this.emit('radio', { text, urgent }); }
+    // Lines are [speaker, text, delaySeconds]. Delayed lines let the crew answer each other.
+    say(lines, urgent = false) {
+      const fill = t => t.replace('{wait}', this.wait ? Math.round(this.wait) : '').replace('{extract}', this.config.extractTime);
+      for (const [who, text, delay = 0] of lines) {
+        const line = { at: this.time + delay, text: `${who}: ${fill(text)}`, urgent };
+        if (delay <= 0) this.radio(line.text, urgent); else this.chatter.push(line);
+      }
+    }
     start() {
       if (this.status !== 'briefing') return false;
       this.status = 'playing';
       this.radio(this.config.intro);
+      this.say(this.config.crew.intro);
       return true;
     }
     pause() {
@@ -388,40 +486,75 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       if (!def || !this.terrain.canStand(x, y, def.radius + 3)) return null;
       const e = { id: this.nextId++, kind, x: clamp(x, 15, WORLD.width - 15),
         y: clamp(y, 15, WORLD.height - 15), hp: def.hp, maxHp: def.hp,
-        radius: def.radius, angle: 0, grace: RULES.spawnGrace,
+        radius: def.radius, angle: 0, heading: 0, grace: RULES.spawnGrace,
         attack: 1.8 + this.rng() * 1.2, age: 0, path: [], repath: 0, terrainVersion: -1 };
       this.enemies.push(e); return e;
     }
-    spawnWave() {
-      if (this.enemies.length >= RULES.enemyCap) return;
-      this.wave++;
-      let count = this.time < 45 ? 2 : this.time < 110 ? 3 : 4;
-      if (this.phase === 'extraction') count = 4;
-      count = Math.min(count, RULES.enemyCap - this.enemies.length);
-      const lanes = this.config.entries.map(([x,y]) => ({x,y})).filter(p => {
-        const d = distance(p, this.courier); return d >= 260 && d <= 610;
-      });
-      const lane = lanes.length ? lanes[Math.floor(this.rng()*lanes.length)] : null;
-      const angle = this.rng() * Math.PI * 2;
-      const radius = 320 + this.rng() * 50;
-      let spawned = 0;
-      for (let i = 0; i < count; i++) {
-        let x = lane ? lane.x + i * 18 : clamp(this.courier.x + Math.cos(angle)*radius+i*20,35,1765);
-        let y = lane ? lane.y + i * 12 : clamp(this.courier.y + Math.sin(angle)*radius+i*13,35,965);
-        let kind = 'runner';
-        if (this.time > (this.config.id === 'floodgate' ? 22 : 40) && i === 0 && this.wave % 3 === 0) kind = 'launcher';
-        if (this.time > (this.config.id === 'floodgate' ? 50 : 80) && i === count - 1 && this.wave % 3 === 1) kind = 'raider';
-        const p = this.terrain.spawnPoint(x,y,ENEMIES[kind].radius,this.courier);
-        if (!p) continue;
-        this.spawnEnemy(kind,p.x,p.y); spawned++;
-        if (kind !== 'runner' && !this.radioFlags.has(kind)) {
-          this.radioFlags.add(kind);
-          this.radio(kind === 'launcher' ? 'CONTROL: Long-range team. Watch for the charging ring.' :
-            'CONTROL: Armored raider. Use Hammer or Thunder.', true);
+    // Each squad comes from its own entry lane, avoids the previous wave's lanes, and
+    // fans out so one Hammer cannot erase it. Members also approach from different sides.
+    pickLanes(n) {
+      const all = this.config.entries.map(([x, y]) => ({ x, y }));
+      let lanes = all.filter(p => { const d = distance(p, this.courier); return d >= 260 && d <= 640; });
+      const fresh = lanes.filter(p => !this.lastLanes.some(l => l.x === p.x && l.y === p.y));
+      if (fresh.length >= n) lanes = fresh;
+      for (let i = lanes.length - 1; i > 0; i--) { const j = Math.floor(this.rng() * (i + 1)); [lanes[i], lanes[j]] = [lanes[j], lanes[i]]; }
+      const picked = [];
+      for (const p of lanes) if (picked.length < n && picked.every(q => distance(p, q) >= 220)) picked.push(p);
+      for (const p of lanes) if (picked.length < n && !picked.includes(p)) picked.push(p);
+      this.lastLanes = picked.slice();
+      return picked;
+    }
+    spawnSquad(center, kinds) {
+      const spin = this.rng() * Math.PI * 2, placed = [];
+      const flank = Math.atan2(center.y - this.courier.y, center.x - this.courier.x);
+      for (let i = 0; i < kinds.length; i++) {
+        const kind = kinds[i], r = ENEMIES[kind].radius;
+        if (this.enemies.length >= this.director.cap) break;
+        let p = null;
+        for (let tries = 0; tries < 6 && !p; tries++) {
+          const a = spin + i * Math.PI * 2 / kinds.length + (this.rng() - 0.5) * 0.5 + tries * 0.9;
+          const spread = kinds.length === 1 ? 0 : 50 + this.rng() * 16;
+          const q = this.terrain.spawnPoint(clamp(center.x + Math.cos(a) * spread, 25, 1775), clamp(center.y + Math.sin(a) * spread, 25, 975), r, this.courier);
+          if (q && placed.every(o => distance(o, q) >= 64)) p = q;
         }
+        if (!p) continue;
+        const e = this.spawnEnemy(kind, p.x, p.y);
+        if (!e) continue;
+        placed.push(e);
+        // Squadmates aim at different sides of Rook instead of a single file.
+        e.flank = { angle: flank + (i - (kinds.length - 1) / 2) * 0.9, r: kinds.length === 1 ? 0 : 40 + this.rng() * 25 };
+        e.pace = 0.88 + this.rng() * 0.24;
+        if (kind !== 'runner' && !this.radioFlags.has(kind)) { this.radioFlags.add(kind); this.say(CREW[kind], true); }
+      }
+      return placed.length;
+    }
+    spawnWave() {
+      const dir = this.director;
+      if (this.enemies.length >= dir.cap) return;
+      this.wave++;
+      const plan = this.phase === 'extraction' ? dir.exfil : dir.waves.find(w => this.time < w.until);
+      const lanes = this.pickLanes(plan.squads);
+      let spawned = 0;
+      for (let k = 0; k < plan.squads; k++) {
+        const size = plan.size[0] + Math.floor(this.rng() * (plan.size[1] - plan.size[0] + 1));
+        const kinds = Array(size).fill('runner');
+        if (this.time > dir.launcherAt && k === 0 && this.wave % 3 === 0) kinds[0] = 'launcher';
+        if (this.time > dir.raiderAt && k === plan.squads - 1 && this.wave % 3 === 1) kinds[size - 1] = 'raider';
+        let center = lanes[k];
+        if (!center) {
+          const a = this.rng() * Math.PI * 2, r = 320 + this.rng() * 50;
+          center = { x: clamp(this.courier.x + Math.cos(a) * r, 35, 1765), y: clamp(this.courier.y + Math.sin(a) * r, 35, 965) };
+        }
+        spawned += this.spawnSquad({ x: center.x + (this.rng() - 0.5) * 50, y: center.y + (this.rng() - 0.5) * 50 }, kinds);
       }
       if (this.wave === 1) this.radio('CONTROL: Heat signatures inbound. White marks are hostile.');
       this.emit('wave', { count: spawned, wave: this.wave });
+    }
+    spawnTank() {
+      const dir = this.director;
+      if (this.enemies.filter(e => e.kind === 'tank').length >= dir.maxTanks || this.enemies.length >= dir.cap) return;
+      const lane = this.pickLanes(1)[0];
+      if (lane && this.spawnSquad(lane, ['tank'])) this.emit('wave', { count: 1, wave: this.wave, tank: true });
     }
     damageCourier(amount, source) {
       const scale = this.difficulty === 'relaxed' ? 0.55 : 1;
@@ -432,19 +565,18 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
         this.stats.penalty = Math.round(this.stats.friendlyDamage * 30);
         if (!this.radioFlags.has('friendly') || this.time - this.lastFriendlyRadio > 6) {
           this.radioFlags.add('friendly'); this.lastFriendlyRadio = this.time;
-          this.radio('ROOK-1: Too close! Move that fire away from us!', true);
+          this.say(CREW.friendly[this.friendlyIndex++ % CREW.friendly.length], true);
         }
       } else this.stats.enemyDamage += actual;
-      if (this.courier.hp <= 35 && !this.radioFlags.has('critical')) {
-        this.radioFlags.add('critical'); this.radio('ROOK-1: We are barely holding together!', true);
-      }
+      if (this.courier.hp <= 60 && !this.radioFlags.has('hull60')) { this.radioFlags.add('hull60'); this.say(CREW.hull60, true); }
+      if (this.courier.hp <= 35 && !this.radioFlags.has('critical')) { this.radioFlags.add('critical'); this.say(CREW.hull35, true); }
       this.emit('damage', { amount: actual, source });
     }
     impact(shot) {
       if (shot.faction === 'enemy') {
         const source = {x:shot.fromX ?? shot.x,y:shot.fromY ?? shot.y};
         if (distance(shot, this.courier) <= 26 && this.terrain.segmentFree(source, shot, 0, true) && this.terrain.segmentFree(shot, this.courier, 0, true)) this.damageCourier(shot.damage, 'enemy');
-        this.emit('incomingImpact', { x: shot.x, y: shot.y });
+        this.emit('incomingImpact', { x: shot.x, y: shot.y, heavy: Boolean(shot.heavy) });
         return;
       }
       const w = WEAPONS[shot.weapon];
@@ -453,15 +585,15 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
         this.emit('impact', {x:shot.x,y:shot.y,weapon:shot.weapon,radius:w.radius,hit:false,blocked:true});
         return;
       }
-      let hit = false;
+      let hit = false, killed = 0;
       for (const e of this.enemies) {
         if (e.hp <= 0) continue;
         const strength = falloff(distance(shot, e), w.radius + e.radius);
         if (!strength || !this.terrain.segmentFree(shot, e, 0, true)) continue;
         hit = true;
-        e.hp -= w.damage * strength * (e.kind === 'raider' ? w.armor : 1);
+        e.hp -= w.damage * strength * ENEMIES[e.kind].armor[shot.weapon];
         if (e.hp <= 0) {
-          const points = ENEMIES[e.kind].points;
+          const points = ENEMIES[e.kind].points; killed++;
           this.stats.kills++; this.stats.killPoints += points;
           this.emit('kill', { x: e.x, y: e.y, kind: e.kind, points });
         }
@@ -472,22 +604,36 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       this.enemies = this.enemies.filter(e => e.hp > 0);
       this.emit('impact', { x: shot.x, y: shot.y, weapon: shot.weapon, radius: w.radius, hit });
       if (this.stats.kills > 0 && !this.radioFlags.has('firstKill')) {
-        this.radioFlags.add('firstKill'); this.radio('ROOK-1: Good hit. Keep us moving.');
+        this.radioFlags.add('firstKill'); this.say(CREW.firstKill);
+      } else if (killed >= 3 && this.time - this.lastMulti > 40) {
+        this.lastMulti = this.time; this.say(CREW.multiKill[this.multiIndex++ % CREW.multiKill.length]);
       }
     }
     moveCourier(dt) {
       if (this.phase === 'checkpoint') {
+        const stop = this.config.crew.stops[this.checkpointIndex - 1], cp = this.checkpoints[this.checkpointIndex - 1];
+        const half = cp.wait / 2, before = this.wait;
         this.wait = Math.max(0, this.wait - dt);
+        if (before > half && this.wait <= half) this.say(stop.mid);
         if (this.wait <= 0) {
-          if (this.checkpoints[this.checkpointIndex-1]?.opensGate && this.terrain.openGate()) {
-            this.emit('gateOpen'); this.radio('ROOK-1: Gate repaired! Bridge is open. Moving across.', true);
-          } else this.radio('ROOK-1: All clear. Moving again.');
+          if (cp.opensGate && this.terrain.openGate()) this.emit('gateOpen');
+          if (cp.resupply) {
+            this.heavyAmmo = Math.min(RULES.heavyAmmo, this.heavyAmmo + cp.resupply);
+            this.emit('resupply', { amount: cp.resupply }); this.radio(`CONTROL: Thunder reloaded. ${this.heavyAmmo} rounds.`);
+          }
+          this.say(stop.leave, true);
           this.phase = 'transit';
         }
         return;
       }
-      if (this.phase === 'extraction') { this.extraction = Math.max(0, this.extraction - dt); return; }
+      if (this.phase === 'extraction') {
+        const before = this.extraction;
+        this.extraction = Math.max(0, this.extraction - dt);
+        if (before > 6 && this.extraction <= 6) this.say(this.config.crew.rotors);
+        return;
+      }
       if (this.holdRequested && this.holdRemaining > 0) {
+        if (!this.radioFlags.has('hold')) { this.radioFlags.add('hold'); this.say(CREW.hold); }
         const held = Math.min(dt, this.holdRemaining);
         this.holdRemaining -= held;
         dt -= held;
@@ -500,13 +646,13 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       if (this.routeBlocked) return;
       if (cp && next >= cp.at) {
         next = cp.at; this.phase = 'checkpoint'; this.wait = cp.wait; this.checkpointIndex++;
-        this.radio(`ROOK-1: Stopped at ${cp.name.toLowerCase()}. Cover us for ${cp.wait} seconds.`, true);
+        this.say(this.config.crew.stops[this.checkpointIndex - 1].arrive, true);
       }
       this.courier.distance = next;
       Object.assign(this.courier, pointOnRoute(next, this.config));
       if (next >= this.routeLength && this.phase !== 'checkpoint') {
         this.phase = 'extraction';
-        this.radio(`ROOK-1: At extraction. Give us ${this.config.extractTime} more seconds!`, true);
+        this.say(this.config.crew.extract, true);
         this.nextWave = Math.min(this.nextWave, this.time + 0.5);
       }
     }
@@ -521,8 +667,10 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       this.moveCourier(dt);
       if (this.enableSpawns && this.time >= this.nextWave) {
         this.spawnWave();
-        this.nextWave = this.time + (this.phase === 'extraction' ? 3.3 : this.time < 45 ? 7.0 : this.time < 110 ? 6.0 : 5.2);
+        this.nextWave = this.time + (this.phase === 'extraction' ? this.director.exfil : this.director.waves.find(w => this.time < w.until)).every;
       }
+      if (this.enableSpawns && this.time >= this.nextTank) { this.spawnTank(); this.nextTank = this.time + this.director.tankEvery; }
+      this.updateChatter();
       for (const e of this.enemies) {
         const def = ENEMIES[e.kind];
         e.age += dt; e.grace = Math.max(0, e.grace - dt);
@@ -532,25 +680,30 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
         const lineOfSight = this.terrain.segmentFree(e, this.courier, 0, true);
         if ((d > def.range || !lineOfSight) && d > 0) {
           e.repath -= dt;
-          let target = this.courier;
-          if (!this.terrain.segmentFree(e, this.courier, e.radius > 6 ? 12 : 8)) {
+          let goal = this.courier;
+          if (e.flank?.r) {
+            const f = { x: this.courier.x + Math.cos(e.flank.angle) * e.flank.r, y: this.courier.y + Math.sin(e.flank.angle) * e.flank.r };
+            if (this.terrain.canStand(f.x, f.y, e.radius + 2)) goal = f;
+          }
+          let target = goal;
+          if (!this.terrain.segmentFree(e, goal, e.radius > 6 ? 12 : 8)) {
             if (e.repath <= 0 || e.terrainVersion !== this.terrain.version) {
-              e.path = this.terrain.findPath(e, this.courier, e.radius);
+              e.path = this.terrain.findPath(e, goal, e.radius);
               e.repath = 1.2 + (e.id % 5)*0.08; e.terrainVersion = this.terrain.version;
             }
             while(e.path.length && distance(e,e.path[0]) < 2) e.path.shift();
             if (!e.path.length) continue;
             target = e.path[0];
           } else e.path = [];
-          const td=distance(e,target),step=Math.min(td,def.speed*dt);
-          if(td>0) {e.angle=Math.atan2(target.y-e.y,target.x-e.x);this.terrain.move(e,(target.x-e.x)/td*step,(target.y-e.y)/td*step);}
+          const td=distance(e,target),step=Math.min(td,def.speed*(e.pace||1)*dt);
+          if(td>0) {e.heading=Math.atan2(target.y-e.y,target.x-e.x);if(e.kind!=='tank')e.angle=e.heading;this.terrain.move(e,(target.x-e.x)/td*step,(target.y-e.y)/td*step);}
         } else {
           e.attack -= dt;
           if (e.attack <= 0) {
             e.attack = def.interval;
             this.shots.push({ id: this.nextId++, faction: 'enemy', x: this.courier.x,
-              y: this.courier.y, fromX: e.x, fromY: e.y, remaining: 0.65, duration: 0.65,
-              damage: def.damage });
+              y: this.courier.y, fromX: e.x, fromY: e.y, remaining: def.shell, duration: def.shell,
+              damage: def.damage, heavy: e.kind === 'tank' });
             this.emit('incoming', { x: e.x, y: e.y, kind: e.kind });
           }
         }
@@ -567,6 +720,29 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       else if (this.phase === 'extraction' && this.extraction <= 0) this.finish(true, 'Rook-1 is home.');
       else if (this.time >= this.config.maxTime) this.finish(false, 'The extraction window closed.');
     }
+    updateChatter() {
+      for (const line of this.chatter) if (line.at <= this.time) this.radio(line.text, line.urgent);
+      this.chatter = this.chatter.filter(line => line.at > this.time);
+      // Idle talk only when nothing is close and the channel has been quiet for a while.
+      const quiet = this.config.crew.quiet;
+      if (this.quietIndex >= quiet.length || this.phase !== 'transit' || this.chatter.length) return;
+      const cp = this.checkpoints[this.checkpointIndex];
+      if (cp && cp.at - this.courier.distance < this.config.speed * 12) return;
+      if (this.time - this.lastRadio < 9 || this.time - this.lastQuiet < 35 || this.time < 25) return;
+      if (this.enemies.some(e => distance(e, this.courier) < 300)) return;
+      this.lastQuiet = this.time; this.say(quiet[this.quietIndex++]);
+    }
+    debrief() {
+      const d = this.config.crew.debrief;
+      if (this.status === 'won') {
+        if (this.stats.friendlyDamage >= 15) return d.friendly;
+        if (this.courier.hp <= 35) return d.hurt;
+        if (this.courier.hp >= 95) return d.clean;
+        return d.win;
+      }
+      if (this.time >= this.config.maxTime) return d.timeout;
+      return this.stats.friendlyDamage > this.stats.enemyDamage ? ['CONTROL', 'Rook-1 went down under our own fire. That goes in the report.'] : d.killed;
+    }
     finish(won, reason) {
       if (this.status !== 'playing') return;
       this.status = won ? 'won' : 'lost'; this.reason = reason; this.holdRequested = false;
@@ -578,10 +754,11 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       const shots = this.stats.shots.reduce((a, b) => a + b, 0);
       return { version: VERSION, mission: this.config.id, missionNumber: this.config.number, seed: this.seed, difficulty: this.difficulty, status: this.status,
         time: this.time, hp: this.courier.hp, score: this.score, reason: this.reason,
-        accuracy: shots ? this.stats.hits / shots : 0, ...this.stats, shots: [...this.stats.shots] };
+        accuracy: shots ? this.stats.hits / shots : 0, debrief: this.status === 'won' || this.status === 'lost' ? this.debrief() : null,
+        ...this.stats, shots: [...this.stats.shots] };
     }
   }
-  return { VERSION, WORLD, ROUTE, ROUTE_LENGTH, CHECKPOINTS, WEAPONS, ENEMIES, RULES,
+  return { VERSION, WORLD, ROUTE, ROUTE_LENGTH, CHECKPOINTS, WEAPONS, ENEMIES, RULES, CREW,
     MISSIONS: T.MISSIONS, getMission: T.getMission, Terrain: T.Terrain, Mission, makeRng, pointOnRoute, falloff, distance, clamp };
 });
 
@@ -600,7 +777,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   const palette = { white: '#f0f2dd', cyan: '#9ce4d2', amber: '#efbd79', red: '#f29280', dim: '#99b3b0' };
   const SAVE_KEY = 'night-relay-v2';
   const mediaReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let prefs = {version:2,muted:true,reduced:Boolean(mediaReduced),best:{home:{standard:0,relaxed:0},floodgate:{standard:0,relaxed:0}}};
+  let prefs = {version:2,muted:true,reduced:Boolean(mediaReduced),best:Object.fromEntries(C.MISSIONS.map(m=>[m.id,{standard:0,relaxed:0}]))};
   let storageOK = true;
   try {
     const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
@@ -609,7 +786,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     if(source){
       if(typeof source.muted==='boolean')prefs.muted=source.muted;
       if(typeof source.reduced==='boolean')prefs.reduced=source.reduced;
-      for(const id of ['home','floodgate'])for(const mode of ['standard','relaxed']){
+      for(const {id} of C.MISSIONS)for(const mode of ['standard','relaxed']){
         const value=source.version===2?source.best?.[id]?.[mode]:id==='home'?source.best?.[mode]:0;
         if(Number.isFinite(value)&&value>=0)prefs.best[id][mode]=value;
       }
@@ -671,8 +848,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   terrain.width=C.WORLD.width;terrain.height=C.WORLD.height;
   const tc=terrain.getContext('2d');let terrainVersion=-1;
   function drawTerrain(){
-    const m=mission.config,rng=C.makeRng(m.terrainSeed+9),flood=m.id==='floodgate';
-    tc.fillStyle=flood?'#243136':'#233135';tc.fillRect(0,0,1800,1000);
+    const m=mission.config,rng=C.makeRng(m.terrainSeed+9);
+    tc.fillStyle=m.tone.ground;tc.fillRect(0,0,1800,1000);
     for(let i=0;i<110;i++){
       const x=Math.floor(rng()*1750),y=Math.floor(rng()*960),w=30+Math.floor(rng()*110),h=25+Math.floor(rng()*70);
       tc.fillStyle=['#26363a','#293b3e','#213236','#2c3a3b'][i%4];tc.fillRect(x,y,w,h);
@@ -693,7 +870,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     }
     // Only these drawn roof rectangles are solid buildings. Small terrain specks are decorative.
     for(const b of mission.terrain.buildings){const {x,y,w,h}=b;
-      tc.fillStyle='#142427';tc.fillRect(x+6,y+8,w,h);tc.fillStyle=flood?'#56605a':'#465856';tc.fillRect(x,y,w,h);
+      tc.fillStyle='#142427';tc.fillRect(x+6,y+8,w,h);tc.fillStyle=m.tone.roof;tc.fillRect(x,y,w,h);
       tc.fillStyle='#344644';tc.fillRect(x+3,y+4,w-6,h-8);tc.fillStyle='#7b8470';tc.fillRect(x,y,w,2);tc.fillRect(x,y,2,h);
       tc.fillStyle='#243739';tc.fillRect(x+8,y+8,9,8);
       if(w>45){tc.fillStyle='#536b61';for(let yy=y+8;yy<y+h-6;yy+=8)tc.fillRect(x+23,yy,w-30,2);}
@@ -745,14 +922,16 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     camera.y = C.clamp(camera.y, halfH, C.WORLD.height - halfH);
   }
   function reset(mode = 'standard', begin = false) {
-    mission = new C.Mission({ difficulty: mode, mission:selectedMission });
+    // Fresh seed each run so spawn order can't be memorized. Tests pass fixed seeds.
+    mission = new C.Mission({ difficulty: mode, mission:selectedMission, seed:Math.floor(Math.random()*4294967296) });
     drawTerrain();inputUI();
     document.querySelectorAll('[data-mission]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mission===selectedMission)));
     $('mission-tag').textContent=`MISSION 0${mission.config.number}`;
     $('mission-title').textContent=mission.config.title;$('mission-subtitle').textContent=mission.config.subtitle;
     $('brief-headline').textContent=mission.config.headline;
     $('brief-description').textContent=mission.config.brief;$('mission-intel').textContent=mission.config.intel;
-    $('brief-fine').textContent=`${mission.config.number===1?'About 4':'About 4½'} minutes · Friendly fire is on`;
+    const m=mission.config,nominal=(m.length/m.speed+m.checkpoints.reduce((a,c)=>a+c.wait,0)+m.extractTime)/60;
+    $('brief-fine').textContent=`About ${Math.round(nominal*2)/2} minutes · Friendly fire is on`.replace('.5 ','½ ');
     $('cp0').textContent=`01 ${mission.checkpoints[0].short}`;$('cp1').textContent=`02 ${mission.checkpoints[1].short}`;
     touchTarget=null;hasAim=false;panMode=false;inputUI();
     selected = 0; zoomed = false; follow = true; camera.zoom = 0.8;
@@ -816,12 +995,13 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       if (e.type === 'radio') { radio(e.text, e.urgent, e.time); sound('radio'); }
       if (e.type === 'fire') { sound('fire', e.weapon); recoil = Math.max(recoil, 0.15 + e.weapon * 0.15); }
       if (e.type === 'gateOpen') {drawTerrain();flash('FLOODGATE OPEN · COVER THE CROSSING');}
+      if (e.type === 'resupply') flash(`THUNDER +${e.amount} · ${mission.heavyAmmo} ROUNDS`);
       if (e.type === 'impact') {
         addParticles(e.x, e.y, e.blocked?0:e.weapon);
         rings.push({ x: e.x, y: e.y, life: 0.38 + e.weapon * 0.15, max: 0.38 + e.weapon * 0.15, radius: e.radius, enemy: false });
         recoil = Math.max(recoil, [0.3, 1.3, 3.0][e.weapon]); sound('impact', e.weapon);
       }
-      if (e.type === 'incomingImpact') rings.push({ x: e.x, y: e.y, life: 0.28, max: 0.28, radius: 15, enemy: true });
+      if (e.type === 'incomingImpact') rings.push({ x: e.x, y: e.y, life: e.heavy ? 0.45 : 0.28, max: e.heavy ? 0.45 : 0.28, radius: e.heavy ? 26 : 15, enemy: true });
       if (e.type === 'damage') {
         damageFlash = e.source === 'friendly' ? 0.65 : 0.25;
         if (e.source === 'friendly') flash('FRIENDLY FIRE · WATCH YOUR BLAST RADIUS');
@@ -843,12 +1023,16 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     if (won && s.score > oldBest) { best[mission.difficulty] = s.score; save(); }
     $('result-label').textContent = won ? 'EXTRACTION CONFIRMED / MISSION COMPLETE' : 'SIGNAL LOST / MISSION FAILED';
     $('result-title').textContent = won ? 'You brought them home.' : 'Rook-1 is gone.';
+    const [who,line]=s.debrief;
+    $('result-debrief').innerHTML='';
+    if(who){const b=document.createElement('b');b.textContent=who==='CONTROL'?'CONTROL':`${who} / ROOK-1`;$('result-debrief').append(b);}
+    $('result-debrief').append(document.createTextNode(who?`“${line}”`:line));
     $('result-detail').textContent = `${clock(s.time)} elapsed · ${mission.difficulty === 'relaxed' ? 'Relaxed' : 'Standard'} run. ` +
       (won ? `Escort bonus +${s.escortBonus.toLocaleString()}. ` : `${s.reason} `) +
       `Friendly fire: ${s.friendlyDamage.toFixed(1)} damage (−${s.penalty} points).`;
     $('result-stats').innerHTML = `<div><strong>${s.score.toLocaleString()}</strong><span>FINAL SCORE</span></div><div><strong>${Math.ceil(s.hp)}%</strong><span>HULL REMAINING</span></div><div><strong>${s.kills}</strong><span>THREATS STOPPED</span></div>`;
     $('result-best').textContent = `${won && s.score > oldBest ? 'NEW LOCAL BEST · ' : ''}${mission.difficulty.toUpperCase()} BEST: ${best[mission.difficulty].toLocaleString()} · R retries the same mission`;
-    $('next-mission').hidden=!(won && mission.config.number===1);
+    $('next-mission').hidden=!(won && C.MISSIONS[mission.config.number]);
     showOverlay('results'); $('retry').focus({preventScroll:true});
   }
   function updateUI() {
@@ -961,6 +1145,21 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     if (!friendly) { ctx.fillStyle = '#e4e9d0'; ctx.fillRect(-2, -2, 4, 4); ctx.fillRect(1, -1, 10, 2); }
     ctx.restore();
   }
+  // Tank hull snaps to 90° like the trucks; the turret tracks Rook freely.
+  function drawTank(e) {
+    ctx.save(); ctx.translate(Math.round(e.x), Math.round(e.y));
+    ctx.save(); ctx.rotate(Math.round(e.heading / (Math.PI / 2)) * Math.PI / 2);
+    ctx.fillStyle = '#10272c'; ctx.fillRect(-17, -13, 34, 27);
+    ctx.fillStyle = '#2a3b3c'; ctx.fillRect(-16, -13, 32, 6); ctx.fillRect(-16, 7, 32, 6);
+    ctx.fillStyle = '#5d6b62'; for (let x = -15 + Math.floor(e.age * 12) % 4; x < 15; x += 4) { ctx.fillRect(x, -12, 2, 4); ctx.fillRect(x, 8, 2, 4); }
+    ctx.fillStyle = '#c4cdb6'; ctx.fillRect(-14, -7, 28, 14);
+    ctx.fillStyle = '#7f8c7c'; ctx.fillRect(-14, -7, 28, 2);
+    ctx.restore();
+    ctx.rotate(e.angle);
+    ctx.fillStyle = palette.white; ctx.fillRect(-6, -5, 12, 10); ctx.fillRect(4, -2, 18, 4);
+    ctx.fillStyle = '#334948'; ctx.fillRect(-3, -2, 5, 4);
+    ctx.restore();
+  }
   function draw() {
     frameCounter++;
     ctx.imageSmoothingEnabled = false;
@@ -973,7 +1172,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     ctx.drawImage(terrain, 0, 0);
     // Abstract wreckage only: no bodies or gore.
     for (const w of wrecks) {
-      ctx.fillStyle = '#17272a'; ctx.fillRect(w.x - (w.kind === 'raider' ? 12 : 4), w.y - 3, w.kind === 'raider' ? 25 : 9, w.kind === 'raider' ? 12 : 5);
+      const size = w.kind === 'tank' ? [16, 32, 18] : w.kind === 'raider' ? [12, 25, 12] : [4, 9, 5];
+      ctx.fillStyle = '#17272a'; ctx.fillRect(w.x - size[0], w.y - 3, size[1], size[2]);
       ctx.fillStyle = '#536355'; ctx.fillRect(w.x, w.y, 3, 2);
     }
     for (const e of mission.enemies) {
@@ -983,14 +1183,14 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
         ctx.strokeStyle = '#cfdec188'; ctx.lineWidth = 1 / camera.zoom;
         ctx.setLineDash([3, 4]); ctx.strokeRect(e.x - 15, e.y - 15, 30, 30); ctx.setLineDash([]);
       }
-      if (e.kind === 'raider') drawVehicle(e.x, e.y, e.angle); else drawPerson(e);
+      if (e.kind === 'tank') drawTank(e); else if (e.kind === 'raider') drawVehicle(e.x, e.y, e.angle); else drawPerson(e);
       if (e.hp < e.maxHp) {
         ctx.fillStyle = '#173035'; ctx.fillRect(e.x - 9, e.y - 15, 18, 2);
         ctx.fillStyle = palette.amber; ctx.fillRect(e.x - 9, e.y - 15, 18 * e.hp / e.maxHp, 2);
       }
-      if (e.kind === 'launcher' && e.grace <= 0 && e.attack < 1.8 && C.distance(e, mission.courier) <= C.ENEMIES.launcher.range) {
+      if ((e.kind === 'launcher' || e.kind === 'tank') && e.grace <= 0 && e.attack < 1.8 && C.distance(e, mission.courier) <= C.ENEMIES[e.kind].range) {
         ctx.strokeStyle = palette.amber; ctx.lineWidth = 2 / camera.zoom;
-        ctx.beginPath(); ctx.arc(e.x, e.y, 17, -Math.PI / 2, -Math.PI / 2 + (1 - e.attack / 1.8) * Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.kind === 'tank' ? 26 : 17, -Math.PI / 2, -Math.PI / 2 + (1 - e.attack / 1.8) * Math.PI * 2); ctx.stroke();
       }
     }
     drawVehicle(mission.courier.x, mission.courier.y, mission.courier.angle, true);
@@ -1035,8 +1235,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
       const s = toScreen(e.x, e.y);
       if (s.x > 12 && s.x < W - 12 && s.y > 12 && s.y < H - 12) continue;
       const x = C.clamp(s.x, 12, W - 12), y = C.clamp(s.y, 35, H - 25);
-      ctx.fillStyle = e.kind === 'launcher' ? palette.amber : '#d1d9bf';
-      ctx.fillRect(x - 2, y - 2, 4, 4);
+      ctx.fillStyle = e.kind === 'launcher' || e.kind === 'tank' ? palette.amber : '#d1d9bf';
+      const r = e.kind === 'tank' ? 4 : 2; ctx.fillRect(x - r, y - r, r * 2, r * 2);
     }
     for (const f of floaters) {
       const s = toScreen(f.x, f.y); ctx.globalAlpha = Math.min(1, f.life * 2); pixelText(f.text, s.x, s.y, palette.cyan, 'center', 8);
@@ -1082,7 +1282,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
     for (const cp of mission.checkpoints) { const p = C.pointOnRoute(cp.at, mission.config); mc.fillStyle = '#d7b87a'; mc.fillRect(p.x * sx - 2, p.y * sy - 2, 4, 4); }
     mc.strokeStyle = '#b1d0bd66'; mc.lineWidth = 1;
     mc.strokeRect((camera.x - W / camera.zoom / 2) * sx, (camera.y - H / camera.zoom / 2) * sy, W / camera.zoom * sx, H / camera.zoom * sy);
-    for (const e of mission.enemies) { mc.fillStyle = e.kind === 'launcher' ? palette.amber : palette.white; mc.fillRect(Math.floor(e.x * sx), Math.floor(e.y * sy), 2, 2); }
+    for (const e of mission.enemies) { mc.fillStyle = e.kind === 'launcher' || e.kind === 'tank' ? palette.amber : palette.white; const r = e.kind === 'tank' ? 4 : 2; mc.fillRect(Math.floor(e.x * sx), Math.floor(e.y * sy), r, r); }
     mc.fillStyle = palette.cyan; mc.fillRect(mission.courier.x * sx - 3, mission.courier.y * sy - 3, 6, 6);
     const end=mission.route.at(-1);
     mc.strokeStyle = '#b5caa3'; mc.strokeRect(end.x * sx - 4, end.y * sy - 4, 8, 8);
@@ -1195,7 +1395,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   window.addEventListener('blur', () => { clearInputs(); pause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
   document.querySelectorAll('[data-mission]').forEach(b=>activateButton(b,()=>{if(['playing','paused'].includes(mission.status))return;selectedMission=b.dataset.mission;reset();}));
-  activateButton($('next-mission'),()=>{selectedMission='floodgate';reset();});
+  activateButton($('next-mission'),()=>{const next=C.MISSIONS[mission.config.number];if(next){selectedMission=next.id;reset();}});
   activateButton($('start'), () => reset('standard', true));
   activateButton($('training'), () => reset('relaxed', true));
   activateButton($('retry'), () => reset(mission.difficulty, true));
