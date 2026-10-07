@@ -1718,6 +1718,137 @@ h3 {
 .choice-card small, .panel-help, .guest-copy p, .site-select-label, .tag, .plan-summary { font-size:.875rem; }
 .challenge-card:disabled { cursor:default; transform:none; }
 
+/* ── Play feel: placing guests on the map, a living day, and a recap worth watching. ── */
+
+/* The status strip stays in view so meter changes are visible during the day. */
+@media (min-width: 961px) {
+  .status-ribbon { position: sticky; top: 8px; z-index: 15; }
+  .camp-map { scroll-margin-top: 110px; }
+}
+.status-ribbon strong[data-delta] { position: relative; }
+.status-ribbon strong.delta-up::after,
+.status-ribbon strong.delta-down::after {
+  position: absolute; left: calc(100% + 6px); top: 50%;
+  padding: 1px 7px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; white-space: nowrap;
+  content: attr(data-delta); animation: delta-pop 2.6s ease-out forwards;
+}
+.status-ribbon strong.delta-up::after { color: #1f5a37; background: #d6ead2; }
+.status-ribbon strong.delta-down::after { color: #7c2f1d; background: #f4d8cc; }
+.status-ribbon strong.delta-up, .status-ribbon strong.delta-down { animation: meter-bump 0.5s ease-out; }
+@keyframes delta-pop {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  12% { opacity: 1; transform: translate(0, -50%) scale(1.1); }
+  80% { opacity: 1; transform: translate(0, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(0, -110%); }
+}
+@keyframes meter-bump { 40% { transform: scale(1.25); } }
+
+/* Planning on the map */
+.camp-map.planning .visitor-token { pointer-events: auto; cursor: pointer; }
+.camp-map.planning .campsite { cursor: pointer; }
+.camp-map.planning .campsite:hover { transform: translate(-50%, -50%) scale(1.04); }
+.visitor-token.mood-great { border-color: #f4c867; box-shadow: 0 0 0 3px rgba(244, 200, 103, 0.55), 0 8px 16px rgba(23, 49, 38, 0.24); }
+.visitor-token.mood-good { border-color: #9cc68f; }
+.visitor-token.mood-mixed { border-color: #e7c27a; }
+.visitor-token.mood-poor { border-color: #d57b60; box-shadow: 0 0 0 3px rgba(213, 123, 96, 0.4), 0 8px 16px rgba(23, 49, 38, 0.24); }
+.visitor-token.picked { transform: translate(-50%, -60%) scale(1.15); z-index: 2; animation: picked-bob 0.9s ease-in-out infinite; }
+@keyframes picked-bob { 50% { transform: translate(-50%, -70%) scale(1.15); } }
+.camp-map.placing .map-location { opacity: 0.55; }
+.camp-map.placing .campsite { box-shadow: 0 0 0 4px rgba(244, 200, 103, 0.55), 0 11px 20px rgba(35, 68, 54, 0.18); }
+.camp-map.placing .campsite.current-site { box-shadow: 0 0 0 4px rgba(36, 77, 61, 0.35); }
+.campsite[data-preview]::after {
+  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+  padding: 2px 9px; border-radius: 999px; color: var(--cream); background: var(--forest);
+  content: attr(data-preview); font-size: 0.78rem; font-weight: 800; white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(23, 49, 38, 0.25);
+}
+.place-hint {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 8;
+  width: max-content; max-width: calc(100% - 24px); padding: 8px 14px; border-radius: 999px;
+  color: var(--ink); background: var(--cream); box-shadow: var(--shadow-small); font-size: 0.9rem;
+}
+.place-hint small { margin-left: 6px; color: var(--ink-soft); }
+.place-button { cursor: pointer; border: 2px dashed transparent; transition: border-color 0.15s, transform 0.15s; }
+.place-button:hover:not(:disabled) { border-color: var(--forest-2); transform: rotate(-4deg) scale(1.06); }
+
+/* Emoji reactions above guests */
+.visitor-token.emoting::before {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  padding: 2px 6px; border-radius: 12px 12px 12px 3px; background: var(--white);
+  box-shadow: 0 4px 10px rgba(23, 49, 38, 0.2); content: attr(data-emote); font-size: 1rem; line-height: 1.3;
+  animation: emote-pop 1.5s ease-out forwards;
+}
+@keyframes emote-pop {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.5); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+  80% { opacity: 1; transform: translate(-50%, -2px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); }
+}
+
+/* Time of day */
+.camp-map::after {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none; content: "";
+  background: transparent; transition: background 1.2s ease;
+}
+.camp-map[data-phase="morning"]::after { background: linear-gradient(180deg, rgba(255, 214, 160, 0.22), transparent 60%); }
+.camp-map[data-phase="afternoon"]::after { background: linear-gradient(180deg, rgba(255, 255, 230, 0.12), transparent 60%); }
+.camp-map[data-phase="evening"]::after { background: linear-gradient(180deg, rgba(56, 44, 110, 0.42), rgba(214, 112, 64, 0.22) 55%, rgba(30, 30, 60, 0.3)); }
+.sun { transition: opacity 300ms ease, transform 300ms ease, top 1.2s ease, right 1.2s ease, background 1.2s ease; }
+.camp-map[data-phase="morning"] .sun { top: 64px; right: 72%; }
+.camp-map[data-phase="afternoon"] .sun { top: 12px; right: 40%; }
+.camp-map[data-phase="evening"] .sun { top: 120px; right: 8%; background: #ef8d58; }
+.camp-map[data-phase="evening"] .map-location.active { z-index: 5; box-shadow: 0 0 0 6px rgba(244, 160, 80, 0.45), 0 0 40px 14px rgba(244, 160, 80, 0.55); animation: fire-flicker 0.7s ease-in-out infinite alternate; }
+@keyframes fire-flicker { to { box-shadow: 0 0 0 4px rgba(244, 160, 80, 0.35), 0 0 52px 18px rgba(244, 180, 90, 0.6); } }
+.story-bubble { z-index: 9; }
+
+/* Plan dock */
+.plan-dock {
+  position: fixed; left: 50%; bottom: 14px; z-index: 50; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px; width: min(760px, calc(100% - 24px));
+  padding: 8px 8px 8px 16px; border: 1px solid rgba(23, 49, 38, 0.14); border-radius: 999px;
+  background: rgba(255, 250, 240, 0.96); box-shadow: 0 14px 34px rgba(26, 52, 41, 0.22); backdrop-filter: blur(8px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.plan-dock.tucked { opacity: 0; pointer-events: none; transform: translate(-50%, 20px); }
+.dock-forecast { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.9rem; }
+.dock-guest { padding: 2px 9px; border-radius: 999px; background: var(--paper); border: 2px solid transparent; }
+.dock-guest.mood-great { border-color: #f4c867; }
+.dock-guest.mood-good { border-color: #9cc68f; }
+.dock-guest.mood-mixed { border-color: #e7c27a; }
+.dock-guest.mood-poor { border-color: #d57b60; }
+.dock-challenge { font-size: 0.85rem; }
+.primary-button.dock-button { width: auto; padding: 12px 22px; border-radius: 999px; }
+body:has(.plan-dock:not(.hidden)) { padding-bottom: 84px; }
+@media (max-width: 640px) {
+  .plan-dock { border-radius: 18px; padding: 8px 8px 8px 12px; gap: 8px; }
+  .dock-forecast { gap: 4px 6px; font-size: 0.8rem; }
+  .dock-challenge { display: none; }
+}
+
+/* Recap: stars land one at a time, challenge wins get confetti, postcards drop in */
+.reward-recap { position: relative; overflow: hidden; }
+.star-slots { display: flex; gap: 10px; margin-bottom: 10px; }
+.star-slot { display: flex; flex-direction: column; align-items: center; min-width: 84px; padding: 6px 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); }
+.star-slot b { font-size: 2rem; line-height: 1; color: rgba(255, 250, 240, 0.35); }
+.star-slot small { font-size: 0.72rem; text-align: center; color: rgba(255, 250, 240, 0.75); }
+.star-slot.earned b { color: var(--sun); animation: star-land 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) both; animation-delay: calc(0.25s + var(--i) * 0.35s); }
+@keyframes star-land { from { opacity: 0; transform: scale(2.4) rotate(-25deg); } to { opacity: 1; transform: none; } }
+.confetti { position: absolute; inset: 0; pointer-events: none; }
+.confetti i {
+  position: absolute; top: -12px; left: var(--x); width: 8px; height: 12px; border-radius: 2px; background: var(--c);
+  animation: confetti-fall 1.8s ease-in var(--d) both;
+}
+@keyframes confetti-fall { to { transform: translateY(260px) rotate(var(--r)); opacity: 0; } }
+.postcard { animation: postcard-in 0.5s ease-out both; }
+.postcard:nth-child(1) { animation-delay: 0.9s; }
+.postcard:nth-child(2) { animation-delay: 1.05s; }
+.postcard:nth-child(3) { animation-delay: 1.2s; }
+@keyframes postcard-in { from { opacity: 0; transform: translateY(18px) rotate(var(--tilt, 0deg)); } }
+/* The mood is the postcard's stamp. */
+.postcard-top .postcard-mood { position: absolute; top: 12px; right: 12px; display: grid; width: 30px; height: 36px; place-items: center; font-size: 1.2rem; }
+.postcard.mood-great { border-color: #f4c867; }
+.postcard.mood-poor { border-color: #e2a48f; }
+
 </style>
 <script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/pinecone-pass-morning.js"></script></head>
 <body>
@@ -1786,7 +1917,7 @@ h3 {
         </div>
       </section>
 
-      <section class="challenge-section" aria-labelledby="challengeHeading"><div class="challenge-heading"><h2 id="challengeHeading">Make today count</h2><span>Pick one challenge · build a streak for bigger bonuses</span></div><div id="challengeBoard" class="challenge-board"></div></section>
+      <section class="challenge-section" aria-labelledby="challengeHeading"><div class="challenge-heading"><h2 id="challengeHeading">Make today count</h2><span id="streakNote">Pick one challenge · build a streak for bigger bonuses</span></div><div id="challengeBoard" class="challenge-board"></div></section>
       <div class="game-grid">
         <section class="panel planning-panel" aria-labelledby="arrivalsHeading">
           <div class="panel-heading">
@@ -1854,22 +1985,22 @@ h3 {
               <small>2.1-mile loop</small>
             </div>
 
-            <div class="campsite site-pine" data-site="pine">
+            <div class="campsite site-pine" data-site="pine" role="button" tabindex="0">
               <span class="site-number">1</span>
               <strong>Whispering Pines</strong>
               <small>Quiet · shade · trees</small>
             </div>
-            <div class="campsite site-lake" data-site="lake">
+            <div class="campsite site-lake" data-site="lake" role="button" tabindex="0">
               <span class="site-number">2</span>
               <strong>Lakeview Bend</strong>
               <small>Water · family · open</small>
             </div>
-            <div class="campsite site-meadow" data-site="meadow">
+            <div class="campsite site-meadow" data-site="meadow" role="button" tabindex="0">
               <span class="site-number">3</span>
               <strong>Sunset Meadow</strong>
               <small>Social · sunny · roomy</small>
             </div>
-            <div class="campsite site-rv" data-site="rv">
+            <div class="campsite site-rv" data-site="rv" role="button" tabindex="0">
               <span class="site-number">4</span>
               <strong>Old Ranger Loop</strong>
               <small>Power · access · road</small>
@@ -1879,6 +2010,7 @@ h3 {
             <div class="visitor-token-layer" id="visitorTokenLayer" aria-hidden="true"></div>
 
             <div class="story-bubble hidden" id="storyBubble" role="status" aria-live="polite"></div>
+            <div class="place-hint hidden" id="placeHint" role="status" aria-live="polite"></div>
           </div>
 
           <div class="map-footer">
@@ -1938,6 +2070,11 @@ h3 {
       </div>
     </main>
   </div>
+
+  <aside class="plan-dock hidden" id="planDock" aria-label="Today's plan at a glance">
+    <div class="dock-forecast" id="dockForecast"></div>
+    <button class="primary-button dock-button" id="dockOpenButton" type="button"><span>Open camp</span></button>
+  </aside>
 
   <div class="modal-backdrop hidden" id="modalBackdrop" role="presentation"></div>
 
@@ -2861,6 +2998,7 @@ h3 {
   let skipRequested = false;
   let wakeSimulation = null;
   let resolveIncident = null;
+  let placingPartyId = null;
 
   const dom = {};
 
@@ -2936,6 +3074,11 @@ h3 {
       "howToModal",
       "howToClose",
       "resetButton",
+      "planDock",
+      "dockForecast",
+      "dockOpenButton",
+      "streakNote",
+      "placeHint",
     ];
 
     ids.forEach((id) => {
@@ -2945,6 +3088,26 @@ h3 {
 
   function bindStaticEvents() {
     dom.openCampButton.addEventListener("click", runDay);
+    dom.dockOpenButton.addEventListener("click", runDay);
+    // Guests can be placed on the map: pick a party (card avatar, token, or occupied site), then a campsite.
+    document.querySelectorAll(".campsite[data-site]").forEach((siteElement) => {
+      const choose = () => chooseSite(siteElement.dataset.site);
+      siteElement.addEventListener("click", choose);
+      siteElement.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); }
+      });
+    });
+    dom.visitorTokenLayer.addEventListener("click", (event) => {
+      const token = event.target.closest?.(".visitor-token");
+      if (token && !simulating && !pendingResult) startPlacing(token.dataset.partyId);
+    });
+    // The dock hides while the full Open camp button is on screen.
+    if ("IntersectionObserver" in window) {
+      const wrap = dom.openCampButton.closest?.(".open-camp-wrap");
+      if (wrap) new IntersectionObserver(([entry]) => {
+        dom.planDock.classList.toggle("tucked", entry.isIntersecting);
+      }).observe(wrap);
+    }
     dom.skipButton.addEventListener("click", skipSimulation);
     dom.continueButton.addEventListener("click", continueFromResults);
     dom.howToButton.addEventListener("click", () => openModal(dom.howToModal));
@@ -2958,6 +3121,7 @@ h3 {
 
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
+      if (placingPartyId) stopPlacing();
       if (!dom.howToModal.classList.contains("hidden")) {
         closeModal(dom.howToModal);
       }
@@ -2988,6 +3152,9 @@ h3 {
     dom.skipButton.classList.add("hidden");
     dom.openCampButton.disabled = false;
     dom.openCampButton.innerHTML = `<span>Open camp</span><small>Watch the day unfold</small>`;
+    dom.campMap.dataset.phase = "";
+    dom.campMap.classList.add("planning");
+    placingPartyId = null;
 
     updateMeters();
     renderGuests(day);
@@ -3002,6 +3169,7 @@ h3 {
     renderChallenges();
     updatePlanSummary();
     setPlanningDisabled(false);
+    setDockVisible(!state.finished);
   }
 
   function renderGuests(day) {
@@ -3019,7 +3187,7 @@ h3 {
 
       card.innerHTML = `
         <div class="guest-topline">
-          <span class="guest-avatar" aria-hidden="true">${party.emoji}</span>
+          <button class="guest-avatar place-button" type="button" data-party-id="${party.id}" title="Place on the map" aria-label="Place ${escapeHtml(party.name)} on the map">${party.emoji}</button>
           <div class="guest-copy">
             <h3>${escapeHtml(party.name)}</h3>
             <p>${escapeHtml(party.blurb)}</p>
@@ -3041,27 +3209,98 @@ h3 {
 
     dom.guestList.querySelectorAll(".site-select").forEach((select) => {
       select.addEventListener("change", (event) => {
-        const partyId = event.currentTarget.dataset.partyId;
-        const newSite = event.currentTarget.value;
-        const oldSite = plan.assignments[partyId];
-
-        const otherPartyId = Object.keys(plan.assignments).find(
-          (id) => id !== partyId && plan.assignments[id] === newSite,
-        );
-
-        plan.assignments[partyId] = newSite;
-        if (otherPartyId) {
-          plan.assignments[otherPartyId] = oldSite;
-        }
-
-        if (plan.assignments[partyId] !== recommendation.assignments[partyId]) {
-          state.decisionsChanged += 1;
-        }
-
-        syncSiteSelects();
-        updatePlanSummary();
+        assignParty(event.currentTarget.dataset.partyId, event.currentTarget.value);
       });
     });
+    dom.guestList.querySelectorAll(".place-button").forEach((button) => {
+      button.addEventListener("click", () => startPlacing(button.dataset.partyId));
+    });
+  }
+
+  // Choosing an occupied site swaps the two parties.
+  function assignParty(partyId, newSite) {
+    const oldSite = plan.assignments[partyId];
+    const otherPartyId = Object.keys(plan.assignments).find(
+      (id) => id !== partyId && plan.assignments[id] === newSite,
+    );
+
+    plan.assignments[partyId] = newSite;
+    if (otherPartyId) {
+      plan.assignments[otherPartyId] = oldSite;
+    }
+
+    if (plan.assignments[partyId] !== recommendation.assignments[partyId]) {
+      state.decisionsChanged += 1;
+    }
+
+    syncSiteSelects();
+    updatePlanSummary();
+  }
+
+  function startPlacing(partyId) {
+    if (simulating || pendingResult || state.finished) return;
+    if (placingPartyId === partyId) { stopPlacing(); return; }
+    const day = DAYS[Math.min(state.dayIndex, DAYS.length - 1)];
+    const party = day.parties.find((item) => item.id === partyId);
+    if (!party) return;
+    placingPartyId = partyId;
+    dom.campMap.classList.add("placing");
+    dom.placeHint.innerHTML = `<span>${party.emoji}</span> Where should <strong>${escapeHtml(party.shortName)}</strong> stay? Tap a campsite. <small>Esc to cancel</small>`;
+    dom.placeHint.classList.remove("hidden");
+    setDockVisible(false);
+    // Preview this party's score at each site, including any swap it would cause.
+    SITES.forEach((site) => {
+      const trial = clone(plan);
+      const other = Object.keys(trial.assignments).find((id) => id !== partyId && trial.assignments[id] === site.id);
+      if (other) trial.assignments[other] = trial.assignments[partyId];
+      trial.assignments[partyId] = site.id;
+      const score = evaluateDay(day, trial).partyResults.find((item) => item.party.id === partyId).score;
+      const element = document.querySelector(`[data-site="${site.id}"]`);
+      if (!element) return;
+      element.dataset.preview = `${moodEmoji(score)} ${score.toFixed(1)}`;
+      element.classList.toggle("current-site", plan.assignments[partyId] === site.id);
+    });
+    document.querySelectorAll(".visitor-token").forEach((token) => token.classList.toggle("picked", token.dataset.partyId === partyId));
+    dom.campMap.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+  }
+
+  function stopPlacing() {
+    placingPartyId = null;
+    dom.campMap.classList.remove("placing");
+    dom.placeHint.classList.add("hidden");
+    setDockVisible(!simulating && !pendingResult && !state.finished);
+    document.querySelectorAll(".campsite[data-preview]").forEach((element) => {
+      delete element.dataset.preview;
+      element.classList.remove("current-site");
+    });
+    document.querySelectorAll(".visitor-token.picked").forEach((token) => token.classList.remove("picked"));
+  }
+
+  function chooseSite(siteId) {
+    if (simulating || pendingResult || state.finished) return;
+    if (!placingPartyId) {
+      const occupant = Object.keys(plan.assignments).find((id) => plan.assignments[id] === siteId);
+      if (occupant) startPlacing(occupant);
+      return;
+    }
+    const partyId = placingPartyId;
+    stopPlacing();
+    assignParty(partyId, siteId);
+    const token = document.getElementById(`token-${partyId}`);
+    token?.classList.add("bounce");
+    window.setTimeout(() => token?.classList.remove("bounce"), 300);
+  }
+
+  function moodEmoji(score) {
+    return score >= 8.3 ? "😍" : score >= 7 ? "😊" : score >= 5 ? "😐" : "😣";
+  }
+
+  function moodClass(score) {
+    return score >= 8.3 ? "mood-great" : score >= 7 ? "mood-good" : score >= 5 ? "mood-mixed" : "mood-poor";
+  }
+
+  function setDockVisible(visible) {
+    dom.planDock.classList.toggle("hidden", !visible);
   }
 
   function syncSiteSelects() {
@@ -3228,6 +3467,10 @@ h3 {
 
     simulating = true;
     skipRequested = false;
+    stopPlacing();
+    setDockVisible(false);
+    dom.campMap.classList.remove("planning");
+    dom.campMap.scrollIntoView?.({ behavior: "smooth", block: "center" });
     pendingResult = evaluateDay(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], plan);
     setPlanningDisabled(true);
     dom.resetButton.disabled = true;
@@ -3239,18 +3482,35 @@ h3 {
     const phases = [
       {
         name: "Morning check-in",
+        phase: "morning",
         story: pendingResult.stories[0],
-        action: () => moveTokensToSites(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]),
+        action: () => {
+          moveTokensToSites(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]);
+          pendingResult.partyResults.forEach((item) => emote(item.party.id, moodEmoji(item.score), 650));
+        },
       },
       {
         name: "Afternoon wandering",
+        phase: "afternoon",
         story: pendingResult.stories[1],
-        action: () => moveTokensToAfternoon(DAYS[Math.min(state.dayIndex, DAYS.length - 1)]),
+        action: () => {
+          const day = DAYS[Math.min(state.dayIndex, DAYS.length - 1)];
+          moveTokensToAfternoon(day);
+          const icons = { lake: "🛶", trail: "🥾", store: "🛍️", lodge: "☕" };
+          day.parties.forEach((party) => emote(party.id, icons[afternoonDestination(day, party)] || "🌲", 900));
+        },
       },
       {
         name: "Evening together",
+        phase: "evening",
         story: pendingResult.stories[2],
-        action: () => moveTokensToEvent(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], EVENTS[plan.event]),
+        action: () => {
+          moveTokensToEvent(DAYS[Math.min(state.dayIndex, DAYS.length - 1)], EVENTS[plan.event]);
+          pendingResult.partyResults.forEach((item) => {
+            emote(item.party.id, EVENTS[plan.event].icon, 1100);
+            window.setTimeout(() => emote(item.party.id, moodEmoji(item.score), 0), 700);
+          });
+        },
       },
     ];
 
@@ -3261,6 +3521,7 @@ h3 {
       }
       if (skipRequested) continue;
       dom.phaseLabel.textContent = phase.name;
+      dom.campMap.dataset.phase = phase.phase;
       dom.dayLog.innerHTML = `<span class="log-dot"></span><p>${escapeHtml(phase.story)}</p>`;
       showStory(phase.story);
       phase.action();
@@ -3301,8 +3562,38 @@ h3 {
     saveState();
     dom.resetButton.disabled = false;
     renderResults(pendingResult);
-    openResultsModal();
+    flashMeterDeltas(pendingResult.deltas);
     simulating = false;
+    // A beat to see the meters move before the recap covers them.
+    const pause = skipRequested || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1100;
+    if (!pause) { openResultsModal(); return; }
+    showStory(`Day's end: ${effectText(pendingResult.deltas)}`);
+    window.setTimeout(() => {
+      if (pendingResult && dom.resultsModal.classList.contains("hidden")) openResultsModal();
+    }, pause);
+  }
+
+  function flashMeterDeltas(deltas) {
+    [["joy", dom.joyValue], ["trust", dom.trustValue], ["nature", dom.natureValue], ["cash", dom.cashValue]].forEach(([key, element]) => {
+      const value = deltas[key];
+      if (!value) return;
+      element.dataset.delta = `${value > 0 ? "+" : "−"}${key === "cash" ? "$" : ""}${Math.abs(value)}`;
+      element.classList.remove("delta-up", "delta-down");
+      void element.offsetWidth;
+      element.classList.add(value > 0 ? "delta-up" : "delta-down");
+      window.setTimeout(() => element.classList.remove("delta-up", "delta-down"), 2600);
+    });
+  }
+
+  function emote(partyId, emoji, delay) {
+    const token = document.getElementById(`token-${partyId}`);
+    if (!token) return;
+    window.setTimeout(() => {
+      token.dataset.emote = emoji;
+      token.classList.remove("emoting");
+      void token.offsetWidth;
+      token.classList.add("emoting");
+    }, delay);
   }
 
   function evaluateDay(day, currentPlan) {
@@ -3605,7 +3896,17 @@ h3 {
   }
 
   function renderResults(result) {
-    dom.rewardRecap.innerHTML = `<strong>${"★".repeat(result.reward?.stars || 0)} ${escapeHtml(result.reward?.message || "Day complete")}</strong><p>${escapeHtml(result.incident?.story || "")} ${result.reward?.bonus ? `Challenge bonus: +$${result.reward.bonus}.` : ""}</p>`;
+    const won = Boolean(result.reward?.bonus);
+    const slots = [
+      [result.averageScore >= 7, "Average 7+"],
+      [result.partyResults.some((p) => p.score >= 8.3), "A delighted party"],
+      [won, result.reward?.name || "Challenge"],
+    ];
+    const confetti = won
+      ? `<div class="confetti" aria-hidden="true">${Array.from({ length: 22 }, (_, i) => `<i style="--x:${Math.round(Math.random() * 100)}%;--d:${(Math.random() * 0.5).toFixed(2)}s;--r:${Math.round(Math.random() * 720 - 360)}deg;--c:${["#f4c867", "#d57b60", "#8fc1bf", "#aab995", "#fffaf0"][i % 5]}"></i>`).join("")}</div>`
+      : "";
+    dom.rewardRecap.innerHTML = `${confetti}<div class="star-slots" role="img" aria-label="${result.reward?.stars || 0} of 3 stars">${slots.map(([earned, label], i) => `<span class="star-slot ${earned ? "earned" : ""}" style="--i:${i}"><b aria-hidden="true">${earned ? "★" : "☆"}</b><small>${escapeHtml(label)}</small></span>`).join("")}</div><strong>${escapeHtml(result.reward?.message || "Day complete")}</strong><p>${escapeHtml(result.incident?.story || "")} ${result.reward?.bonus ? `Challenge bonus: +$${result.reward.bonus}.` : ""}</p>`;
+    dom.rewardRecap.classList.toggle("won", won);
     const average = result.averageScore;
     let title = "A few rough edges";
     if (average >= 8.4) title = "A postcard-perfect day";
@@ -3663,10 +3964,11 @@ h3 {
     const note = postcardNote(partyResult, result);
 
     return `
-      <article class="postcard">
+      <article class="postcard ${moodClass(score)}">
         <div class="postcard-top">
           <span class="postcard-emoji" aria-hidden="true">${party.emoji}</span>
           <h3>${escapeHtml(party.shortName)}</h3>
+          <span class="postcard-mood" aria-hidden="true">${moodEmoji(score)}</span>
         </div>
         <p>“${escapeHtml(note)}”</p>
         <p class="postcard-reasons">${partyResult.reasons.slice(0, 3).map(escapeHtml).join(" · ")}</p>
@@ -3903,7 +4205,7 @@ h3 {
         const site = getSite(plan.assignments[party.id]);
         const offset = tokenOffset(index);
         return `
-          <div class="visitor-token" id="token-${party.id}" data-label="${escapeHtml(party.shortName)}" style="left:${site.position.x + offset.x}%;top:${site.position.y + offset.y}%">
+          <div class="visitor-token" id="token-${party.id}" data-party-id="${party.id}" data-label="${escapeHtml(party.shortName)}" style="left:${site.position.x + offset.x}%;top:${site.position.y + offset.y}%">
             ${party.emoji}
           </div>
         `;
@@ -3952,10 +4254,11 @@ h3 {
   }
 
   function tokenOffset(index) {
+    // Tokens sit just above a place's label card, side by side, so names stay readable.
     const offsets = [
-      { x: -2.2, y: -1.5 },
-      { x: 2.5, y: 0 },
-      { x: 0, y: 3.2 },
+      { x: -3.6, y: -9 },
+      { x: 0, y: -10.5 },
+      { x: 3.6, y: -9 },
     ];
     return offsets[index % offsets.length];
   }
@@ -4047,6 +4350,10 @@ h3 {
   ];
 
   function renderChallenges() {
+    const nextBonus = 30 + Math.min(state.streak, 3) * 10;
+    dom.streakNote.textContent = state.streak
+      ? `🔥 ${state.streak}-day streak · today's bonus $${nextBonus}`
+      : "Pick one challenge · build a streak for bigger bonuses";
     dom.challengeBoard.innerHTML = CHALLENGES.map(c => `<button type="button" class="challenge-card ${plan.challenge === c.id ? "selected" : ""}" data-challenge="${c.id}" aria-pressed="${plan.challenge === c.id}"><strong>${c.icon} ${c.name}</strong><span>${c.goal}</span><small>★ + $${30 + Math.min(state.streak, 3) * 10} if completed</small></button>`).join("");
     dom.challengeBoard.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
       if (simulating) return;
@@ -4066,6 +4373,23 @@ h3 {
     result.partyResults.forEach(p => {
       const card = dom.guestList.querySelector(`[data-party-id="${p.party.id}"]`);
       if (card) card.title = p.reasons.join(". ");
+    });
+    renderPlanTokens(result);
+    const onTrack = challenge.test(result);
+    dom.dockForecast.innerHTML = `${result.partyResults.map(p => `<span class="dock-guest ${moodClass(p.score)}" title="${escapeHtml(p.party.name)}">${p.party.emoji} <b>${p.score.toFixed(1)}</b></span>`).join("")}<span class="dock-challenge ${onTrack ? "on-track" : "at-risk"}">${onTrack ? "✓" : "↗"} ${escapeHtml(challenge.name)}</span>`;
+  }
+
+  // While planning, guests wait at their campsites wearing their forecast mood.
+  function renderPlanTokens(result) {
+    if (simulating || pendingResult) return;
+    const day = DAYS[Math.min(state.dayIndex, DAYS.length - 1)];
+    createTokens(day);
+    result.partyResults.forEach(p => {
+      const token = document.getElementById(`token-${p.party.id}`);
+      if (!token) return;
+      token.classList.add(moodClass(p.score));
+      token.dataset.label = `${p.party.shortName} · ${p.score.toFixed(1)}`;
+      token.title = `${p.party.name}: tap to move`;
     });
   }
 
@@ -4147,6 +4471,7 @@ h3 {
   }
 
   function openResultsModal() {
+    setDockVisible(false);
     dom.modalBackdrop.classList.remove("hidden");
     dom.resultsModal.classList.remove("hidden");
     dom.resultsModal.querySelector(".modal-scroll")?.scrollTo(0, 0);
