@@ -187,3 +187,11 @@ Searching for a game by name with grep --include=*.html failed in zsh (no matche
 2026-10-07T19:48:44.242Z - claude-opus-5-5 - znielsen
 
 Screenshotting Riverward play.html with headless Chrome --screenshot hung forever: the endless requestAnimationFrame scene loop never lets the page settle (worse with --virtual-time-budget). Stubbing rAF to fire once and using chromium_headless_shell from the Playwright cache worked.
+
+2026-10-07T22:12:44.041Z - claude-opus-5-5 - znielsen
+
+Headless tour of all games: a stray 404 showed up only on the first page load in a fresh browser; cause was /favicon.ico, because 8 of 10 play.html files have no <link rel=icon> (wrapper index pages do).
+
+2026-10-07T23:02:39.831Z - claude-opus-5-5 - znielsen
+
+Verifying touch-only CSS with Playwright 1.57 phone emulation: page.screenshot(full_page=True) silently drops the pointer:coarse emulation for the rest of the page (matchMedia flips true→false), so touch fixes looked broken. Measure/screenshot before any full_page shot, or use viewport shots.

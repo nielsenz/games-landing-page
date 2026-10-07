@@ -5,7 +5,7 @@
     "genre": "Gunship escort",
     "status": "playable",
     "source": "Night-Relay-v0.2.html",
-    "sha256": "f2b463e9b2e106b6a69ea958f65890bc4c7e706b85cce1e1040ad784e9ac1a00",
+    "sha256": "dc1ccc89e76e9e74b3b8e6a54f6a919cebcd520b57a60710d921ccc7286a0281",
     "route": "/night-relay/"
   },
   {
@@ -14,7 +14,7 @@
     "genre": "Car soccer",
     "status": "playable",
     "source": "Games/Boostball_16_v0_2_Play.html",
-    "sha256": "415848fb5e15d9e32d0681180e11432d9490834d8e5e01c49dcc3c205e0b5bc5",
+    "sha256": "3f2b5a750099cb91430f66ae2f29986cb751e6a6ba80a5fa83f051571dc13bda",
     "route": "/boostball-16/"
   },
   {
@@ -23,7 +23,7 @@
     "genre": "Skateboarding",
     "status": "playable",
     "source": "Games/Roofline.html",
-    "sha256": "0dba08f51ea6f90469ed96093e5693a8fdf6232e47b210d6db5c7f57c4694f61",
+    "sha256": "ffc6481468b89bd696c3c1f81a9773dd69b483f84fe213b617d32db4e23c8ed3",
     "route": "/roofline/"
   },
   {
@@ -32,7 +32,7 @@
     "genre": "Boss fight",
     "status": "playable",
     "source": "Games/Pocket-Behemoth.html",
-    "sha256": "d4969d1c6296552f3ed0d00941eba41fdf8f4af7795c51f58d854481cdc181e3",
+    "sha256": "9ae185d628cfc2a3d3990e60835f24642a3392fd6194d2dda98c6b574ac03781",
     "route": "/pocket-behemoth/"
   },
   {
@@ -41,7 +41,7 @@
     "genre": "Tiny-army RTS",
     "status": "playable",
     "source": "Crumb_Command.html",
-    "sha256": "28af829d166ebe2e6a6ce248d42baca46c6e9c4748813f8ab9e65dba81c8b726",
+    "sha256": "28b58a04dd966b1106b79f3268cd11f3c3dae8209ffc535da79d6c155032392b",
     "route": "/crumb-command/"
   },
   {
@@ -50,7 +50,7 @@
     "genre": "Merchant trading",
     "status": "playable",
     "source": "Riverward_Exchange.html",
-    "sha256": "dabadac0af2deb7e4207c9e533dae608f25e5b299173ba0fa12939a8147d924d",
+    "sha256": "35b452482036b66e53eddc5de95c4a02ca631b9e9107d12e2ecb7c96797c3cd4",
     "route": "/riverward-exchange/"
   },
   {
@@ -59,7 +59,7 @@
     "genre": "Trap defense",
     "status": "playable",
     "source": "projects/dreadworks/index.html",
-    "sha256": "52e411c408a61fe25aa5d06c098f54edd54901d42797145d3959247948f68922",
+    "sha256": "b9d1cb6b3c219e8a12ad5ab3050219cbe9b82105f43ffc648c54dba81e8728fd",
     "route": "/dreadworks/"
   },
   {
@@ -68,7 +68,7 @@
     "genre": "Cozy management",
     "status": "playable",
     "source": "../pinecone-pass/pinecone-pass-prototype/pinecone-pass-prototype.html",
-    "sha256": "e97a4316d36abcba23f9a5168e46339214ba7864662303cec8ef5c2d37a5e5a9",
+    "sha256": "62f9a269eb1c3fc6284f769fa91b90d7c8641e7404ae820c3121d6c5330529f7",
     "route": "/pinecone-pass/"
   },
   {
@@ -77,7 +77,7 @@
     "genre": "Pirate sandbox",
     "status": "playable",
     "source": "../pirates-redo/dist/index.html",
-    "sha256": "4d372073be884c0c77406bc160a9bebf3fb7f1e5a1d9fe4bc0ee32f888578f87",
+    "sha256": "4dee25ec62cfb1efd6a93f470cd86c7aa5be87c3ca15a88d3d0cb9e0408bddb4",
     "route": "/blackwater/"
   },
   {
@@ -86,7 +86,7 @@
     "genre": "Incremental farming",
     "status": "playable",
     "source": "projects/idle-farm/index.html",
-    "sha256": "44e77fb1bce8676317bdff6ba26664fcf8e80e900b2d489528ea53e90d040a3c",
+    "sha256": "0479881b20736ca971a47677fc26bffe4a0aabcefbe5f3774a9a7166d11c861c",
     "route": "/idle-farm/"
   }
 ]
