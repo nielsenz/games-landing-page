@@ -38,7 +38,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
 }
 
 </style>
-</head>
+<script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/night-relay-floodgate.js"></script></head>
 <body>
 <div class="app">
   <header class="topbar">
@@ -731,6 +731,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:
   function setPreferencesUI() {
     $('sound').textContent = prefs.muted ? 'SOUND OFF' : 'SOUND ON';
     $('sound').setAttribute('aria-pressed', String(!prefs.muted));
+    if(window.GameMusic)GameMusic.set(!prefs.muted);
     $('motion').textContent = prefs.reduced ? 'FX OFF' : 'FX ON';
     $('motion').setAttribute('aria-pressed', String(!prefs.reduced));
     document.body.classList.toggle('fx-off', prefs.reduced);

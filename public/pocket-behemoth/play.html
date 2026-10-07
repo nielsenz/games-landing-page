@@ -28,7 +28,7 @@ footer{display:flex;justify-content:space-between;gap:16px;margin-top:29px;paddi
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
-</head>
+<script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/pocket-behemoth-brambleback.js"></script></head>
 <body>
 <div class="page">
 <header>
@@ -785,7 +785,7 @@ footer{display:flex;justify-content:space-between;gap:16px;margin-top:29px;paddi
   let prefs=storage.get('settings',{});if(!prefs||typeof prefs!=='object')prefs={};
   audio.enabled=prefs.sound!==false;renderer.reduced=typeof prefs.reduced==='boolean'?prefs.reduced:!!root.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let best=storage.get('best',null);if(!Number.isFinite(best)||best<=0)best=null;
-  el('sound').checked=audio.enabled;el('reduced').checked=renderer.reduced;
+  el('sound').checked=audio.enabled;if(window.GameMusic)GameMusic.set(audio.enabled);el('reduced').checked=renderer.reduced;
   let practice=false,lastScene='';
   const input={keys:new Set(),mouseHeld:false,mouseAim:false,aim:{x:420,y:220},heavy:false,dodge:false,
     touchX:0,touchY:0,touchLight:false};
@@ -842,7 +842,7 @@ footer{display:flex;justify-content:space-between;gap:16px;margin-top:29px;paddi
   el('start').addEventListener('click',start);el('resume').addEventListener('click',pause);el('again').addEventListener('click',start);
   el('choose-mode').addEventListener('click',()=>{clearInput();game.reset(practice,false);lastScene='';syncScene();el('start').focus({preventScroll:true});});
   el('restart').addEventListener('click',start);el('pause').addEventListener('click',pause);
-  el('sound').addEventListener('change',()=>{audio.enabled=el('sound').checked;if(audio.enabled)audio.unlock();persist();});
+  el('sound').addEventListener('change',()=>{audio.enabled=el('sound').checked;if(audio.enabled)audio.unlock();if(window.GameMusic)GameMusic.set(audio.enabled);persist();});
   el('reduced').addEventListener('change',()=>{renderer.reduced=el('reduced').checked;persist();});
   el('show-touch').addEventListener('change',()=>{el('touch-controls').classList.toggle('force',el('show-touch').checked);clearInput();});
   document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{

@@ -68,6 +68,7 @@ test('Dreadworks source matches its served build; farm scripts and vendor files 
  for(const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)){
   if(m[1].includes('src=')){
    const asset=m[1].match(/src="([^"]+)"/)[1];
+   if(asset.startsWith('../'))continue; // Shared arcade assets; the catalog test checks they exist.
    assert.equal(fs.readFileSync(path.join(root,'projects/idle-farm',asset),'utf8'),fs.readFileSync(path.join(root,'public/idle-farm',asset),'utf8'));
   }
   else new vm.Script(m[2]);

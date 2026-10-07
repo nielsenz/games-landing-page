@@ -18,7 +18,7 @@
 @media(max-width:560px){.screen{height:325px}.menu-fields{gap:9px}}
 
 </style>
-</head>
+<script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/boostball-golden-goal.js"></script></head>
 <body>
   <main class="cabinet">
     <header class="masthead">
@@ -588,7 +588,7 @@
     o.connect(g);g.connect(master);o.start(t);o.stop(t+duration+.02);
     o.onended=()=>{o.disconnect();g.disconnect();};
   }
-  function updateSoundButton(){$('sound').textContent=soundOn?'SOUND ON':'SOUND OFF';$('sound').setAttribute('aria-pressed',String(soundOn));}
+  function updateSoundButton(){$('sound').textContent=soundOn?'SOUND ON':'SOUND OFF';$('sound').setAttribute('aria-pressed',String(soundOn));if(window.GameMusic)GameMusic.set(soundOn);}
   function toggleSound(){soundOn=!soundOn;ensureAudio();updateSoundButton();if(master)master.gain.value=soundOn?.20:0;if(soundOn)tone(520,.08);}
   function announce(message){$('status').textContent=message;}
   function burst(x,y,color,n=15,power=60){

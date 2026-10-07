@@ -86,13 +86,14 @@
       z-index: 500; display: none; max-width: 240px;
     }
   </style>
-</head>
+<script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/idle-farm-seasons.js"></script></head>
 <body>
   <div id="gameContainer">
     <canvas id="farmCanvas"></canvas>
 
     <div class="ui-panel">
       <h1>🌾 Idle Farm</h1>
+      <button type="button" data-music="idle-farm:music" hidden>Music on</button>
       <div class="row" style="justify-content:space-between; flex-wrap:wrap;">
         <div class="row">
           <div>🌾 <span id="grain" class="stat">0</span></div>

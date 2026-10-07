@@ -18,7 +18,7 @@
 @media(max-width:600px){.combo-area{left:auto;right:9px;top:55px;bottom:auto;min-width:160px;max-width:54%;padding:6px 8px}.combo-number{font-size:20px}.combo-note{display:none}.combo-actions{max-width:185px}.combo-area:not([hidden])~.message{top:auto;bottom:6px;font-size:6px;padding:4px 7px}}
 @media(max-height:520px) and (orientation:landscape){.playing .combo-area{left:auto;right:20px;top:67px;bottom:auto;min-width:185px;max-width:32%;padding:7px 9px}.combo-note{display:none}.combo-number{font-size:22px}}
 </style>
-</head>
+<script src="../assets/music/game-music.js"></script><script src="../assets/music/tracks/roofline-grind.js"></script></head>
 <body>
 <div class="app">
   <header class="masthead">
@@ -780,7 +780,7 @@
   }
   function pause(){if(state==='playing'){setState('paused');$('resume').focus({preventScroll:true});}else if(state==='paused'){setState('playing');$('game').focus({preventScroll:true});sound.unlock();}}
   function updateSettings(){
-    $('soundButton').innerHTML=`SOUND <span>${sound.enabled?'ON':'OFF'}</span>`;$('soundButton').setAttribute('aria-pressed',String(sound.enabled));
+    $('soundButton').innerHTML=`SOUND <span>${sound.enabled?'ON':'OFF'}</span>`;$('soundButton').setAttribute('aria-pressed',String(sound.enabled));if(window.GameMusic)GameMusic.set(sound.enabled);
     $('motionButton').innerHTML=`MOTION <span>${renderer.reducedMotion?'LOW':'FULL'}</span>`;$('motionButton').setAttribute('aria-pressed',String(renderer.reducedMotion));
   }
   function toggleSound(){sound.enabled=!sound.enabled;records.sound=sound.enabled;updateSettings();save();sound.unlock();if(sound.enabled)sound.tone(440,.12,'triangle',.04);}
