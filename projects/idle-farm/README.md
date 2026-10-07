@@ -19,3 +19,7 @@ Run `node --test tests/save.test.cjs`. These regression tests cover hidden-tab s
 This directory is now the maintained source in the arcade repository. The old sibling `farm-idle/` folder is historical. Run `npm run sync` from the repository root to update the public game and its vendor assets.
 
 New farms get a first-field guide: harvest 15 grain, sell it, and buy one field. The guided buy always purchases exactly one field, even if the bulk selector is set to x10. The guide disappears once any producer is owned or prestige has been earned. Existing saves use the same storage keys. The guide's complete DOM flow and reload behavior are checked by the arcade's onboarding suite.
+
+## Controls and layout
+
+Click or tap the farm (or press H) to harvest. Each harvest gathers 1 grain or 10% of a second's production, whichever is more, so clicking stays worthwhile as the farm grows. S sells all grain. The farm, Harvest and Sell stay in view on desktop beside the shop; on phones Harvest/Sell are pinned to the bottom of the screen. Producers unlock one at a time (owning one reveals the next), and after the first field a short chain of goals points toward a farmhand, ten fields, fertilizer, a barn, and the first new season. Each producer has its own lot on the farm, with a faded slot marking where the next purchase will appear.

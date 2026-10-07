@@ -104,7 +104,7 @@ test('Idle Farm first-field buttons complete the economy loop and preserve it on
   assert.equal(f.$('firstFieldAction').textContent,'Sell grain');f.$('firstFieldAction').click();
   assert.equal(f.$('coins').textContent,'15');
   // The guided purchase is exactly one field regardless of the bulk-purchase selector.
-  f.$('buyMode').value='10';f.$('firstFieldAction').click();
+  f.w.document.querySelector('#buyMode [data-mode="10"]').click();f.$('firstFieldAction').click();
   assert.equal(f.$('firstFieldGoal').hidden,true);assert.equal(f.$('count_field').textContent,'1');
   assert.equal(f.$('coins').textContent,'0');assert.equal(f.$('pps').textContent,'0.50');
   saved=f.w.localStorage.getItem('idle_farm_save_v2');assert.deepEqual(f.errors,[]);

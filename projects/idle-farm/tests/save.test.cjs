@@ -10,7 +10,7 @@ function fixture() {
     localStorage: { getItem: k => data.get(k) ?? null, setItem: (k,v) => data.set(k,v) },
     render() {}, updateFarmVisuals() {} };
   vm.createContext(context);
-  vm.runInContext(source + '\nglobalThis.api = {normalizeSave,load,save,importSave, get state(){return S}, hide(){pausedSince=now()}, resume(){save();pausedSince=null}}', context);
+  vm.runInContext(source + '\nglobalThis.api = {normalizeSave,load,save,importSave,harvestValue, get state(){return S}, hide(){pausedSince=now()}, resume(){save();pausedSince=null}}', context);
   return { ...context.api, api: context.api, data, context, advance: ms => time += ms };
 }
 test('hidden autosaves and reload credit production exactly once', () => {
@@ -41,4 +41,11 @@ test('legacy saves migrate and future timestamps do not subtract grain', () => {
   assert.equal(f.api.load().grain,15);
   f.data.set('idle_farm_save_v2',JSON.stringify({fields:2,grain:5,lastSavedTs:200000}));
   assert.equal(f.api.load().grain,5);
+});
+test('harvests gather at least 1 grain and scale with production', () => {
+  const {api:g} = fixture();
+  assert.equal(g.harvestValue(g.state),1);
+  g.state.producers.field = 10; assert.equal(g.harvestValue(g.state),1);
+  g.state.producers.tractor = 3; assert.equal(g.harvestValue(g.state),31);
+  g.state.prestigeTokens = 10; assert.equal(g.harvestValue(g.state),61);
 });
