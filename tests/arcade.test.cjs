@@ -54,7 +54,7 @@ test('Crumb Command pauses its economy and resolves a full match',()=>{
  for(let i=0;i<60*301&&g.status==='playing';i++)g.step(C.STEP);
  assert.notEqual(g.status,'playing');finiteTree(g);
 });
-test('Night Relay both missions complete without enemies and remain finite',()=>{
+test('Night Relay all three missions complete without enemies and remain finite',()=>{
  const world=core('night-relay');const {Mission}=core('night-relay',1,world);
  for(const mission of ['home','floodgate','mast']){
   const g=new Mission({mission,seed:123,spawns:false});g.start();
