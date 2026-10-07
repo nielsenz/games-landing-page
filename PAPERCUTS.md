@@ -179,3 +179,11 @@ Blackwater headless QA: editing localStorage 'blackwater-save-v1' then reloading
 2026-10-07T17:27:10.948Z - claude-opus-5-5 - znielsen
 
 Blackwater headless QA: 'uv run --with playwright' installs the newest Playwright, which wants chromium_headless_shell-1243, but only 1187/1208 are cached; pin playwright==1.57.0 and pass executable_path to the cached chromium-1208 binary.
+
+2026-10-07T19:45:03.314Z - claude-opus-5-5 - znielsen
+
+Searching for a game by name with grep --include=*.html failed in zsh (no matches found: unquoted glob); quote include patterns or use --exclude-dir instead.
+
+2026-10-07T19:48:44.242Z - claude-opus-5-5 - znielsen
+
+Screenshotting Riverward play.html with headless Chrome --screenshot hung forever: the endless requestAnimationFrame scene loop never lets the page settle (worse with --virtual-time-budget). Stubbing rAF to fire once and using chromium_headless_shell from the Playwright cache worked.
