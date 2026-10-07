@@ -167,3 +167,15 @@ Wanted a real-browser visual check of Night Relay's new tank sprite: chrome-brow
 2026-10-07T05:20:42.350Z - claude-opus-5-5 - znielsen
 
 tests/onboarding.test.cjs crumb() helper didn't stub ResizeObserver, so any page using it (Night Relay) threw on load in jsdom; added a ??= stub to the shared helper.
+
+2026-10-07T15:53:08.844Z - claude-opus-5-5 - znielsen
+
+Headless visual QA: unpinned 'uv run --with playwright' pulls a Playwright whose Chromium isn't in ~/Library/Caches/ms-playwright; pin playwright==1.58.0 to use the cached chromium-1208 without a download.
+
+2026-10-07T16:00:53.513Z - claude-opus-5-5 - znielsen
+
+Blackwater headless QA: editing localStorage 'blackwater-save-v1' then reloading doesn't stick, because the page re-saves the live voyage on unload; inject the edited save with add_init_script before load. Autosave also doesn't update every few seconds, so it can't be used to read the ship's position while steering.
+
+2026-10-07T17:27:10.948Z - claude-opus-5-5 - znielsen
+
+Blackwater headless QA: 'uv run --with playwright' installs the newest Playwright, which wants chromium_headless_shell-1243, but only 1187/1208 are cached; pin playwright==1.57.0 and pass executable_path to the cached chromium-1208 binary.
